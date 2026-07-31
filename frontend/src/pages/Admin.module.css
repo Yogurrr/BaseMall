@@ -1,0 +1,285 @@
+.page {
+  display: flex;
+  align-items: stretch;
+  min-height: 100svh;
+  text-align: left;
+}
+
+/* --- Sidebar --- */
+.sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 24px 16px;
+  gap: 24px;
+}
+
+.brand {
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--text-h);
+}
+
+.brand span {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--accent);
+  letter-spacing: 1px;
+}
+
+.tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.tab {
+  font: inherit;
+  font-size: 16px;
+  text-align: left;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: none;
+  background: none;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.tab:hover {
+  background: var(--accent-bg);
+}
+
+.tabActive {
+  background: var(--accent-bg);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.backLink {
+  font-size: 15px;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.backLink:hover {
+  color: var(--accent);
+}
+
+/* --- Content --- */
+.content {
+  flex: 1;
+  min-width: 0;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.content h1 {
+  font-size: 26px;
+  margin: 0;
+  text-align: left;
+}
+
+.panelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+/* --- Stat cards --- */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.statCard {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 20px;
+}
+
+.statCard span {
+  display: block;
+  font-size: 15px;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.statCard strong {
+  font-size: 26px;
+  color: var(--text-h);
+}
+
+@media (max-width: 720px) {
+  .stats {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --- Filter bar --- */
+.filterBar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.searchInput {
+  box-sizing: border-box;
+  height: 44px;
+  flex: 1;
+  max-width: 360px;
+  min-width: 0;
+  font: inherit;
+  font-size: 16px;
+  padding: 0 16px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text-h);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--accent-border);
+  box-shadow: 0 0 0 3px var(--accent-bg);
+}
+
+/* --- Form --- */
+.form {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 12px;
+  align-items: end;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 15px;
+  color: var(--text);
+  min-width: 0;
+}
+
+.field input,
+.field select {
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+  font: inherit;
+  font-size: 16px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text-h);
+}
+
+.formActions {
+  display: flex;
+  gap: 8px;
+  grid-column: span 2;
+}
+
+@media (max-width: 960px) {
+  .form {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .formActions {
+    grid-column: span 2;
+  }
+}
+
+/* --- Table --- */
+.tableWrap {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 16px;
+}
+
+thead th {
+  text-align: left;
+  padding: 12px 16px;
+  background: var(--code-bg);
+  color: var(--text);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+tbody td {
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  color: var(--text-h);
+  vertical-align: middle;
+}
+
+tbody tr:hover {
+  background: var(--accent-bg);
+}
+
+.orderBuyerEmail {
+  font-size: 12px;
+  color: var(--text);
+}
+
+tbody td select {
+  font: inherit;
+  font-size: 13px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text-h);
+}
+
+.badge {
+  font-size: 13px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+  color: #fff;
+}
+
+.badgeNEW {
+  background: #2563eb;
+}
+
+.badgeSALE {
+  background: #dc2626;
+}
+
+.badgeBEST {
+  background: var(--accent);
+}
+
+.rowActions {
+  display: flex;
+  gap: 6px;
+}
+
+.empty {
+  padding: 32px;
+  text-align: center;
+  color: var(--text);
+}
+
+.error {
+  color: #dc2626;
+}

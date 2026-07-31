@@ -1,0 +1,40 @@
+.summary {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: fit-content;
+  position: sticky;
+  top: 88px;
+}
+
+.summary h2 {
+  margin: 0 0 4px;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 16px;
+  color: var(--text);
+}
+
+.hint {
+  font-size: 14px;
+  color: var(--accent);
+  margin: -4px 0 0;
+}
+
+.totalRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 19px;
+  font-weight: 800;
+  color: var(--text-h);
+  padding-top: 12px;
+  margin-top: 4px;
+  border-top: 1px solid var(--border);
+}

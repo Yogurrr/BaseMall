@@ -1,0 +1,6 @@
+spring.datasource.url=jdbc:postgresql://<host>:5432/postgres
+spring.datasource.username=<username>
+spring.datasource.password=<password>
+
+# 💡 HS256 서명 키 (최소 256bit/32byte 필요)
+jwt.secret=<random-32byte-hex-string>

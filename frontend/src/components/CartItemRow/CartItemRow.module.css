@@ -1,0 +1,126 @@
+.row {
+  display: grid;
+  grid-template-columns: 88px 1fr auto auto auto;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+@media (max-width: 640px) {
+  .row {
+    grid-template-columns: 64px 1fr auto;
+    grid-template-areas:
+      'thumb info remove'
+      'thumb stepper stepper'
+      'thumb total total';
+    row-gap: 8px;
+  }
+
+  .thumb {
+    grid-area: thumb;
+  }
+  .info {
+    grid-area: info;
+  }
+  .stepper {
+    grid-area: stepper;
+  }
+  .lineTotal {
+    grid-area: total;
+  }
+  .removeButton {
+    grid-area: remove;
+    align-self: start;
+  }
+}
+
+.thumb {
+  aspect-ratio: 1 / 1;
+  width: 88px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  border-radius: 12px;
+  background: radial-gradient(circle at 30% 20%, var(--accent-bg), var(--code-bg));
+  text-decoration: none;
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.category {
+  font-size: 14px;
+  color: var(--accent);
+  font-weight: 600;
+  margin: 0;
+}
+
+.name {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text-h);
+  text-decoration: none;
+}
+
+.name:hover {
+  text-decoration: underline;
+}
+
+.unitPrice {
+  font-size: 15px;
+  color: var(--text);
+  margin: 0;
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 6px 12px;
+}
+
+.stepper button {
+  border: none;
+  background: none;
+  font-size: 17px;
+  cursor: pointer;
+  color: var(--text-h);
+  width: 18px;
+}
+
+.stepper span {
+  min-width: 20px;
+  text-align: center;
+  font-size: 16px;
+}
+
+.lineTotal {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text-h);
+  white-space: nowrap;
+}
+
+.removeButton {
+  border: none;
+  background: none;
+  color: var(--text);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 50%;
+  transition: color 0.15s, background 0.15s;
+}
+
+.removeButton:hover {
+  color: #dc2626;
+  background: var(--code-bg);
+}

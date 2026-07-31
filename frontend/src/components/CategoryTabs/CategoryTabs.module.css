@@ -1,0 +1,32 @@
+.categories {
+  display: flex;
+  gap: 10px;
+  padding: 28px 24px;
+  overflow-x: auto;
+}
+
+.chip {
+  flex-shrink: 0;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 500;
+  padding: 10px 20px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.chip:hover {
+  border-color: var(--accent-border);
+  transform: translateY(-1px);
+}
+
+.chipActive {
+  background: linear-gradient(120deg, var(--accent), #86efac);
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 4px 14px var(--accent-bg);
+}

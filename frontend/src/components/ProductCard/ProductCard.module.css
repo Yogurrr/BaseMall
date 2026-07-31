@@ -1,0 +1,160 @@
+.card {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow);
+  border-color: var(--accent-border);
+}
+
+.thumb {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 56px;
+  background: radial-gradient(circle at 30% 20%, var(--accent-bg), var(--code-bg));
+  overflow: hidden;
+  transition: transform 0.3s ease;
+  text-decoration: none;
+  color: inherit;
+}
+
+.card:hover .thumb {
+  transform: scale(1.04);
+}
+
+.badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.badgeNEW {
+  background: linear-gradient(120deg, #2563eb, #38bdf8);
+}
+
+.badgeSALE {
+  background: linear-gradient(120deg, #dc2626, #f97316);
+}
+
+.badgeBEST {
+  background: linear-gradient(120deg, var(--accent), #86efac);
+}
+
+.likeButton {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  border: none;
+  background: color-mix(in srgb, var(--bg) 80%, transparent);
+  backdrop-filter: blur(4px);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.likeButton:hover {
+  transform: scale(1.12);
+}
+
+.likeButtonActive {
+  animation: pop 0.3s ease;
+}
+
+@keyframes pop {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.3);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.cardBody {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cardBody h3 {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text-h);
+  margin: 0;
+}
+
+.titleLink {
+  color: inherit;
+  text-decoration: none;
+}
+
+.titleLink:hover {
+  text-decoration: underline;
+}
+
+.category {
+  font-size: 14px;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.team {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.rating {
+  font-size: 15px;
+  color: var(--text);
+}
+
+.priceRow {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin: 6px 0 12px;
+  flex-wrap: wrap;
+}
+
+.discount {
+  font-size: 17px;
+  font-weight: 800;
+  color: #f97316;
+}
+
+.originalPrice {
+  font-size: 15px;
+  color: var(--text);
+  text-decoration: line-through;
+}
+
+.price {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text-h);
+}
