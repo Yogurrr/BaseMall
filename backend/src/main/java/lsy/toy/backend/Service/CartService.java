@@ -9,6 +9,7 @@ import lsy.toy.backend.Repository.ProductRepository;
 import lsy.toy.backend.Repository.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -58,12 +59,14 @@ public class CartService {
         return getCart(email);
     }
 
+    @Transactional
     public List<CartItemResponse> removeItem(String email, Long productId) {
         User user = findUser(email);
         cartItemRepository.deleteByUser_IdAndProduct_Id(user.getId(), productId);
         return getCart(email);
     }
 
+    @Transactional
     public void clearCart(String email) {
         User user = findUser(email);
         cartItemRepository.deleteByUser_Id(user.getId());
