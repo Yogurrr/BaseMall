@@ -7,20 +7,20 @@
 
 .content {
   flex: 1;
-  max-width: 1080px;
+  max-width: 54rem;
   width: 100%;
   margin: 0 auto;
-  padding: 24px 24px 72px;
+  padding: 1.2rem 1.2rem 3.6rem;
   box-sizing: border-box;
 }
 
 .breadcrumb {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 15px;
+  gap: 0.4rem;
+  font-size: 0.75rem;
   color: var(--text);
-  margin-bottom: 24px;
+  margin-bottom: 1.2rem;
 }
 
 .breadcrumb a {
@@ -39,24 +39,24 @@
 
 .empty {
   color: var(--text);
-  padding: 80px 0;
+  padding: 4rem 0;
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 0.6rem;
 }
 
 .detail {
   display: grid;
-  grid-template-columns: minmax(280px, 440px) 1fr;
-  gap: 48px;
+  grid-template-columns: minmax(14rem, 22rem) 1fr;
+  gap: 2.4rem;
 }
 
 @media (max-width: 768px) {
   .detail {
     grid-template-columns: 1fr;
-    gap: 24px;
+    gap: 1.2rem;
   }
 }
 
@@ -66,22 +66,22 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 120px;
-  border-radius: 20px;
+  font-size: 6rem;
+  border-radius: 1rem;
   background: radial-gradient(circle at 30% 20%, var(--accent-bg), var(--code-bg));
   overflow: hidden;
 }
 
 .badge {
   position: absolute;
-  top: 14px;
-  left: 14px;
-  font-size: 14px;
+  top: 0.7rem;
+  left: 0.7rem;
+  font-size: 0.7rem;
   font-weight: 700;
-  padding: 5px 12px;
-  border-radius: 999px;
+  padding: 0.25rem 0.6rem;
+  border-radius: 49.95rem;
   color: #fff;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0.1rem 0.3rem rgba(0, 0, 0, 0.2);
 }
 
 .badgeNEW {
@@ -102,10 +102,10 @@
 }
 
 .category {
-  font-size: 15px;
+  font-size: 0.75rem;
   color: var(--accent);
   font-weight: 600;
-  margin-bottom: 6px;
+  margin-bottom: 0.3rem;
 }
 
 .team {
@@ -114,15 +114,15 @@
 }
 
 .title {
-  font-size: 33px;
-  margin: 0 0 10px;
-  letter-spacing: -0.4px;
+  font-size: 1.65rem;
+  margin: 0 0 0.5rem;
+  letter-spacing: -0.02rem;
 }
 
 .rating {
-  font-size: 16px;
+  font-size: 0.8rem;
   color: var(--text-h);
-  margin-bottom: 20px;
+  margin-bottom: 1rem;
 }
 
 .reviewCount {
@@ -133,27 +133,27 @@
 .priceRow {
   display: flex;
   align-items: baseline;
-  gap: 10px;
-  margin-bottom: 20px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid var(--border);
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 0.05rem solid var(--border);
   flex-wrap: wrap;
 }
 
 .discount {
-  font-size: 26px;
+  font-size: 1.3rem;
   font-weight: 800;
   color: #f97316;
 }
 
 .originalPrice {
-  font-size: 18px;
+  font-size: 0.9rem;
   color: var(--text);
   text-decoration: line-through;
 }
 
 .price {
-  font-size: 33px;
+  font-size: 1.65rem;
   font-weight: 800;
   color: var(--text-h);
 }
@@ -161,59 +161,59 @@
 .quantityRow {
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 16px;
-  font-size: 16px;
+  gap: 0.8rem;
+  margin-bottom: 0.8rem;
+  font-size: 0.8rem;
   color: var(--text-h);
 }
 
 .stepper {
   display: flex;
   align-items: center;
-  gap: 14px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 6px 14px;
+  gap: 0.7rem;
+  border: 0.05rem solid var(--border);
+  border-radius: 0.5rem;
+  padding: 0.3rem 0.7rem;
 }
 
 .stepper button {
   border: none;
   background: none;
-  font-size: 18px;
+  font-size: 0.9rem;
   cursor: pointer;
   color: var(--text-h);
-  width: 20px;
+  width: 1rem;
 }
 
 .stepper span {
-  min-width: 24px;
+  min-width: 1.2rem;
   text-align: center;
 }
 
 .totalPrice {
-  font-size: 17px;
+  font-size: 0.85rem;
   font-weight: 600;
   color: var(--text-h);
-  margin-bottom: 24px;
+  margin-bottom: 1.2rem;
 }
 
 .actions {
   display: flex;
-  gap: 12px;
+  gap: 0.6rem;
   flex-wrap: wrap;
-  margin-bottom: 16px;
+  margin-bottom: 0.8rem;
 }
 
 .toast {
-  font-size: 15px;
+  font-size: 0.75rem;
   color: var(--accent);
   font-weight: 600;
-  margin-bottom: 16px;
+  margin-bottom: 0.8rem;
 }
 
 .backLink {
   color: var(--text);
-  font-size: 16px;
+  font-size: 0.8rem;
   text-decoration: none;
 }
 

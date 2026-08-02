@@ -1,20 +1,5 @@
 import { api } from './axiosInstance';
-
-export interface AuthResponse {
-  token: string;
-  id: number;
-  name: string;
-  email: string;
-  role: 'USER' | 'ADMIN';
-}
-
-export interface UserInfo {
-  id: number;
-  name: string;
-  email: string;
-  role: 'USER' | 'ADMIN';
-  favoriteTeam?: string;
-}
+import type { AuthResponse, UserInfo } from '../types/user';
 
 export const register = async (name: string, email: string, password: string): Promise<AuthResponse> => {
   const response = await api.post<AuthResponse>('/auth/register', { name, email, password });

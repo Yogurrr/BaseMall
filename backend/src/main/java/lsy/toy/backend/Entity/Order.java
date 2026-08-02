@@ -35,6 +35,11 @@ public class Order {
 
     private Instant createdAt = Instant.now();
 
+    private String shippingAddress;
+
+    // 💡 배송 시작 후 관리자가 입력하는 운송장 번호. 그 전까지는 null.
+    private String trackingNumber;
+
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<OrderItem> items = new ArrayList<>();
 
@@ -59,4 +64,10 @@ public class Order {
     public void setStatus(String status) { this.status = status; }
     public Instant getCreatedAt() { return createdAt; }
     public List<OrderItem> getItems() { return items; }
+
+    public String getShippingAddress() { return shippingAddress; }
+    public void setShippingAddress(String shippingAddress) { this.shippingAddress = shippingAddress; }
+
+    public String getTrackingNumber() { return trackingNumber; }
+    public void setTrackingNumber(String trackingNumber) { this.trackingNumber = trackingNumber; }
 }

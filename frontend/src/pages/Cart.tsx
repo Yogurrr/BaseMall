@@ -16,6 +16,7 @@ export const Cart = () => {
   const [orderedMessage, setOrderedMessage] = useState(false);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
+  const [address, setAddress] = useState('');
 
   const handleCheckout = async () => {
     setCheckoutError(null);
@@ -27,9 +28,11 @@ export const Cart = () => {
       return;
     }
 
+    if (!address.trim()) return;
+
     setIsCheckingOut(true);
     try {
-      await createOrder();
+      await createOrder(address.trim());
       clearCart();
       setOrderedMessage(true);
     } catch (err) {
@@ -84,7 +87,13 @@ export const Cart = () => {
 
             <div>
               {checkoutError && <p className={styles.checkoutError}>{checkoutError}</p>}
-              <CartSummary totalPrice={totalPrice} onCheckout={handleCheckout} isSubmitting={isCheckingOut} />
+              <CartSummary
+                totalPrice={totalPrice}
+                address={address}
+                onAddressChange={setAddress}
+                onCheckout={handleCheckout}
+                isSubmitting={isCheckingOut}
+              />
             </div>
           </div>
         )}

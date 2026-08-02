@@ -13,6 +13,8 @@ public class OrderResponse {
     private final Integer totalPrice;
     private final Instant createdAt;
     private final List<OrderItemResponse> items;
+    private final String shippingAddress;
+    private final String trackingNumber;
 
     public OrderResponse(Order order) {
         this.id = order.getId();
@@ -22,6 +24,8 @@ public class OrderResponse {
         this.totalPrice = order.getTotalPrice();
         this.createdAt = order.getCreatedAt();
         this.items = order.getItems().stream().map(OrderItemResponse::new).toList();
+        this.shippingAddress = order.getShippingAddress();
+        this.trackingNumber = order.getTrackingNumber();
     }
 
     public Long getId() { return id; }
@@ -31,4 +35,6 @@ public class OrderResponse {
     public Integer getTotalPrice() { return totalPrice; }
     public Instant getCreatedAt() { return createdAt; }
     public List<OrderItemResponse> getItems() { return items; }
+    public String getShippingAddress() { return shippingAddress; }
+    public String getTrackingNumber() { return trackingNumber; }
 }

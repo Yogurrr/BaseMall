@@ -1,10 +1,5 @@
 import { api } from './axiosInstance';
-
-export interface User {
-  id?: number;
-  name: string;
-  email: string;
-}
+import type { User } from '../types/user';
 
 export const fetchUsers = async (): Promise<User[]> => {
   const response = await api.get<User[]>('/users');

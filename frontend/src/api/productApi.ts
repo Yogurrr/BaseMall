@@ -1,37 +1,7 @@
 import { api } from './axiosInstance';
+import type { Product, ProductInput, ProductPage, ProductStatus } from '../types/product';
 
-export interface Product {
-  id: number;
-  name: string;
-  category: string;
-  team?: string;
-  price: number;
-  originalPrice?: number;
-  rating: number;
-  reviewCount: number;
-  emoji: string;
-  badge?: 'NEW' | 'SALE' | 'BEST';
-}
-
-export interface ProductInput {
-  name: string;
-  category: string;
-  team?: string;
-  price: number;
-  originalPrice?: number;
-  emoji: string;
-  badge?: 'NEW' | 'SALE' | 'BEST';
-}
-
-export interface ProductPage {
-  content: Product[];
-  totalElements: number;
-  totalPages: number;
-  number: number;
-  size: number;
-  first: boolean;
-  last: boolean;
-}
+export const PRODUCT_STATUSES: ProductStatus[] = ['판매중', '판매중지', '품절'];
 
 export const formatPrice = (price: number) => `${price.toLocaleString('ko-KR')}원`;
 
@@ -56,6 +26,7 @@ export const fetchProductsPage = async (params: {
   category?: string;
   team?: string;
   keyword?: string;
+  sort?: string;
 }): Promise<ProductPage> => {
   const response = await api.get<ProductPage>('/products/page', {
     params: {
@@ -64,6 +35,7 @@ export const fetchProductsPage = async (params: {
       category: params.category || undefined,
       team: params.team || undefined,
       keyword: params.keyword || undefined,
+      sort: params.sort || undefined,
     },
   });
   return response.data;
@@ -95,5 +67,15 @@ export const deleteProduct = async (id: number): Promise<void> => {
 
 export const restoreProduct = async (id: number): Promise<Product> => {
   const response = await api.patch<Product>(`/products/${id}/restore`);
+  return response.data;
+};
+
+export const updateProductStock = async (id: number, stock: number): Promise<Product> => {
+  const response = await api.patch<Product>(`/products/${id}/stock`, { stock });
+  return response.data;
+};
+
+export const updateProductStatus = async (id: number, status: ProductStatus): Promise<Product> => {
+  const response = await api.patch<Product>(`/products/${id}/status`, { status });
   return response.data;
 };

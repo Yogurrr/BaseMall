@@ -1,18 +1,18 @@
 .categories {
   display: flex;
-  gap: 10px;
-  padding: 28px 24px;
+  gap: 0.5rem;
+  padding: 1.4rem 1.2rem;
   overflow-x: auto;
 }
 
 .chip {
   flex-shrink: 0;
   font: inherit;
-  font-size: 16px;
+  font-size: 0.8rem;
   font-weight: 500;
-  padding: 10px 20px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
+  padding: 0.5rem 1rem;
+  border-radius: 49.95rem;
+  border: 0.05rem solid var(--border);
   background: var(--bg);
   color: var(--text);
   cursor: pointer;
@@ -21,12 +21,12 @@
 
 .chip:hover {
   border-color: var(--accent-border);
-  transform: translateY(-1px);
+  transform: translateY(-0.05rem);
 }
 
 .chipActive {
   background: linear-gradient(120deg, var(--accent), #86efac);
   border-color: transparent;
   color: #fff;
-  box-shadow: 0 4px 14px var(--accent-bg);
+  box-shadow: 0 0.2rem 0.7rem var(--accent-bg);
 }

@@ -1,13 +1,12 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Link, useNavigate } from 'react-router-dom';
-import { Button } from '../components/Button/Button';
-import { Spinner } from '../components/Spinner/Spinner';
-import { SelectFilter } from '../components/SelectFilter/SelectFilter';
-import { fetchUsers } from '../api/userApi';
-import type { User } from '../api/userApi';
-import { register } from '../api/authApi';
-import { clearToken } from '../api/authToken';
+import axios from 'axios';
+import { Button } from '../../components/Button/Button';
+import { Spinner } from '../../components/Spinner/Spinner';
+import { CheckboxFilterGroup } from '../../components/CheckboxFilterGroup/CheckboxFilterGroup';
+import { StockEditor } from '../../components/StockEditor/StockEditor';
+import { SortableTh } from '../../components/SortableTh/SortableTh';
+import { ProductStatusSelect } from '../../components/ProductStatusSelect/ProductStatusSelect';
 import {
   createProduct,
   deleteProduct,
@@ -18,12 +17,17 @@ import {
   formatPrice,
   restoreProduct,
   updateProduct,
-} from '../api/productApi';
-import type { Product, ProductInput } from '../api/productApi';
-import { ORDER_STATUSES, fetchOrders, updateOrderStatus } from '../api/orderApi';
+  updateProductStock,
+  updateProductStatus,
+  PRODUCT_STATUSES,
+} from '../../api/productApi';
+import type { Product, ProductInput, ProductStatus } from '../../types/product';
 import styles from './Admin.module.css';
 
-type Tab = 'products' | 'orders' | 'users';
+type ProductSortKey = 'name' | 'category' | 'team' | 'price' | 'stock' | 'rating';
+type SortDirection = 'asc' | 'desc';
+
+const BADGE_OPTIONS = ['NEW', 'SALE', 'BEST'];
 
 const EMPTY_FORM = {
   name: '',
@@ -33,65 +37,47 @@ const EMPTY_FORM = {
   originalPrice: '',
   emoji: '🛒',
   badge: '' as Product['badge'] | '',
+  stock: '0',
 };
 
-export const Admin = () => {
-  const [tab, setTab] = useState<Tab>('products');
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    clearToken();
-    navigate('/login');
-  };
-
-  return (
-    <div className={styles.page}>
-      <aside className={styles.sidebar}>
-        <div className={styles.brand}>
-          ⚾ KBO 굿즈
-          <span>ADMIN</span>
-        </div>
-        <nav className={styles.tabs}>
-          <button
-            type="button"
-            className={`${styles.tab} ${tab === 'products' ? styles.tabActive : ''}`}
-            onClick={() => setTab('products')}
-          >
-            상품 관리
-          </button>
-          <button
-            type="button"
-            className={`${styles.tab} ${tab === 'orders' ? styles.tabActive : ''}`}
-            onClick={() => setTab('orders')}
-          >
-            주문 관리
-          </button>
-          <button
-            type="button"
-            className={`${styles.tab} ${tab === 'users' ? styles.tabActive : ''}`}
-            onClick={() => setTab('users')}
-          >
-            회원 관리
-          </button>
-        </nav>
-        <button type="button" className={styles.tab} onClick={handleLogout}>
-          로그아웃
-        </button>
-        <Link to="/" className={styles.backLink}>
-          ← 쇼핑몰로 돌아가기
-        </Link>
-      </aside>
-
-      <main className={styles.content}>
-        {tab === 'products' ? <ProductsPanel /> : tab === 'orders' ? <OrdersPanel /> : <UsersPanel />}
-      </main>
-    </div>
-  );
+const toggleInSet = (set: Set<string>, value: string) => {
+  const next = new Set(set);
+  if (next.has(value)) {
+    next.delete(value);
+  } else {
+    next.add(value);
+  }
+  return next;
 };
 
-const ProductsPanel = () => {
+export const AdminProducts = () => {
   const queryClient = useQueryClient();
   const [showDeleted, setShowDeleted] = useState(false);
+  const [sortKey, setSortKey] = useState<ProductSortKey | null>(null);
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+
+  const [categoryFilter, setCategoryFilter] = useState<Set<string>>(new Set());
+  const [teamFilter, setTeamFilter] = useState<Set<string>>(new Set());
+  const [badgeFilter, setBadgeFilter] = useState<Set<string>>(new Set());
+  const [statusFilter, setStatusFilter] = useState<Set<string>>(new Set());
+  const hasActiveFilter =
+    categoryFilter.size > 0 || teamFilter.size > 0 || badgeFilter.size > 0 || statusFilter.size > 0;
+
+  const resetFilters = () => {
+    setCategoryFilter(new Set());
+    setTeamFilter(new Set());
+    setBadgeFilter(new Set());
+    setStatusFilter(new Set());
+  };
+
+  const handleSort = (key: ProductSortKey) => {
+    if (sortKey === key) {
+      setSortDirection((d) => (d === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortKey(key);
+      setSortDirection('asc');
+    }
+  };
 
   const { data: products = [], isLoading, isError } = useQuery({
     queryKey: ['products'],
@@ -114,6 +100,30 @@ const ProductsPanel = () => {
     queryKey: ['teams'],
     queryFn: fetchTeams,
   });
+
+  const filteredProducts = useMemo(() => {
+    return products.filter((product) => {
+      if (categoryFilter.size > 0 && !categoryFilter.has(product.category)) return false;
+      if (teamFilter.size > 0 && !(product.team && teamFilter.has(product.team))) return false;
+      if (badgeFilter.size > 0 && !(product.badge && badgeFilter.has(product.badge))) return false;
+      if (statusFilter.size > 0 && !statusFilter.has(product.status)) return false;
+      return true;
+    });
+  }, [products, categoryFilter, teamFilter, badgeFilter, statusFilter]);
+
+  const sortedProducts = useMemo(() => {
+    if (!sortKey) return filteredProducts;
+    const direction = sortDirection === 'asc' ? 1 : -1;
+    return [...filteredProducts].sort((a, b) => {
+      const aValue = a[sortKey];
+      const bValue = b[sortKey];
+      if (typeof aValue === 'number' && typeof bValue === 'number') {
+        return (aValue - bValue) * direction;
+      }
+      return String(aValue ?? '').localeCompare(String(bValue ?? ''), 'ko') * direction;
+    });
+  }, [filteredProducts, sortKey, sortDirection]);
+
   const [form, setForm] = useState(EMPTY_FORM);
   const [editingId, setEditingId] = useState<number | null>(null);
 
@@ -158,6 +168,29 @@ const ProductsPanel = () => {
     },
   });
 
+  const stockMutation = useMutation({
+    mutationFn: ({ id, stock }: { id: number; stock: number }) => updateProductStock(id, stock),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+    },
+  });
+
+  const [statusError, setStatusError] = useState<string | null>(null);
+  const statusMutation = useMutation({
+    mutationFn: ({ id, status }: { id: number; status: ProductStatus }) => updateProductStatus(id, status),
+    onSuccess: () => {
+      setStatusError(null);
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+    },
+    onError: (error) => {
+      setStatusError(
+        axios.isAxiosError(error) && error.response?.data?.message
+          ? error.response.data.message
+          : '상태 변경에 실패했습니다.',
+      );
+    },
+  });
+
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
     const trimmedName = form.name.trim();
@@ -172,6 +205,7 @@ const ProductsPanel = () => {
       originalPrice: form.originalPrice ? Number(form.originalPrice) : undefined,
       emoji: form.emoji || '🛒',
       badge: form.badge || undefined,
+      stock: Math.max(0, Math.floor(Number(form.stock) || 0)),
     });
   };
 
@@ -185,6 +219,7 @@ const ProductsPanel = () => {
       originalPrice: product.originalPrice ? String(product.originalPrice) : '',
       emoji: product.emoji,
       badge: product.badge ?? '',
+      stock: String(product.stock),
     });
   };
 
@@ -323,6 +358,16 @@ const ProductsPanel = () => {
           />
         </label>
         <label className={styles.field}>
+          재고
+          <input
+            type="number"
+            min="0"
+            value={form.stock}
+            onChange={(e) => setForm((f) => ({ ...f, stock: e.target.value }))}
+            placeholder="50"
+          />
+        </label>
+        <label className={styles.field}>
           아이콘
           <input
             value={form.emoji}
@@ -355,6 +400,48 @@ const ProductsPanel = () => {
         {saveMutation.isError && <p className={styles.error}>저장에 실패했습니다.</p>}
       </form>
 
+      {statusError && <p className={styles.error}>{statusError}</p>}
+
+      <div className={styles.checkboxFilterBar}>
+        <div className={styles.checkboxFilterGroups}>
+          <CheckboxFilterGroup
+            label="카테고리"
+            options={categoryNames}
+            selected={categoryFilter}
+            onToggle={(value) => setCategoryFilter((prev) => toggleInSet(prev, value))}
+          />
+          <CheckboxFilterGroup
+            label="구단"
+            options={teamNames}
+            selected={teamFilter}
+            onToggle={(value) => setTeamFilter((prev) => toggleInSet(prev, value))}
+          />
+          <CheckboxFilterGroup
+            label="뱃지"
+            options={BADGE_OPTIONS}
+            selected={badgeFilter}
+            onToggle={(value) => setBadgeFilter((prev) => toggleInSet(prev, value))}
+          />
+          <CheckboxFilterGroup
+            label="판매 상태"
+            options={PRODUCT_STATUSES}
+            selected={statusFilter}
+            onToggle={(value) => setStatusFilter((prev) => toggleInSet(prev, value))}
+          />
+        </div>
+        {hasActiveFilter && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className={styles.checkboxFilterReset}
+            onClick={resetFilters}
+          >
+            필터 초기화
+          </Button>
+        )}
+      </div>
+
       <div className={styles.tableWrap}>
         {isLoading ? (
           <div className={styles.empty}><Spinner /></div>
@@ -364,17 +451,49 @@ const ProductsPanel = () => {
           <table>
             <thead>
               <tr>
-                <th>상품</th>
-                <th>카테고리</th>
-                <th>구단</th>
-                <th>가격</th>
-                <th>평점</th>
+                <SortableTh
+                  label="상품"
+                  active={sortKey === 'name'}
+                  direction={sortDirection}
+                  onClick={() => handleSort('name')}
+                />
+                <SortableTh
+                  label="카테고리"
+                  active={sortKey === 'category'}
+                  direction={sortDirection}
+                  onClick={() => handleSort('category')}
+                />
+                <SortableTh
+                  label="구단"
+                  active={sortKey === 'team'}
+                  direction={sortDirection}
+                  onClick={() => handleSort('team')}
+                />
+                <SortableTh
+                  label="가격"
+                  active={sortKey === 'price'}
+                  direction={sortDirection}
+                  onClick={() => handleSort('price')}
+                />
+                <SortableTh
+                  label="재고"
+                  active={sortKey === 'stock'}
+                  direction={sortDirection}
+                  onClick={() => handleSort('stock')}
+                />
+                <th>상태</th>
+                <SortableTh
+                  label="평점"
+                  active={sortKey === 'rating'}
+                  direction={sortDirection}
+                  onClick={() => handleSort('rating')}
+                />
                 <th>뱃지</th>
                 <th></th>
               </tr>
             </thead>
             <tbody>
-              {products.map((product) => (
+              {sortedProducts.map((product) => (
                 <tr key={product.id}>
                   <td>
                     {product.emoji} {product.name}
@@ -382,6 +501,20 @@ const ProductsPanel = () => {
                   <td>{product.category}</td>
                   <td>{product.team ?? '-'}</td>
                   <td>{formatPrice(product.price)}</td>
+                  <td>
+                    <StockEditor
+                      value={product.stock}
+                      isSaving={stockMutation.isPending && stockMutation.variables?.id === product.id}
+                      onSave={(stock) => stockMutation.mutate({ id: product.id, stock })}
+                    />
+                  </td>
+                  <td>
+                    <ProductStatusSelect
+                      value={product.status}
+                      isSaving={statusMutation.isPending && statusMutation.variables?.id === product.id}
+                      onSave={(status) => statusMutation.mutate({ id: product.id, status })}
+                    />
+                  </td>
                   <td>⭐ {product.rating}</td>
                   <td>
                     {product.badge && (
@@ -413,244 +546,12 @@ const ProductsPanel = () => {
         {!isLoading && !isError && products.length === 0 && (
           <p className={styles.empty}>등록된 상품이 없습니다.</p>
         )}
+        {!isLoading && !isError && products.length > 0 && sortedProducts.length === 0 && (
+          <p className={styles.empty}>필터 조건에 맞는 상품이 없습니다.</p>
+        )}
       </div>
         </>
       )}
-    </>
-  );
-};
-
-const ORDER_STATUS_FILTERS = ['전체', ...ORDER_STATUSES];
-
-const OrdersPanel = () => {
-  const queryClient = useQueryClient();
-  const { data: orders = [], isLoading, isError } = useQuery({
-    queryKey: ['orders'],
-    queryFn: fetchOrders,
-  });
-  const [statusFilter, setStatusFilter] = useState('전체');
-  const [keyword, setKeyword] = useState('');
-
-  const statusMutation = useMutation({
-    mutationFn: ({ id, status }: { id: number; status: string }) => updateOrderStatus(id, status),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['orders'] });
-    },
-  });
-
-  const totalRevenue = orders.reduce((sum, order) => sum + order.totalPrice, 0);
-  const trimmedKeyword = keyword.trim().toLowerCase();
-  const filteredOrders = orders
-    .filter((order) => statusFilter === '전체' || order.status === statusFilter)
-    .filter((order) => {
-      if (!trimmedKeyword) return true;
-      const orderNumber = `#${order.id}`;
-      const haystack = [
-        orderNumber,
-        String(order.id),
-        order.buyerName,
-        order.buyerEmail,
-        ...order.items.map((item) => item.name),
-      ]
-        .join(' ')
-        .toLowerCase();
-      return haystack.includes(trimmedKeyword);
-    });
-
-  return (
-    <>
-      <div className={styles.panelHeader}>
-        <h1>주문 관리</h1>
-      </div>
-
-      <section className={styles.stats}>
-        <div className={styles.statCard}>
-          <span>전체 주문</span>
-          <strong>{orders.length}건</strong>
-        </div>
-        <div className={styles.statCard}>
-          <span>주문 총액</span>
-          <strong>{formatPrice(totalRevenue)}</strong>
-        </div>
-      </section>
-
-      <div className={styles.filterBar}>
-        <SelectFilter options={ORDER_STATUS_FILTERS} value={statusFilter} onChange={setStatusFilter} />
-        <input
-          type="search"
-          className={styles.searchInput}
-          value={keyword}
-          onChange={(e) => setKeyword(e.target.value)}
-          placeholder="주문번호, 주문자, 이메일, 상품명으로 검색"
-          aria-label="주문 검색"
-        />
-      </div>
-
-      <div className={styles.tableWrap}>
-        {isLoading ? (
-          <div className={styles.empty}><Spinner /></div>
-        ) : isError ? (
-          <p className={`${styles.empty} ${styles.error}`}>주문 목록을 불러오지 못했습니다.</p>
-        ) : orders.length === 0 ? (
-          <p className={styles.empty}>주문 내역이 없습니다.</p>
-        ) : filteredOrders.length === 0 ? (
-          <p className={styles.empty}>
-            {trimmedKeyword ? `'${keyword}'에 대한 검색 결과가 없습니다.` : `'${statusFilter}' 상태의 주문이 없습니다.`}
-          </p>
-        ) : (
-          <table>
-            <thead>
-              <tr>
-                <th>주문번호</th>
-                <th>주문자</th>
-                <th>상품</th>
-                <th>금액</th>
-                <th>주문일시</th>
-                <th>상태</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredOrders.map((order) => (
-                <tr key={order.id}>
-                  <td>#{order.id}</td>
-                  <td>
-                    {order.buyerName}
-                    <div className={styles.orderBuyerEmail}>{order.buyerEmail}</div>
-                  </td>
-                  <td>
-                    {order.items.map((item, index) => (
-                      <div key={index}>
-                        {item.emoji} {item.name} × {item.quantity}
-                      </div>
-                    ))}
-                  </td>
-                  <td>{formatPrice(order.totalPrice)}</td>
-                  <td>{new Date(order.createdAt).toLocaleString('ko-KR')}</td>
-                  <td>
-                    <select
-                      value={order.status}
-                      disabled={statusMutation.isPending && statusMutation.variables?.id === order.id}
-                      onChange={(e) => statusMutation.mutate({ id: order.id, status: e.target.value })}
-                    >
-                      {ORDER_STATUSES.map((status) => (
-                        <option key={status} value={status}>
-                          {status}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
-    </>
-  );
-};
-
-const UsersPanel = () => {
-  const { data: users, isLoading, isError } = useQuery({ queryKey: ['users'], queryFn: fetchUsers });
-  // 백엔드 목업이 실제로 신규 회원을 저장하지 않고 GET 응답도 고정값이라,
-  // 새로 추가한 회원은 쿼리 캐시가 아닌 별도 상태로 보관해 뒤늦게 끝나는
-  // 최초 조회 응답이 추가분을 덮어쓰지 않도록 한다.
-  const [createdUsers, setCreatedUsers] = useState<User[]>([]);
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-
-  const mutation = useMutation({
-    // 💡 register()는 발급된 토큰을 함께 반환하지만, 여기서는 관리자가
-    // 남 대신 계정을 만드는 것이므로 그 토큰으로 로그인 세션을 바꾸면 안 된다.
-    // id/name/email만 취해 목록에 반영하고 토큰은 버린다.
-    mutationFn: (payload: { name: string; email: string; password: string }) =>
-      register(payload.name, payload.email, payload.password),
-    onSuccess: (newUser) => {
-      setCreatedUsers((prev) => [...prev, { id: newUser.id, name: newUser.name, email: newUser.email }]);
-      setName('');
-      setEmail('');
-      setPassword('');
-    },
-  });
-
-  const handleSubmit = (event: FormEvent) => {
-    event.preventDefault();
-    if (!name.trim() || !email.trim() || !password) return;
-    mutation.mutate({ name: name.trim(), email: email.trim(), password });
-  };
-
-  const allUsers = [...(users ?? []), ...createdUsers];
-
-  return (
-    <>
-      <h1>회원 관리</h1>
-
-      <section className={styles.stats}>
-        <div className={styles.statCard}>
-          <span>전체 회원</span>
-          <strong>{allUsers.length}명</strong>
-        </div>
-      </section>
-
-      <form className={styles.form} onSubmit={handleSubmit}>
-        <label className={styles.field}>
-          이름
-          <input value={name} onChange={(e) => setName(e.target.value)} placeholder="홍길동" required />
-        </label>
-        <label className={styles.field}>
-          이메일
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="hong@example.com"
-            required
-          />
-        </label>
-        <label className={styles.field}>
-          비밀번호
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            minLength={4}
-            required
-          />
-        </label>
-        <div className={styles.formActions}>
-          <Button type="submit" isLoading={mutation.isPending}>
-            회원 추가
-          </Button>
-        </div>
-        {mutation.isError && <p className={styles.error}>회원 추가에 실패했습니다.</p>}
-      </form>
-
-      <div className={styles.tableWrap}>
-        {isLoading ? (
-          <div className={styles.empty}><Spinner /></div>
-        ) : isError ? (
-          <p className={`${styles.empty} ${styles.error}`}>회원 목록을 불러오지 못했습니다.</p>
-        ) : (
-          <table>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>이름</th>
-                <th>이메일</th>
-              </tr>
-            </thead>
-            <tbody>
-              {allUsers.map((user) => (
-                <tr key={user.id}>
-                  <td>{user.id}</td>
-                  <td>{user.name}</td>
-                  <td>{user.email}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
     </>
   );
 };

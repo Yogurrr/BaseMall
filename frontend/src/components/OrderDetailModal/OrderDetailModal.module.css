@@ -1,0 +1,153 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.8rem;
+  z-index: 100;
+}
+
+.modal {
+  width: 100%;
+  max-width: 28rem;
+  max-height: 85vh;
+  overflow-y: auto;
+  background: var(--bg);
+  border: 0.05rem solid var(--border);
+  border-radius: 0.6rem;
+  box-shadow: 0 0.6rem 1.6rem rgba(0, 0, 0, 0.2);
+  padding: 1.2rem;
+  text-align: left;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.8rem;
+}
+
+.header h2 {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--text-h);
+}
+
+.closeButton {
+  font: inherit;
+  font-size: 0.8rem;
+  line-height: 1;
+  border: none;
+  background: none;
+  color: var(--text);
+  cursor: pointer;
+  padding: 0.3rem;
+  border-radius: 0.3rem;
+}
+
+.closeButton:hover {
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
+.infoGrid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.4rem 0.8rem;
+  margin: 0 0 1rem;
+  padding: 0.8rem;
+  border: 0.05rem solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--code-bg);
+}
+
+.infoGrid dt {
+  font-size: 0.7rem;
+  color: var(--text);
+}
+
+.infoGrid dd {
+  margin: 0;
+  font-size: 0.7rem;
+  color: var(--text-h);
+  font-weight: 600;
+}
+
+.trackingField {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-bottom: 1rem;
+  font-size: 0.7rem;
+  color: var(--text);
+}
+
+.trackingInputRow {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.trackingInputRow input {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  font-size: 0.7rem;
+  padding: 0.4rem 0.5rem;
+  border-radius: 0.4rem;
+  border: 0.05rem solid var(--border);
+  background: var(--bg);
+  color: var(--text-h);
+}
+
+.trackingError {
+  margin: 0;
+  font-size: 0.65rem;
+  color: #dc2626;
+}
+
+.itemTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.75rem;
+  margin-bottom: 0.8rem;
+}
+
+.itemTable thead th {
+  text-align: left;
+  padding: 0.4rem 0.5rem;
+  border-bottom: 0.05rem solid var(--border);
+  color: var(--text);
+  font-weight: 600;
+}
+
+.itemTable tbody td {
+  padding: 0.5rem;
+  border-bottom: 0.05rem solid var(--border);
+  color: var(--text-h);
+  vertical-align: middle;
+}
+
+.itemCategory {
+  display: block;
+  font-size: 0.6rem;
+  color: var(--text);
+}
+
+.totalRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 0.4rem;
+}
+
+.totalRow span {
+  font-size: 0.75rem;
+  color: var(--text);
+}
+
+.totalRow strong {
+  font-size: 1rem;
+  color: var(--text-h);
+}

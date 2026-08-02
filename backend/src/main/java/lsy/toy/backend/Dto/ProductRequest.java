@@ -8,6 +8,7 @@ public class ProductRequest {
     private Integer originalPrice;
     private String emoji;
     private String badge;
+    private Integer stock;
 
     public String getName() { return name; }
     public String getCategory() { return category; }
@@ -16,4 +17,5 @@ public class ProductRequest {
     public Integer getOriginalPrice() { return originalPrice; }
     public String getEmoji() { return emoji; }
     public String getBadge() { return badge; }
+    public Integer getStock() { return stock; }
 }

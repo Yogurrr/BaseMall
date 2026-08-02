@@ -15,7 +15,7 @@ interface AdBannerProps {
   intervalMs?: number;
 }
 
-export const AdBanner = ({ slides, intervalMs = 5000 }: AdBannerProps) => {
+export const AdBanner = ({ slides, intervalMs = 8000 }: AdBannerProps) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [brokenImages, setBrokenImages] = useState<Set<number>>(new Set());
 

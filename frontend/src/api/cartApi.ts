@@ -1,27 +1,23 @@
 import { api } from './axiosInstance';
-import type { Product } from './productApi';
+import type { CartItem } from '../types/cart';
 
-export interface CartItemDto extends Product {
-  quantity: number;
-}
-
-export const fetchCart = async (): Promise<CartItemDto[]> => {
-  const response = await api.get<CartItemDto[]>('/cart');
+export const fetchCart = async (): Promise<CartItem[]> => {
+  const response = await api.get<CartItem[]>('/cart');
   return response.data;
 };
 
-export const addCartItem = async (productId: number, quantity = 1): Promise<CartItemDto[]> => {
-  const response = await api.post<CartItemDto[]>('/cart/items', { productId, quantity });
+export const addCartItem = async (productId: number, quantity = 1): Promise<CartItem[]> => {
+  const response = await api.post<CartItem[]>('/cart/items', { productId, quantity });
   return response.data;
 };
 
-export const updateCartItem = async (productId: number, quantity: number): Promise<CartItemDto[]> => {
-  const response = await api.put<CartItemDto[]>(`/cart/items/${productId}`, { quantity });
+export const updateCartItem = async (productId: number, quantity: number): Promise<CartItem[]> => {
+  const response = await api.put<CartItem[]>(`/cart/items/${productId}`, { quantity });
   return response.data;
 };
 
-export const removeCartItem = async (productId: number): Promise<CartItemDto[]> => {
-  const response = await api.delete<CartItemDto[]>(`/cart/items/${productId}`);
+export const removeCartItem = async (productId: number): Promise<CartItem[]> => {
+  const response = await api.delete<CartItem[]>(`/cart/items/${productId}`);
   return response.data;
 };
 

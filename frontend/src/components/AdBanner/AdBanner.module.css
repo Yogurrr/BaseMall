@@ -1,11 +1,8 @@
 .banner {
-  /*
-  max-width: 1400px;
-  */
-  width: 1700px;
-  height: 1000px;
+  width: 85rem;
+  height: 50rem;
   margin: 0 auto;
-  padding: 24px 24px 0;
+  padding: 1.2rem 1.2rem 0;
   box-sizing: border-box;
 }
 
@@ -14,9 +11,9 @@
   width: 100%;
   /* 💡 업로드된 배너 이미지(1672×941, 대략 16:9) 비율에 맞춰 높이를 자동 계산한다. */
   aspect-ratio: 1672 / 941;
-  min-height: 240px;
-  max-height: 620px;
-  border-radius: 20px;
+  min-height: 12rem;
+  max-height: 50rem;
+  border-radius: 1rem;
   overflow: hidden;
 }
 
@@ -48,28 +45,28 @@
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
-  gap: 10px;
-  padding: 0 72px;
+  gap: 0.5rem;
+  padding: 0 3.6rem;
 }
 
 @media (max-width: 720px) {
   .slideContent {
-    padding: 0 32px;
+    padding: 0 1.6rem;
     text-align: left;
   }
 }
 
 .eyebrow {
-  font-size: 18px;
+  font-size: 0.9rem;
   font-weight: 700;
-  letter-spacing: 1.5px;
+  letter-spacing: 0.075rem;
   text-transform: uppercase;
   opacity: 0.9;
   margin: 0;
 }
 
 .title {
-  font-size: 48px;
+  font-size: 2.4rem;
   font-weight: 800;
   margin: 0;
   line-height: 1.3;
@@ -77,45 +74,45 @@
 
 @media (max-width: 720px) {
   .title {
-    font-size: 30px;
+    font-size: 1.5rem;
   }
 }
 
 .description {
-  font-size: 20px;
+  font-size: 1rem;
   opacity: 0.95;
-  margin: 0 0 4px;
+  margin: 0 0 0.2rem;
 }
 
 .cta {
   font: inherit;
-  font-size: 18px;
+  font-size: 0.9rem;
   font-weight: 700;
   color: var(--text-h);
   background: #fff;
   border: none;
-  border-radius: 999px;
-  padding: 14px 28px;
+  border-radius: 49.95rem;
+  padding: 0.7rem 1.4rem;
   cursor: pointer;
-  margin-top: 12px;
+  margin-top: 0.6rem;
   transition: transform 0.15s;
 }
 
 .cta:hover {
-  transform: translateY(-2px);
+  transform: translateY(-0.1rem);
 }
 
 .arrow {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  width: 48px;
-  height: 48px;
+  width: 2.4rem;
+  height: 2.4rem;
   border-radius: 50%;
   border: none;
   background: rgba(255, 255, 255, 0.25);
   color: #fff;
-  font-size: 26px;
+  font-size: 1.3rem;
   line-height: 1;
   cursor: pointer;
   display: flex;
@@ -129,11 +126,11 @@
 }
 
 .arrowLeft {
-  left: 24px;
+  left: 1.2rem;
 }
 
 .arrowRight {
-  right: 24px;
+  right: 1.2rem;
 }
 
 @media (max-width: 720px) {
@@ -145,13 +142,13 @@
 .dots {
   display: flex;
   justify-content: center;
-  gap: 8px;
-  padding: 12px 0;
+  gap: 0.4rem;
+  padding: 0.6rem 0;
 }
 
 .dot {
-  width: 8px;
-  height: 8px;
+  width: 0.4rem;
+  height: 0.4rem;
   border-radius: 50%;
   border: none;
   background: var(--border);
@@ -166,6 +163,6 @@
 
 .dotActive {
   background: var(--accent);
-  width: 20px;
-  border-radius: 999px;
+  width: 1rem;
+  border-radius: 49.95rem;
 }

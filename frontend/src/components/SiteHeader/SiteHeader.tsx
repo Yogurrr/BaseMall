@@ -130,21 +130,22 @@ export const SiteHeader = () => {
                 </div>
               )}
             </div>
-            {isAdmin && <Link to="/admin">관리자 페이지</Link>}
           </nav>
         </div>
         <div className={styles.searchWrap}>
           <SearchBar size="lg" onSearch={handleSearch} />
         </div>
         <div className={styles.headerActions}>
-          <Link to="/cart" className={styles.cartButton} aria-label="장바구니">
-            🛒
-            {totalCount > 0 && <span className={styles.cartBadge}>{totalCount}</span>}
-          </Link>
+          {!isAdmin && (
+            <Link to="/cart" className={styles.cartButton} aria-label="장바구니">
+              🛒
+              {totalCount > 0 && <span className={styles.cartBadge}>{totalCount}</span>}
+            </Link>
+          )}
           {loggedIn ? (
             <>
-              <Link to="/mypage" className={styles.authButton}>
-                마이페이지
+              <Link to={isAdmin ? '/admin' : '/mypage'} className={styles.authButton}>
+                {isAdmin ? '관리자 페이지' : '마이페이지'}
               </Link>
               <button type="button" className={styles.authButton} onClick={handleLogout}>
                 로그아웃

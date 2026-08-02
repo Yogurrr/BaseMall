@@ -38,7 +38,11 @@ public class OrderService {
     }
 
     @Transactional
-    public OrderResponse createOrderFromCart(String email) {
+    public OrderResponse createOrderFromCart(String email, String shippingAddress) {
+        if (shippingAddress == null || shippingAddress.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "배송지를 입력해주세요.");
+        }
+
         User user = findUser(email);
         List<CartItem> cartItems = cartItemRepository.findByUser_IdOrderByIdAsc(user.getId());
         if (cartItems.isEmpty()) {
@@ -50,6 +54,7 @@ public class OrderService {
             .sum();
 
         Order order = new Order(user, totalPrice);
+        order.setShippingAddress(shippingAddress.trim());
         for (CartItem cartItem : cartItems) {
             order.addItem(new OrderItem(
                 cartItem.getProduct().getName(),
@@ -58,6 +63,8 @@ public class OrderService {
                 cartItem.getProduct().getPrice(),
                 cartItem.getQuantity()
             ));
+            // 💡 인기순/판매순 정렬이 참조하는 누적 판매 수량. 같은 트랜잭션이라 별도 save 없이 커밋 시 반영된다.
+            cartItem.getProduct().incrementSoldCount(cartItem.getQuantity());
         }
 
         Order saved = orderRepository.save(order);
@@ -72,6 +79,13 @@ public class OrderService {
             .toList();
     }
 
+    public List<OrderResponse> getMyOrders(String email) {
+        User user = findUser(email);
+        return orderRepository.findByUser_IdOrderByCreatedAtDesc(user.getId()).stream()
+            .map(OrderResponse::new)
+            .toList();
+    }
+
     public OrderResponse updateStatus(Long orderId, String status) {
         if (status == null || !VALID_STATUSES.contains(status)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "올바르지 않은 주문 상태입니다: " + status);
@@ -81,6 +95,14 @@ public class OrderService {
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "주문을 찾을 수 없습니다: " + orderId));
 
         order.setStatus(status);
+        return new OrderResponse(orderRepository.save(order));
+    }
+
+    public OrderResponse updateTrackingNumber(Long orderId, String trackingNumber) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "주문을 찾을 수 없습니다: " + orderId));
+
+        order.setTrackingNumber(trackingNumber == null || trackingNumber.isBlank() ? null : trackingNumber.trim());
         return new OrderResponse(orderRepository.save(order));
     }
 

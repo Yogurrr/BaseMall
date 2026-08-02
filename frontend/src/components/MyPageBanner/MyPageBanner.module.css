@@ -1,0 +1,59 @@
+.banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  padding: 1.2rem 1.4rem;
+  border-radius: 0.8rem;
+  color: #fff;
+  background: linear-gradient(120deg, var(--accent), #4ade80);
+}
+
+.greeting {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.name {
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 49.95rem;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.links {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.link {
+  font: inherit;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #fff;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+.divider {
+  width: 0.05rem;
+  height: 0.6rem;
+  background: rgba(255, 255, 255, 0.5);
+}

@@ -45,6 +45,12 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/register", "/api/auth/login").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/products", "/api/products/page").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/categories").permitAll()
+                // 💡 주문 전체 조회/상태 변경은 관리자 전용 기능(어드민 페이지에서만 사용).
+                // 로그인만 하면 누구나 호출 가능했던 걸 막아, 다른 회원의 이름/이메일/배송지가 새는 것을 방지한다.
+                .requestMatchers(HttpMethod.POST, "/api/orders").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/orders/me").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/orders").hasAuthority("ADMIN")
+                .requestMatchers(HttpMethod.PATCH, "/api/orders/**").hasAuthority("ADMIN")
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

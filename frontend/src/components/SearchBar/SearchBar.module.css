@@ -1,21 +1,21 @@
 .form {
   display: flex;
   align-items: center;
-  gap: 8px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
+  gap: 0.4rem;
+  border-radius: 49.95rem;
+  border: 0.05rem solid var(--border);
   background: var(--code-bg);
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .form:focus-within {
   border-color: var(--accent-border);
-  box-shadow: 0 0 0 3px var(--accent-bg);
+  box-shadow: 0 0 0 0.15rem var(--accent-bg);
 }
 
 .icon {
   flex-shrink: 0;
-  font-size: 14px;
+  font-size: 0.7rem;
   opacity: 0.7;
 }
 
@@ -34,9 +34,9 @@
 }
 
 .sm {
-  width: 200px;
-  padding: 9px 16px;
-  font-size: 16px;
+  width: 10rem;
+  padding: 0.45rem 0.8rem;
+  font-size: 0.8rem;
 }
 
 @media (max-width: 720px) {
@@ -47,25 +47,25 @@
 
 .lg {
   width: 100%;
-  max-width: 560px;
-  padding: 8px 8px 8px 20px;
-  font-size: 18px;
+  max-width: 28rem;
+  padding: 0.4rem 0.4rem 0.4rem 1rem;
+  font-size: 0.9rem;
 }
 
 .button {
   flex-shrink: 0;
   font: inherit;
-  font-size: 16px;
+  font-size: 0.8rem;
   font-weight: 700;
   color: #fff;
   background: linear-gradient(120deg, var(--accent), #86efac);
   border: none;
-  border-radius: 999px;
-  padding: 10px 22px;
+  border-radius: 49.95rem;
+  padding: 0.5rem 1.1rem;
   cursor: pointer;
   transition: transform 0.15s;
 }
 
 .button:hover {
-  transform: translateY(-1px);
+  transform: translateY(-0.05rem);
 }

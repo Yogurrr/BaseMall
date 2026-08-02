@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { formatPrice } from '../../api/productApi';
-import type { CartItem } from '../../context/CartContext';
+import type { CartItem } from '../../types/cart';
 import styles from './CartItemRow.module.css';
 
 interface CartItemRowProps {

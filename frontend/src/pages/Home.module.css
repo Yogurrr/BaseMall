@@ -6,43 +6,43 @@
 }
 
 .filterLabel {
-  padding: 0 24px;
-  font-size: 15px;
+  padding: 0 1.2rem;
+  font-size: 1.0rem;
   font-weight: 600;
   color: var(--text);
 }
 
 .filterLabel:first-of-type {
-  padding-top: 8px;
+  padding-top: 0.4rem;
 }
 
 /* --- Products --- */
 .products {
   flex: 1;
-  padding: 8px 24px 72px;
+  padding: 0.4rem 1.2rem 3.6rem;
 }
 
 .products h2 {
   position: relative;
-  margin-bottom: 24px;
-  padding-left: 14px;
+  margin-bottom: 1.2rem;
+  padding-left: 0.7rem;
 }
 
 .products h2::before {
   content: '';
   position: absolute;
   left: 0;
-  top: 2px;
-  bottom: 4px;
-  width: 4px;
-  border-radius: 4px;
+  top: 0.1rem;
+  bottom: 0.2rem;
+  width: 0.2rem;
+  border-radius: 0.2rem;
   background: linear-gradient(180deg, var(--accent), #86efac);
 }
 
 .grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 22px;
+  gap: 1.1rem;
 }
 
 @media (max-width: 1024px) {
@@ -59,6 +59,6 @@
 
 .empty {
   color: var(--text);
-  padding: 40px 0;
+  padding: 2rem 0;
   text-align: center;
 }

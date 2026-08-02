@@ -6,6 +6,7 @@ import { SiteFooter } from '../components/SiteFooter/SiteFooter';
 import { Button } from '../components/Button/Button';
 import { Spinner } from '../components/Spinner/Spinner';
 import { useCart } from '../context/CartContext';
+import { useWishlist } from '../context/WishlistContext';
 import { fetchProduct, formatPrice } from '../api/productApi';
 import styles from './ProductDetail.module.css';
 
@@ -14,8 +15,8 @@ export const ProductDetail = () => {
   const productId = Number(id);
   const navigate = useNavigate();
   const { addItem } = useCart();
+  const { isLiked, toggleWishlist } = useWishlist();
 
-  const [liked, setLiked] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [addedMessage, setAddedMessage] = useState(false);
 
@@ -124,10 +125,10 @@ export const ProductDetail = () => {
                 <Button
                   size="lg"
                   variant="outline"
-                  onClick={() => setLiked((prev) => !prev)}
-                  aria-pressed={liked}
+                  onClick={() => toggleWishlist(product)}
+                  aria-pressed={isLiked(product.id)}
                 >
-                  {liked ? '❤️ 찜 완료' : '🤍 찜하기'}
+                  {isLiked(product.id) ? '❤️ 찜 완료' : '🤍 찜하기'}
                 </Button>
               </div>
 

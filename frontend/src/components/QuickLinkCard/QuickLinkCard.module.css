@@ -2,41 +2,41 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 20px;
+  gap: 0.2rem;
+  border: 0.05rem solid var(--border);
+  border-radius: 0.7rem;
+  padding: 1rem;
   text-decoration: none;
   color: inherit;
   transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
 }
 
 .card:hover {
-  transform: translateY(-3px);
+  transform: translateY(-0.15rem);
   box-shadow: var(--shadow);
   border-color: var(--accent-border);
 }
 
 .icon {
-  font-size: 26px;
-  margin-bottom: 4px;
+  font-size: 1.3rem;
+  margin-bottom: 0.2rem;
 }
 
 .label {
-  font-size: 17px;
+  font-size: 0.85rem;
   font-weight: 700;
   color: var(--text-h);
 }
 
 .description {
-  font-size: 15px;
+  font-size: 0.75rem;
   color: var(--text);
 }
 
 .arrow {
   position: absolute;
-  top: 20px;
-  right: 20px;
+  top: 1rem;
+  right: 1rem;
   color: var(--text);
-  font-size: 16px;
+  font-size: 0.8rem;
 }

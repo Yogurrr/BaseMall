@@ -1,6 +1,6 @@
 .card {
-  border: 1px solid var(--border);
-  border-radius: 16px;
+  border: 0.05rem solid var(--border);
+  border-radius: 0.8rem;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -9,18 +9,18 @@
 }
 
 .card:hover {
-  transform: translateY(-6px);
+  transform: translateY(-0.3rem);
   box-shadow: var(--shadow);
   border-color: var(--accent-border);
 }
 
 .thumb {
   position: relative;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 4 / 3;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 56px;
+  font-size: 2.2rem;
   background: radial-gradient(circle at 30% 20%, var(--accent-bg), var(--code-bg));
   overflow: hidden;
   transition: transform 0.3s ease;
@@ -34,14 +34,14 @@
 
 .badge {
   position: absolute;
-  top: 10px;
-  left: 10px;
-  font-size: 13px;
+  top: 0.5rem;
+  left: 0.5rem;
+  font-size: 0.65rem;
   font-weight: 700;
-  padding: 4px 10px;
-  border-radius: 999px;
+  padding: 0.2rem 0.5rem;
+  border-radius: 49.95rem;
   color: #fff;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0.1rem 0.3rem rgba(0, 0, 0, 0.2);
 }
 
 .badgeNEW {
@@ -58,15 +58,15 @@
 
 .likeButton {
   position: absolute;
-  top: 8px;
-  right: 8px;
+  top: 0.4rem;
+  right: 0.4rem;
   border: none;
   background: color-mix(in srgb, var(--bg) 80%, transparent);
-  backdrop-filter: blur(4px);
-  width: 32px;
-  height: 32px;
+  backdrop-filter: blur(0.2rem);
+  width: 2.2rem;
+  height: 2.2rem;
   border-radius: 50%;
-  font-size: 15px;
+  font-size: 1.0rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -95,14 +95,14 @@
 }
 
 .cardBody {
-  padding: 16px;
+  padding: 0.8rem;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 0.2rem;
 }
 
 .cardBody h3 {
-  font-size: 17px;
+  font-size: 1rem;
   font-weight: 600;
   color: var(--text-h);
   margin: 0;
@@ -118,7 +118,7 @@
 }
 
 .category {
-  font-size: 14px;
+  font-size: 0.8rem;
   color: var(--accent);
   font-weight: 600;
 }
@@ -129,32 +129,32 @@
 }
 
 .rating {
-  font-size: 15px;
+  font-size: 0.85rem;
   color: var(--text);
 }
 
 .priceRow {
   display: flex;
   align-items: baseline;
-  gap: 6px;
-  margin: 6px 0 12px;
+  gap: 0.3rem;
+  margin: 0.3rem 0 0.6rem;
   flex-wrap: wrap;
 }
 
 .discount {
-  font-size: 17px;
+  font-size: 1rem;
   font-weight: 800;
   color: #f97316;
 }
 
 .originalPrice {
-  font-size: 15px;
+  font-size: 0.85rem;
   color: var(--text);
   text-decoration: line-through;
 }
 
 .price {
-  font-size: 20px;
+  font-size: 1.15rem;
   font-weight: 800;
   color: var(--text-h);
 }

@@ -10,7 +10,9 @@ import { ProductCard } from '../components/ProductCard/ProductCard';
 import { Pagination } from '../components/Pagination/Pagination';
 import { SiteFooter } from '../components/SiteFooter/SiteFooter';
 import { Spinner } from '../components/Spinner/Spinner';
-import { useCart } from '../context/CartContext';
+import { RecommendedProducts } from '../components/RecommendedProducts/RecommendedProducts';
+import { useWishlist } from '../context/WishlistContext';
+import { useCurrentUser } from '../hooks/useCurrentUser';
 import { fetchCategories, fetchProductsPage, fetchTeams } from '../api/productApi';
 import { getPublicStorageUrl } from '../api/supabaseStorage';
 import styles from './Home.module.css';
@@ -56,8 +58,8 @@ export const Home = () => {
   const [activeCategory, setActiveCategory] = useState(() => searchParams.get('category') || '전체');
   const [activeTeam, setActiveTeam] = useState(() => searchParams.get('team') || '전체');
   const [page, setPage] = useState(0);
-  const [likedIds, setLikedIds] = useState<Set<number>>(new Set());
-  const { addItem } = useCart();
+  const { isLiked, toggleWishlist } = useWishlist();
+  const { data: currentUser } = useCurrentUser();
 
   const { data: productPage, isLoading, isError } = useQuery({
     queryKey: ['products', 'page', page, activeCategory, activeTeam],
@@ -103,18 +105,6 @@ export const Home = () => {
     setPage(0);
   };
 
-  const toggleLike = (id: number) => {
-    setLikedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      return next;
-    });
-  };
-
   return (
     <div className={styles.page}>
       <AnnouncementBar message="⚾ 전 구단 굿즈 모음 · 신규 가입 시 15% 할인 쿠폰 증정 · 5만원 이상 구매 시 무료배송" />
@@ -122,8 +112,10 @@ export const Home = () => {
       <SiteHeader />
 
       <AdBanner slides={AD_SLIDES} />
+       
+      {/* <PerksBar perks={PERKS} /> */}
 
-      <PerksBar perks={PERKS} />
+      {currentUser?.favoriteTeam && <RecommendedProducts team={currentUser.favoriteTeam} />}
 
       <p className={styles.filterLabel}>상품 종류</p>
       <CategoryTabs
@@ -148,9 +140,8 @@ export const Home = () => {
               <ProductCard
                 key={product.id}
                 product={product}
-                liked={likedIds.has(product.id)}
-                onToggleLike={toggleLike}
-                onAddToCart={() => addItem(product)}
+                liked={isLiked(product.id)}
+                onToggleLike={toggleWishlist}
               />
             ))}
           </div>

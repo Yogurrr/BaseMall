@@ -1,33 +1,50 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { SiteHeader } from '../components/SiteHeader/SiteHeader';
 import { SiteFooter } from '../components/SiteFooter/SiteFooter';
-import { SearchBar } from '../components/SearchBar/SearchBar';
 import { ProductCard } from '../components/ProductCard/ProductCard';
 import { Pagination } from '../components/Pagination/Pagination';
 import { Spinner } from '../components/Spinner/Spinner';
+import { SortSelect, type SortOption } from '../components/SortSelect/SortSelect';
 import { useCart } from '../context/CartContext';
+import { useWishlist } from '../context/WishlistContext';
 import { fetchProductsPage } from '../api/productApi';
 import styles from './Search.module.css';
 
 const PAGE_SIZE = 12;
 
+const SORT_OPTIONS: SortOption[] = [
+  { value: '', label: '추천순' },
+  { value: 'popular', label: '인기순' },
+  { value: 'sales', label: '판매순' },
+  { value: 'priceAsc', label: '낮은가격순' },
+  { value: 'priceDesc', label: '높은가격순' },
+  { value: 'reviews', label: '리뷰많은순' },
+  { value: 'discount', label: '할인율순' },
+  { value: 'newest', label: '신상품순' },
+];
+
 export const Search = () => {
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
   const query = searchParams.get('q') ?? '';
   const [page, setPage] = useState(0);
-  const [likedIds, setLikedIds] = useState<Set<number>>(new Set());
+  const [sort, setSort] = useState('');
   const { addItem } = useCart();
+  const { isLiked, toggleWishlist } = useWishlist();
 
   useEffect(() => {
     setPage(0);
   }, [query]);
 
+  const handleSortChange = (value: string) => {
+    setSort(value);
+    setPage(0);
+  };
+
   const { data: productPage, isLoading, isError } = useQuery({
-    queryKey: ['products', 'search', query, page],
-    queryFn: () => fetchProductsPage({ page, size: PAGE_SIZE, keyword: query }),
+    queryKey: ['products', 'search', query, page, sort],
+    queryFn: () => fetchProductsPage({ page, size: PAGE_SIZE, keyword: query, sort }),
     enabled: query.length > 0,
   });
 
@@ -35,34 +52,12 @@ export const Search = () => {
   const totalPages = productPage?.totalPages ?? 0;
   const totalElements = productPage?.totalElements ?? 0;
 
-  const handleSearch = (keyword: string) => {
-    navigate(`/search?q=${encodeURIComponent(keyword)}`);
-  };
-
-  const toggleLike = (id: number) => {
-    setLikedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      return next;
-    });
-  };
-
   return (
     <div className={styles.page}>
       <SiteHeader />
 
       <section className={styles.hero}>
-        <h1>굿즈 검색</h1>
-        <SearchBar
-          size="lg"
-          defaultValue={query}
-          placeholder="찾으시는 구단·상품명을 검색해보세요"
-          onSearch={handleSearch}
-        />
+        <h1>{query ? `'${query}'에 대한 검색 결과` : '굿즈 검색'}</h1>
       </section>
 
       <div className={styles.content}>
@@ -70,9 +65,10 @@ export const Search = () => {
           <p className={styles.empty}>검색어를 입력해주세요.</p>
         ) : (
           <>
-            <p className={styles.resultLabel}>
-              <strong>'{query}'</strong> 검색 결과{!isLoading && !isError ? ` ${totalElements}개` : ''}
-            </p>
+            <div className={styles.resultBar}>
+              {!isLoading && !isError && <p className={styles.resultLabel}>총 {totalElements}개</p>}
+              <SortSelect options={SORT_OPTIONS} value={sort} onChange={handleSortChange} />
+            </div>
 
             {isLoading ? (
               <div className={styles.empty}>
@@ -86,8 +82,8 @@ export const Search = () => {
                   <ProductCard
                     key={product.id}
                     product={product}
-                    liked={likedIds.has(product.id)}
-                    onToggleLike={toggleLike}
+                    liked={isLiked(product.id)}
+                    onToggleLike={toggleWishlist}
                     onAddToCart={() => addItem(product)}
                   />
                 ))}

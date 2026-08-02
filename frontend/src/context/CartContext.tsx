@@ -1,12 +1,9 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import type { Product } from '../api/productApi';
+import type { Product } from '../types/product';
+import type { CartItem } from '../types/cart';
 import { addCartItem, clearCartApi, fetchCart, removeCartItem, updateCartItem } from '../api/cartApi';
 import { isLoggedIn, subscribeAuthChange } from '../api/authToken';
-
-export interface CartItem extends Product {
-  quantity: number;
-}
 
 interface CartContextValue {
   items: CartItem[];

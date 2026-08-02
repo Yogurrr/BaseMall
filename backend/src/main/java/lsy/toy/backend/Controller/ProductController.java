@@ -1,6 +1,8 @@
 package lsy.toy.backend.Controller;
 
 import lsy.toy.backend.Dto.ProductRequest;
+import lsy.toy.backend.Dto.UpdateProductStatusRequest;
+import lsy.toy.backend.Dto.UpdateStockRequest;
 import lsy.toy.backend.Entity.Product;
 import lsy.toy.backend.Service.ProductService;
 import org.springframework.data.domain.Page;
@@ -32,9 +34,10 @@ public class ProductController {
         @RequestParam(defaultValue = "12") int size,
         @RequestParam(required = false) String category,
         @RequestParam(required = false) String team,
-        @RequestParam(required = false) String keyword
+        @RequestParam(required = false) String keyword,
+        @RequestParam(required = false) String sort
     ) {
-        return productService.getProductsPaged(page, size, category, team, keyword);
+        return productService.getProductsPaged(page, size, category, team, keyword, sort);
     }
 
     // 1-1. 삭제된 상품 목록 조회 (GET)
@@ -59,7 +62,8 @@ public class ProductController {
             request.getPrice(),
             request.getOriginalPrice(),
             request.getEmoji(),
-            request.getBadge()
+            request.getBadge(),
+            request.getStock()
         );
     }
 
@@ -74,7 +78,8 @@ public class ProductController {
             request.getPrice(),
             request.getOriginalPrice(),
             request.getEmoji(),
-            request.getBadge()
+            request.getBadge(),
+            request.getStock()
         );
     }
 
@@ -88,5 +93,17 @@ public class ProductController {
     @PatchMapping("/{id}/restore")
     public Product restoreProduct(@PathVariable Long id) {
         return productService.restoreProduct(id);
+    }
+
+    // 6. 재고만 빠르게 수정 (PATCH)
+    @PatchMapping("/{id}/stock")
+    public Product updateStock(@PathVariable Long id, @RequestBody UpdateStockRequest request) {
+        return productService.updateStock(id, request.getStock());
+    }
+
+    // 7. 판매 상태만 빠르게 수정 (PATCH)
+    @PatchMapping("/{id}/status")
+    public Product updateStatus(@PathVariable Long id, @RequestBody UpdateProductStatusRequest request) {
+        return productService.updateStatus(id, request.getStatus());
     }
 }

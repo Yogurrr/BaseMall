@@ -1,40 +1,58 @@
 .summary {
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 24px;
+  border: 0.05rem solid var(--border);
+  border-radius: 0.8rem;
+  padding: 1.2rem;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 0.6rem;
   height: fit-content;
   position: sticky;
-  top: 88px;
+  top: 4.4rem;
 }
 
 .summary h2 {
-  margin: 0 0 4px;
+  margin: 0 0 0.2rem;
+}
+
+.addressField {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.7rem;
+  color: var(--text);
+}
+
+.addressField input {
+  font: inherit;
+  font-size: 0.75rem;
+  padding: 0.5rem 0.6rem;
+  border-radius: 0.4rem;
+  border: 0.05rem solid var(--border);
+  background: var(--bg);
+  color: var(--text-h);
 }
 
 .row {
   display: flex;
   justify-content: space-between;
-  font-size: 16px;
+  font-size: 0.8rem;
   color: var(--text);
 }
 
 .hint {
-  font-size: 14px;
+  font-size: 0.7rem;
   color: var(--accent);
-  margin: -4px 0 0;
+  margin: -0.2rem 0 0;
 }
 
 .totalRow {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  font-size: 19px;
+  font-size: 0.95rem;
   font-weight: 800;
   color: var(--text-h);
-  padding-top: 12px;
-  margin-top: 4px;
-  border-top: 1px solid var(--border);
+  padding-top: 0.6rem;
+  margin-top: 0.2rem;
+  border-top: 0.05rem solid var(--border);
 }

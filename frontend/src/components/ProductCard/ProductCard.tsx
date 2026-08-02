@@ -1,13 +1,14 @@
 import { Link } from 'react-router-dom';
 import { Button } from '../Button/Button';
-import { formatPrice, type Product } from '../../api/productApi';
+import { formatPrice } from '../../api/productApi';
+import type { Product } from '../../types/product';
 import styles from './ProductCard.module.css';
 
 interface ProductCardProps {
   product: Product;
   liked: boolean;
-  onToggleLike: (id: number) => void;
-  onAddToCart: (product: Product) => void;
+  onToggleLike: (product: Product) => void;
+  onAddToCart?: (product: Product) => void;
 }
 
 export const ProductCard = ({ product, liked, onToggleLike, onAddToCart }: ProductCardProps) => {
@@ -29,7 +30,7 @@ export const ProductCard = ({ product, liked, onToggleLike, onAddToCart }: Produ
           aria-pressed={liked}
           onClick={(e) => {
             e.preventDefault();
-            onToggleLike(product.id);
+            onToggleLike(product);
           }}
         >
           {liked ? '❤️' : '🤍'}
@@ -55,9 +56,11 @@ export const ProductCard = ({ product, liked, onToggleLike, onAddToCart }: Produ
             <span className={styles.originalPrice}>{formatPrice(product.originalPrice)}</span>
           )}
         </div>
-        <Button size="sm" onClick={() => onAddToCart(product)}>
-          🛒 장바구니 담기
-        </Button>
+        {onAddToCart && (
+          <Button size="sm" onClick={() => onAddToCart(product)}>
+            🛒 장바구니 담기
+          </Button>
+        )}
       </div>
     </article>
   );
