@@ -38,9 +38,21 @@ KBO(한국프로야구) 구단 굿즈를 사고파는 온라인 쇼핑몰입니�
 | --- | --- |
 | ![상품 검색](docs/screenshots/search.png) | ![장바구니](docs/screenshots/cart.png) |
 
+| 상품 상세 (리뷰) | 주문/결제 |
+| --- | --- |
+| ![상품 상세](docs/screenshots/product-detail.png) | ![주문/결제](docs/screenshots/checkout.png) |
+
 | 마이페이지 (응원팀 선택) | 관리자 - 상품 관리 |
 | --- | --- |
 | ![마이페이지](docs/screenshots/mypage.png) | ![관리자 상품 관리](docs/screenshots/admin.png) |
+
+| 관리자 - 카테고리/뱃지 관리 | 관리자 - 배너 관리 |
+| --- | --- |
+| ![관리자 카테고리/뱃지 관리](docs/screenshots/admin-categories.png) | ![관리자 배너 관리](docs/screenshots/admin-banners.png) |
+
+| 관리자 - 쿠폰 관리 | 관리자 - 매출 대시보드 |
+| --- | --- |
+| ![관리자 쿠폰 관리](docs/screenshots/admin-coupons.png) | ![관리자 매출 대시보드](docs/screenshots/admin-sales.png) |
 
 ### 데모 계정
 
