@@ -12,7 +12,7 @@ public class WishlistItemResponse {
     private final Integer originalPrice;
     private final double rating;
     private final int reviewCount;
-    private final String emoji;
+    private final String imageUrl;
     private final String badge;
     private final int stock;
     private final String status;
@@ -26,7 +26,7 @@ public class WishlistItemResponse {
         this.originalPrice = product.getOriginalPrice();
         this.rating = product.getRating();
         this.reviewCount = product.getReviewCount();
-        this.emoji = product.getEmoji();
+        this.imageUrl = product.getImageUrl();
         this.badge = product.getBadge();
         this.stock = product.getStock();
         this.status = product.getStatus();
@@ -40,7 +40,7 @@ public class WishlistItemResponse {
     public Integer getOriginalPrice() { return originalPrice; }
     public double getRating() { return rating; }
     public int getReviewCount() { return reviewCount; }
-    public String getEmoji() { return emoji; }
+    public String getImageUrl() { return imageUrl; }
     public String getBadge() { return badge; }
     public int getStock() { return stock; }
     public String getStatus() { return status; }

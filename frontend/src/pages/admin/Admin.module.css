@@ -59,6 +59,31 @@
   }
 }
 
+/* --- Stats page sections --- */
+.statsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.sectionTitle {
+  font-size: 1rem;
+  margin: 0;
+  color: var(--text-h);
+}
+
+.breakdownGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.8rem;
+}
+
+@media (max-width: 960px) {
+  .breakdownGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* --- Filter bar --- */
 .filterBar {
   display: flex;
@@ -130,8 +155,13 @@
   min-width: 0;
 }
 
+.fieldWide {
+  grid-column: span 2;
+}
+
 .field input,
-.field select {
+.field select,
+.field textarea {
   min-width: 0;
   width: 100%;
   box-sizing: border-box;
@@ -144,17 +174,32 @@
   color: var(--text-h);
 }
 
+.field textarea {
+  min-height: 6rem;
+  resize: vertical;
+}
+
 .formActions {
   display: flex;
   gap: 0.4rem;
   grid-column: span 2;
 }
 
+.imagePreview {
+  width: 7.2rem;
+  height: 7.2rem;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  background: radial-gradient(circle at 30% 20%, var(--accent-bg), var(--code-bg));
+  font-size: 3.6rem;
+}
+
 @media (max-width: 960px) {
   .form {
     grid-template-columns: repeat(2, 1fr);
   }
-  .formActions {
+  .formActions,
+  .fieldWide {
     grid-column: span 2;
   }
 }

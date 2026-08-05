@@ -52,9 +52,3 @@
 .backLink:hover {
   text-decoration: underline;
 }
-
-.checkoutError {
-  color: #dc2626;
-  font-size: 0.65rem;
-  margin-bottom: 0.6rem;
-}

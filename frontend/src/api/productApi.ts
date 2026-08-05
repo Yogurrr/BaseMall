@@ -1,5 +1,5 @@
 import { api } from './axiosInstance';
-import type { Product, ProductInput, ProductPage, ProductStatus } from '../types/product';
+import type { Product, ProductInput, ProductPage, ProductStats, ProductStatus } from '../types/product';
 
 export const PRODUCT_STATUSES: ProductStatus[] = ['판매중', '판매중지', '품절'];
 
@@ -77,5 +77,21 @@ export const updateProductStock = async (id: number, stock: number): Promise<Pro
 
 export const updateProductStatus = async (id: number, status: ProductStatus): Promise<Product> => {
   const response = await api.patch<Product>(`/products/${id}/status`, { status });
+  return response.data;
+};
+
+export const fetchProductStats = async (): Promise<ProductStats> => {
+  const response = await api.get<ProductStats>('/products/stats');
+  return response.data;
+};
+
+export const uploadProductImage = async (file: File): Promise<{ imageUrl: string }> => {
+  const formData = new FormData();
+  formData.append('file', file);
+  // 💡 axiosInstance가 기본 Content-Type을 application/json으로 고정해두므로,
+  // multipart 경계(boundary)를 브라우저가 직접 채우도록 여기서만 헤더를 비워준다.
+  const response = await api.post<{ imageUrl: string }>('/products/image-upload', formData, {
+    headers: { 'Content-Type': undefined },
+  });
   return response.data;
 };

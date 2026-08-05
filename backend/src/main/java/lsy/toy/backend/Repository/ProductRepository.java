@@ -1,5 +1,7 @@
 package lsy.toy.backend.Repository;
 
+import lsy.toy.backend.Dto.CategorySalesRow;
+import lsy.toy.backend.Entity.Category;
 import lsy.toy.backend.Entity.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -10,6 +12,27 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
+
+    // 💡 인기 상품 TOP10 - 이미 있는 누적 판매 수량(soldCount) 컬럼을 그대로 정렬 기준으로 쓴다.
+    List<Product> findTop10ByUseAtOrderBySoldCountDesc(String useAt);
+
+    long countByUseAtAndStatus(String useAt, String status);
+
+    // 💡 카테고리 삭제 전, 사용 중인 상품이 있는지 확인하기 위한 존재 여부 조회.
+    boolean existsByCategory(Category category);
+
+    // 💡 뱃지 이름 변경/삭제 시, badge가 자유 문자열이라 FK로 자동 반영되지 않으므로
+    // BadgeService가 영향받는 상품을 직접 찾아 갱신하기 위해 사용.
+    List<Product> findByBadge(String badge);
+
+    @Query("""
+        SELECT new lsy.toy.backend.Dto.CategorySalesRow(p.category.name, SUM(p.soldCount))
+        FROM Product p
+        WHERE p.useAt = 'Y'
+        GROUP BY p.category.name
+        ORDER BY SUM(p.soldCount) DESC
+        """)
+    List<CategorySalesRow> findCategorySales();
 
     // 💡 category/team이 @ManyToOne(EAGER)라 fetch join 없이 조회하면 상품 개수만큼
     // categories/teams를 따로 SELECT하는 N+1이 발생한다. 어드민 상품 목록(전체/삭제됨)에서 씀.

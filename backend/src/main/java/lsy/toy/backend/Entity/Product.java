@@ -37,8 +37,18 @@ public class Product {
     private Integer originalPrice;
     private double rating;
     private int reviewCount;
-    private String emoji;
+    @Column(name = "image_url")
+    private String imageUrl;
+
     private String badge;
+
+    // 💡 상품 상세 페이지에 노출하는 자유 서식 설명. 선택 입력이라 기존 상품은 null.
+    @Column(columnDefinition = "text")
+    private String description;
+
+    // 💡 상세 설명에 곁들이는 이미지. 카드/썸네일에 쓰는 imageUrl과는 별개.
+    @Column(name = "detail_image_url")
+    private String detailImageUrl;
 
     @Column(name = "use_at")
     private String useAt = "Y"; // 💡 소프트 삭제 플래그: Y=노출, N=삭제됨
@@ -65,14 +75,14 @@ public class Product {
         // JPA
     }
 
-    public Product(String name, Category category, Integer price, Integer originalPrice, double rating, int reviewCount, String emoji, String badge) {
+    public Product(String name, Category category, Integer price, Integer originalPrice, double rating, int reviewCount, String imageUrl, String badge) {
         this.name = name;
         this.category = category;
         this.price = price;
         this.originalPrice = originalPrice;
         this.rating = rating;
         this.reviewCount = reviewCount;
-        this.emoji = emoji;
+        this.imageUrl = imageUrl;
         this.badge = badge;
     }
 
@@ -106,11 +116,23 @@ public class Product {
 
     public int getReviewCount() { return reviewCount; }
 
-    public String getEmoji() { return emoji; }
-    public void setEmoji(String emoji) { this.emoji = emoji; }
+    // 💡 리뷰 작성/수정/삭제 시 ReviewService가 호출해서 집계값을 갱신한다.
+    public void applyReviewStats(double rating, int reviewCount) {
+        this.rating = rating;
+        this.reviewCount = reviewCount;
+    }
+
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 
     public String getBadge() { return badge; }
     public void setBadge(String badge) { this.badge = badge; }
+
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+
+    public String getDetailImageUrl() { return detailImageUrl; }
+    public void setDetailImageUrl(String detailImageUrl) { this.detailImageUrl = detailImageUrl; }
 
     public String getUseAt() { return useAt; }
     public void setUseAt(String useAt) { this.useAt = useAt; }

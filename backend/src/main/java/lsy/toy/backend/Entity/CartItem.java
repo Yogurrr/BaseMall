@@ -1,5 +1,6 @@
 package lsy.toy.backend.Entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -10,9 +11,10 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
-// 💡 사용자별 장바구니 한 줄(상품 + 수량). 사용자당 상품 하나에 한 행만 존재하도록 유니크 제약을 건다.
+// 💡 사용자별 장바구니 한 줄(상품 + 수량 + 옵션). 같은 상품이라도 사이즈/마킹이 다르면
+// 별도 줄로 취급하므로, 유니크 제약은 상품이 아니라 상품+옵션 조합 기준이다.
 @Entity
-@Table(name = "cart_items", uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "product_id"}))
+@Table(name = "cart_items", uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "product_id", "size", "marking_name"}))
 public class CartItem {
 
     @Id
@@ -29,14 +31,22 @@ public class CartItem {
 
     private int quantity;
 
+    // 💡 유니폼 상품 전용 옵션. 유니폼이 아닌 상품이면 항상 null.
+    private String size;
+
+    @Column(name = "marking_name")
+    private String markingName;
+
     protected CartItem() {
         // JPA
     }
 
-    public CartItem(User user, Product product, int quantity) {
+    public CartItem(User user, Product product, int quantity, String size, String markingName) {
         this.user = user;
         this.product = product;
         this.quantity = quantity;
+        this.size = size;
+        this.markingName = markingName;
     }
 
     public Long getId() { return id; }
@@ -44,4 +54,6 @@ public class CartItem {
     public Product getProduct() { return product; }
     public int getQuantity() { return quantity; }
     public void setQuantity(int quantity) { this.quantity = quantity; }
+    public String getSize() { return size; }
+    public String getMarkingName() { return markingName; }
 }

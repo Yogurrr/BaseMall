@@ -6,16 +6,20 @@ public class ProductRequest {
     private String team;
     private Integer price;
     private Integer originalPrice;
-    private String emoji;
+    private String imageUrl;
     private String badge;
     private Integer stock;
+    private String description;
+    private String detailImageUrl;
 
     public String getName() { return name; }
     public String getCategory() { return category; }
     public String getTeam() { return team; }
     public Integer getPrice() { return price; }
     public Integer getOriginalPrice() { return originalPrice; }
-    public String getEmoji() { return emoji; }
+    public String getImageUrl() { return imageUrl; }
     public String getBadge() { return badge; }
     public Integer getStock() { return stock; }
+    public String getDescription() { return description; }
+    public String getDetailImageUrl() { return detailImageUrl; }
 }

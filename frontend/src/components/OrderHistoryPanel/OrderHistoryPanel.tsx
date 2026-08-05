@@ -1,7 +1,11 @@
 import { useMemo, useState } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { Order } from '../../types/order';
 import { formatPrice } from '../../api/productApi';
+import { cancelOrder } from '../../api/orderApi';
 import { OrderDetailModal } from '../OrderDetailModal/OrderDetailModal';
+import { ProductThumb } from '../ProductThumb/ProductThumb';
+import { Button } from '../Button/Button';
 import styles from './OrderHistoryPanel.module.css';
 
 interface OrderHistoryPanelProps {
@@ -50,6 +54,19 @@ export const OrderHistoryPanel = ({ orders }: OrderHistoryPanelProps) => {
     to: today,
   }));
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const queryClient = useQueryClient();
+  const cancelMutation = useMutation({
+    mutationFn: cancelOrder,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+    },
+  });
+
+  const handleCancel = (order: Order) => {
+    if (window.confirm('주문을 취소하시겠습니까?')) {
+      cancelMutation.mutate(order.id);
+    }
+  };
 
   const handlePreset = (preset: Preset, months: number) => {
     setActivePreset(preset);
@@ -150,12 +167,35 @@ export const OrderHistoryPanel = ({ orders }: OrderHistoryPanelProps) => {
                 <tr key={order.id} onClick={() => setSelectedOrder(order)}>
                   <td>{formatOrderDate(order.createdAt)}</td>
                   <td>
-                    {firstItem ? `${firstItem.emoji} ${firstItem.name}` : '-'}
+                    {firstItem ? (
+                      <>
+                        <ProductThumb imageUrl={firstItem.imageUrl} alt={firstItem.name} size="sm" /> {firstItem.name}
+                      </>
+                    ) : (
+                      '-'
+                    )}
                     {rest.length > 0 && <span className={styles.itemCategory}>외 {rest.length}건</span>}
                   </td>
                   <td>{totalQuantity}</td>
                   <td>{formatPrice(order.totalPrice)}</td>
-                  <td>{order.status}</td>
+                  <td>
+                    {order.status}
+                    {order.status === '결제완료' && (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        className={styles.cancelButton}
+                        isLoading={cancelMutation.isPending && cancelMutation.variables === order.id}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleCancel(order);
+                        }}
+                      >
+                        주문취소
+                      </Button>
+                    )}
+                  </td>
                 </tr>
               );
             })}

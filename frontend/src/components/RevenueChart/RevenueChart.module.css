@@ -1,0 +1,22 @@
+.chartCard {
+  border: 0.05rem solid var(--border);
+  border-radius: 0.5rem;
+  padding: 1.2rem;
+}
+
+.chartCard h2 {
+  margin: 0 0 1.2rem;
+  font-size: 1rem;
+  color: var(--text-h);
+}
+
+.chart {
+  width: 100%;
+  height: 16rem;
+}
+
+@media (max-width: 720px) {
+  .chart {
+    height: 12rem;
+  }
+}

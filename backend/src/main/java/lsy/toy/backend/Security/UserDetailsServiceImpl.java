@@ -18,13 +18,17 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userRepository.findByEmail(email)
+        // 💡 이 조회는 인증(SecurityContext) 성립 "이전"에 매 요청마다 일어나므로
+        // users의 RLS 정책(본인 또는 관리자만)을 통과할 수 없다. 이메일 완전 일치 조회만
+        // 허용하는 SECURITY DEFINER 함수(app_auth_lookup_user) 경유 메서드를 사용한다.
+        User user = userRepository.findAuthCredentialsByEmail(email)
             .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + email));
 
-        return org.springframework.security.core.userdetails.User
-            .withUsername(user.getEmail())
-            .password(user.getPassword() != null ? user.getPassword() : "")
-            .authorities(user.getRole() != null ? user.getRole() : "USER")
-            .build();
+        return new AppUserPrincipal(
+            user.getId(),
+            user.getEmail(),
+            user.getPassword() != null ? user.getPassword() : "",
+            user.getRole() != null ? user.getRole() : "USER"
+        );
     }
 }

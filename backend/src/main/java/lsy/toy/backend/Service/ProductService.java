@@ -1,5 +1,7 @@
 package lsy.toy.backend.Service;
 
+import lsy.toy.backend.Dto.ProductRankRow;
+import lsy.toy.backend.Dto.ProductStatsResponse;
 import lsy.toy.backend.Entity.Category;
 import lsy.toy.backend.Entity.Product;
 import lsy.toy.backend.Entity.Team;
@@ -10,6 +12,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -19,6 +23,8 @@ import java.util.Set;
 
 @Service
 public class ProductService {
+
+    private static final Logger log = LoggerFactory.getLogger(ProductService.class);
 
     private static final Set<String> PRODUCT_STATUSES = Set.of("판매중", "판매중지", "품절");
 
@@ -84,16 +90,22 @@ public class ProductService {
     }
 
     public Product createProduct(
-        String name, String categoryName, String teamName, Integer price, Integer originalPrice, String emoji, String badge, Integer stock
+        String name, String categoryName, String teamName, Integer price, Integer originalPrice, String imageUrl, String badge, Integer stock, String description, String detailImageUrl
     ) {
-        Product product = new Product(name, findCategory(categoryName), price, originalPrice, 0, 0, emoji, badge);
+        Product product = new Product(name, findCategory(categoryName), price, originalPrice, 0, 0, imageUrl, badge);
         product.setTeam(findTeam(teamName));
         product.setStock(validateStock(stock));
-        return productRepository.save(product);
+        product.setDescription(description);
+        product.setDetailImageUrl(detailImageUrl);
+        Product saved = productRepository.save(product);
+
+        log.info("상품 등록: productId={}, name={}, category={}, team={}", saved.getId(), saved.getName(), categoryName, teamName);
+
+        return saved;
     }
 
     public Product updateProduct(
-        Long id, String name, String categoryName, String teamName, Integer price, Integer originalPrice, String emoji, String badge, Integer stock
+        Long id, String name, String categoryName, String teamName, Integer price, Integer originalPrice, String imageUrl, String badge, Integer stock, String description, String detailImageUrl
     ) {
         Product product = productRepository.findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "상품을 찾을 수 없습니다: " + id));
@@ -103,11 +115,16 @@ public class ProductService {
         product.setTeam(findTeam(teamName));
         product.setPrice(price);
         product.setOriginalPrice(originalPrice);
-        product.setEmoji(emoji);
+        product.setImageUrl(imageUrl);
         product.setBadge(badge);
         product.setStock(validateStock(stock));
+        product.setDescription(description);
+        product.setDetailImageUrl(detailImageUrl);
 
-        return productRepository.save(product);
+        Product saved = productRepository.save(product);
+        log.info("상품 수정: productId={}, name={}", saved.getId(), saved.getName());
+
+        return saved;
     }
 
     public Product updateStock(Long id, Integer stock) {
@@ -148,6 +165,16 @@ public class ProductService {
         // 💡 실제로 행을 지우지 않고 use_at을 'N'으로 바꾸는 소프트 삭제
         product.setUseAt("N");
         productRepository.save(product);
+    }
+
+    public ProductStatsResponse getStats() {
+        List<ProductRankRow> topProducts = productRepository.findTop10ByUseAtOrderBySoldCountDesc("Y").stream()
+            .map(p -> new ProductRankRow(p.getId(), p.getName(), p.getImageUrl(), p.getCategoryName(), p.getSoldCount()))
+            .toList();
+
+        long outOfStockCount = productRepository.countByUseAtAndStatus("Y", "품절");
+
+        return new ProductStatsResponse(topProducts, productRepository.findCategorySales(), outOfStockCount);
     }
 
     public Product restoreProduct(Long id) {

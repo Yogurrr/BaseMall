@@ -3,16 +3,25 @@ import { Home } from './pages/Home';
 import { ProductDetail } from './pages/ProductDetail';
 import { Search } from './pages/Search';
 import { Cart } from './pages/Cart';
+import { Checkout } from './pages/Checkout';
 import { MyPageLayout } from './pages/mypage/MyPageLayout';
 import { MyPageHome } from './pages/mypage/MyPageHome';
 import { MyPageOrders } from './pages/mypage/MyPageOrders';
+import { MyPageReturns } from './pages/mypage/MyPageReturns';
 import { MyPageWishlist } from './pages/mypage/MyPageWishlist';
 import { MyPageWithdraw } from './pages/mypage/MyPageWithdraw';
+import { MyPageCoupons } from './pages/mypage/MyPageCoupons';
 import { MyPagePlaceholder } from './pages/mypage/MyPagePlaceholder';
 import { AdminLayout } from './pages/admin/AdminLayout';
 import { AdminProducts } from './pages/admin/AdminProducts';
+import { AdminProductNew } from './pages/admin/AdminProductNew';
 import { AdminOrders } from './pages/admin/AdminOrders';
 import { AdminUsers } from './pages/admin/AdminUsers';
+import { AdminStats } from './pages/admin/AdminStats';
+import { AdminSales } from './pages/admin/AdminSales';
+import { AdminCoupons } from './pages/admin/AdminCoupons';
+import { AdminBanners } from './pages/admin/AdminBanners';
+import { AdminCategories } from './pages/admin/AdminCategories';
 import { AdminPlaceholder } from './pages/admin/AdminPlaceholder';
 import { Login } from './pages/Login';
 import { RequireAuth } from './components/RequireAuth';
@@ -30,6 +39,7 @@ function App() {
             <Route path="/products/:id" element={<ProductDetail />} />
             <Route path="/search" element={<Search />} />
             <Route path="/cart" element={<Cart />} />
+            <Route path="/checkout" element={<Checkout />} />
             <Route
               path="/mypage"
               element={
@@ -40,8 +50,10 @@ function App() {
             >
               <Route index element={<MyPageHome />} />
               <Route path="orders" element={<MyPageOrders />} />
+              <Route path="returns" element={<MyPageReturns />} />
               <Route path="wishlist" element={<MyPageWishlist />} />
               <Route path="withdraw" element={<MyPageWithdraw />} />
+              <Route path="coupons" element={<MyPageCoupons />} />
               <Route path=":section" element={<MyPagePlaceholder />} />
             </Route>
             <Route path="/login" element={<Login />} />
@@ -55,8 +67,15 @@ function App() {
             >
               <Route index element={<Navigate to="products" replace />} />
               <Route path="products" element={<AdminProducts />} />
+              <Route path="products/new" element={<AdminProductNew />} />
+              <Route path="products/:id/edit" element={<AdminProductNew />} />
               <Route path="orders" element={<AdminOrders />} />
               <Route path="users" element={<AdminUsers />} />
+              <Route path="stats" element={<AdminStats />} />
+              <Route path="sales" element={<AdminSales />} />
+              <Route path="coupons" element={<AdminCoupons />} />
+              <Route path="banners" element={<AdminBanners />} />
+              <Route path="categories" element={<AdminCategories />} />
               <Route path=":section" element={<AdminPlaceholder />} />
             </Route>
           </Routes>

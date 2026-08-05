@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState, type FormEvent } from 'react';
+import { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { Button } from '../../components/Button/Button';
@@ -7,8 +8,8 @@ import { CheckboxFilterGroup } from '../../components/CheckboxFilterGroup/Checkb
 import { StockEditor } from '../../components/StockEditor/StockEditor';
 import { SortableTh } from '../../components/SortableTh/SortableTh';
 import { ProductStatusSelect } from '../../components/ProductStatusSelect/ProductStatusSelect';
+import { ProductThumb } from '../../components/ProductThumb/ProductThumb';
 import {
-  createProduct,
   deleteProduct,
   fetchCategories,
   fetchDeletedProducts,
@@ -16,29 +17,16 @@ import {
   fetchTeams,
   formatPrice,
   restoreProduct,
-  updateProduct,
   updateProductStock,
   updateProductStatus,
   PRODUCT_STATUSES,
 } from '../../api/productApi';
-import type { Product, ProductInput, ProductStatus } from '../../types/product';
+import { fetchBadges, getBadgeGradient } from '../../api/badgeApi';
+import type { ProductStatus } from '../../types/product';
 import styles from './Admin.module.css';
 
 type ProductSortKey = 'name' | 'category' | 'team' | 'price' | 'stock' | 'rating';
 type SortDirection = 'asc' | 'desc';
-
-const BADGE_OPTIONS = ['NEW', 'SALE', 'BEST'];
-
-const EMPTY_FORM = {
-  name: '',
-  category: '',
-  team: '',
-  price: '',
-  originalPrice: '',
-  emoji: '🛒',
-  badge: '' as Product['badge'] | '',
-  stock: '0',
-};
 
 const toggleInSet = (set: Set<string>, value: string) => {
   const next = new Set(set);
@@ -51,6 +39,7 @@ const toggleInSet = (set: Set<string>, value: string) => {
 };
 
 export const AdminProducts = () => {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [showDeleted, setShowDeleted] = useState(false);
   const [sortKey, setSortKey] = useState<ProductSortKey | null>(null);
@@ -100,6 +89,11 @@ export const AdminProducts = () => {
     queryKey: ['teams'],
     queryFn: fetchTeams,
   });
+  const { data: badges = [] } = useQuery({
+    queryKey: ['badges'],
+    queryFn: fetchBadges,
+  });
+  const badgeNames = useMemo(() => badges.map((badge) => badge.name), [badges]);
 
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
@@ -124,40 +118,10 @@ export const AdminProducts = () => {
     });
   }, [filteredProducts, sortKey, sortDirection]);
 
-  const [form, setForm] = useState(EMPTY_FORM);
-  const [editingId, setEditingId] = useState<number | null>(null);
-
-  useEffect(() => {
-    if (!form.category && categoryNames.length > 0) {
-      setForm((f) => ({ ...f, category: categoryNames[0] }));
-    }
-  }, [categoryNames]);
-
-  useEffect(() => {
-    if (!form.team && teamNames.length > 0) {
-      setForm((f) => ({ ...f, team: teamNames[0] }));
-    }
-  }, [teamNames]);
-
-  const resetForm = () => {
-    setForm({ ...EMPTY_FORM, category: categoryNames[0] ?? '', team: teamNames[0] ?? '' });
-    setEditingId(null);
-  };
-
-  const saveMutation = useMutation({
-    mutationFn: (payload: ProductInput) =>
-      editingId !== null ? updateProduct(editingId, payload) : createProduct(payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['products'] });
-      resetForm();
-    },
-  });
-
   const deleteMutation = useMutation({
     mutationFn: deleteProduct,
-    onSuccess: (_data, id) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
-      if (editingId === id) resetForm();
     },
   });
 
@@ -191,38 +155,6 @@ export const AdminProducts = () => {
     },
   });
 
-  const handleSubmit = (event: FormEvent) => {
-    event.preventDefault();
-    const trimmedName = form.name.trim();
-    const priceValue = Number(form.price);
-    if (!trimmedName || !priceValue) return;
-
-    saveMutation.mutate({
-      name: trimmedName,
-      category: form.category,
-      team: form.team || undefined,
-      price: priceValue,
-      originalPrice: form.originalPrice ? Number(form.originalPrice) : undefined,
-      emoji: form.emoji || '🛒',
-      badge: form.badge || undefined,
-      stock: Math.max(0, Math.floor(Number(form.stock) || 0)),
-    });
-  };
-
-  const handleEdit = (product: Product) => {
-    setEditingId(product.id);
-    setForm({
-      name: product.name,
-      category: product.category,
-      team: product.team ?? '',
-      price: String(product.price),
-      originalPrice: product.originalPrice ? String(product.originalPrice) : '',
-      emoji: product.emoji,
-      badge: product.badge ?? '',
-      stock: String(product.stock),
-    });
-  };
-
   const handleDelete = (id: number) => {
     deleteMutation.mutate(id);
   };
@@ -231,9 +163,14 @@ export const AdminProducts = () => {
     <>
       <div className={styles.panelHeader}>
         <h1>상품 관리</h1>
-        <Button type="button" variant="outline" size="sm" onClick={() => setShowDeleted((v) => !v)}>
-          {showDeleted ? '활성 상품 보기' : '삭제된 상품 보기'}
-        </Button>
+        <div className={styles.rowActions}>
+          <Button type="button" size="sm" onClick={() => navigate('/admin/products/new')}>
+            상품 등록
+          </Button>
+          <Button type="button" variant="outline" size="sm" onClick={() => setShowDeleted((v) => !v)}>
+            {showDeleted ? '활성 상품 보기' : '삭제된 상품 보기'}
+          </Button>
+        </div>
       </div>
 
       {showDeleted ? (
@@ -256,7 +193,7 @@ export const AdminProducts = () => {
                 {deletedProducts.map((product) => (
                   <tr key={product.id}>
                     <td>
-                      {product.emoji} {product.name}
+                      <ProductThumb imageUrl={product.imageUrl} alt={product.name} size="sm" /> {product.name}
                     </td>
                     <td>{product.category}</td>
                     <td>{formatPrice(product.price)}</td>
@@ -300,106 +237,6 @@ export const AdminProducts = () => {
         </div>
       </section>
 
-      <form className={styles.form} onSubmit={handleSubmit}>
-        <label className={styles.field}>
-          상품명
-          <input
-            value={form.name}
-            onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-            placeholder="예: 오버핏 셔츠"
-            required
-          />
-        </label>
-        <label className={styles.field}>
-          카테고리
-          <select
-            value={form.category}
-            onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
-          >
-            {categoryNames.map((category) => (
-              <option key={category} value={category}>
-                {category}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className={styles.field}>
-          구단
-          <select
-            value={form.team}
-            onChange={(e) => setForm((f) => ({ ...f, team: e.target.value }))}
-          >
-            {teamNames.map((team) => (
-              <option key={team} value={team}>
-                {team}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className={styles.field}>
-          가격
-          <input
-            type="number"
-            min="0"
-            value={form.price}
-            onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
-            placeholder="39000"
-            required
-          />
-        </label>
-        <label className={styles.field}>
-          정가(선택)
-          <input
-            type="number"
-            min="0"
-            value={form.originalPrice}
-            onChange={(e) => setForm((f) => ({ ...f, originalPrice: e.target.value }))}
-            placeholder="52000"
-          />
-        </label>
-        <label className={styles.field}>
-          재고
-          <input
-            type="number"
-            min="0"
-            value={form.stock}
-            onChange={(e) => setForm((f) => ({ ...f, stock: e.target.value }))}
-            placeholder="50"
-          />
-        </label>
-        <label className={styles.field}>
-          아이콘
-          <input
-            value={form.emoji}
-            onChange={(e) => setForm((f) => ({ ...f, emoji: e.target.value }))}
-            placeholder="👕"
-          />
-        </label>
-        <label className={styles.field}>
-          뱃지
-          <select
-            value={form.badge ?? ''}
-            onChange={(e) => setForm((f) => ({ ...f, badge: e.target.value as Product['badge'] | '' }))}
-          >
-            <option value="">없음</option>
-            <option value="NEW">NEW</option>
-            <option value="SALE">SALE</option>
-            <option value="BEST">BEST</option>
-          </select>
-        </label>
-        <div className={styles.formActions}>
-          <Button type="submit" isLoading={saveMutation.isPending}>
-            {editingId !== null ? '수정 저장' : '상품 추가'}
-          </Button>
-          {editingId !== null && (
-            <Button type="button" variant="secondary" onClick={resetForm}>
-              취소
-            </Button>
-          )}
-        </div>
-        {saveMutation.isError && <p className={styles.error}>저장에 실패했습니다.</p>}
-      </form>
-
       {statusError && <p className={styles.error}>{statusError}</p>}
 
       <div className={styles.checkboxFilterBar}>
@@ -418,7 +255,7 @@ export const AdminProducts = () => {
           />
           <CheckboxFilterGroup
             label="뱃지"
-            options={BADGE_OPTIONS}
+            options={badgeNames}
             selected={badgeFilter}
             onToggle={(value) => setBadgeFilter((prev) => toggleInSet(prev, value))}
           />
@@ -496,7 +333,7 @@ export const AdminProducts = () => {
               {sortedProducts.map((product) => (
                 <tr key={product.id}>
                   <td>
-                    {product.emoji} {product.name}
+                    <ProductThumb imageUrl={product.imageUrl} alt={product.name} size="sm" /> {product.name}
                   </td>
                   <td>{product.category}</td>
                   <td>{product.team ?? '-'}</td>
@@ -518,14 +355,14 @@ export const AdminProducts = () => {
                   <td>⭐ {product.rating}</td>
                   <td>
                     {product.badge && (
-                      <span className={`${styles.badge} ${styles[`badge${product.badge}`]}`}>
+                      <span className={styles.badge} style={{ background: getBadgeGradient(badges, product.badge) }}>
                         {product.badge}
                       </span>
                     )}
                   </td>
                   <td>
                     <div className={styles.rowActions}>
-                      <Button size="sm" variant="outline" onClick={() => handleEdit(product)}>
+                      <Button size="sm" variant="outline" onClick={() => navigate(`/admin/products/${product.id}/edit`)}>
                         수정
                       </Button>
                       <Button

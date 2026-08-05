@@ -1,0 +1,82 @@
+.filterBox {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  border: 0.05rem solid var(--border);
+  border-radius: 0.5rem;
+  padding: 0.8rem 1rem;
+}
+
+.presetRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.presetButton {
+  font: inherit;
+  font-size: 0.75rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 49.95rem;
+  border: 0.05rem solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.presetButton:hover {
+  border-color: var(--accent-border);
+}
+
+.presetButtonActive {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.dateRow {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.dateRow input[type='date'] {
+  font: inherit;
+  font-size: 0.8rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: 0.3rem;
+  border: 0.05rem solid var(--border);
+  background: var(--bg);
+  color: var(--text-h);
+}
+
+.dateRow span {
+  color: var(--text);
+}
+
+.searchButton {
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.4rem 0.9rem;
+  border-radius: 0.3rem;
+  border: 0.05rem solid var(--accent);
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.searchButton:hover {
+  opacity: 0.9;
+}
+
+@media (max-width: 720px) {
+  .filterBox {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

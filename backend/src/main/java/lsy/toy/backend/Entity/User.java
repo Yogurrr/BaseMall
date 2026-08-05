@@ -1,6 +1,7 @@
 package lsy.toy.backend.Entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -9,6 +10,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+
+import java.time.Instant;
 
 @Entity
 @Table(name = "users") // 💡 "user"는 Postgres 예약어라 복수형 테이블명 사용
@@ -32,6 +35,17 @@ public class User {
     @JoinColumn(name = "favorite_team_id")
     private Team favoriteTeam;
 
+    // 💡 신규 가입자 통계용. products.created_at과 동일하게 Instant는 timestamptz여야 한다.
+    @Column(columnDefinition = "timestamptz not null default now()")
+    private Instant createdAt = Instant.now();
+
+    // 💡 회원 탈퇴 소프트 삭제 플래그. products.use_at과 동일한 Y/N 패턴 (Y=활성, N=탈퇴).
+    @Column(columnDefinition = "varchar(1) not null default 'Y'")
+    private String useAt = "Y";
+
+    // 💡 탈퇴 시각. 탈퇴 전에는 null, "이번 달 탈퇴 회원" 같은 기간 집계에 쓴다.
+    private Instant withdrawnAt;
+
     protected User() {
         // JPA
     }
@@ -54,4 +68,16 @@ public class User {
 
     public Team getFavoriteTeam() { return favoriteTeam; }
     public void setFavoriteTeam(Team favoriteTeam) { this.favoriteTeam = favoriteTeam; }
+
+    public Instant getCreatedAt() { return createdAt; }
+
+    public String getUseAt() { return useAt; }
+
+    public Instant getWithdrawnAt() { return withdrawnAt; }
+
+    // 💡 실제로 행을 지우지 않고 use_at을 'N'으로 바꾸는 소프트 삭제 (Product.deleteProduct와 동일한 패턴).
+    public void withdraw() {
+        this.useAt = "N";
+        this.withdrawnAt = Instant.now();
+    }
 }

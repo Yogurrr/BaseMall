@@ -36,22 +36,22 @@ public class CartService {
         return toResponses(cartItemRepository.findByUser_IdOrderByIdAsc(user.getId()));
     }
 
-    public List<CartItemResponse> addItem(String email, Long productId, int quantity) {
+    public List<CartItemResponse> addItem(String email, Long productId, int quantity, String size, String markingName) {
         User user = findUser(email);
         Product product = findProduct(productId);
 
-        CartItem item = cartItemRepository.findByUser_IdAndProduct_Id(user.getId(), productId)
-            .orElseGet(() -> new CartItem(user, product, 0));
+        CartItem item = cartItemRepository.findMatchingItem(user.getId(), productId, size, markingName)
+            .orElseGet(() -> new CartItem(user, product, 0, size, markingName));
         item.setQuantity(clampQuantity(item.getQuantity() + quantity));
         cartItemRepository.save(item);
 
         return getCart(email);
     }
 
-    public List<CartItemResponse> updateQuantity(String email, Long productId, int quantity) {
+    public List<CartItemResponse> updateQuantity(String email, Long cartItemId, int quantity) {
         User user = findUser(email);
-        CartItem item = cartItemRepository.findByUser_IdAndProduct_Id(user.getId(), productId)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "장바구니에 없는 상품입니다: " + productId));
+        CartItem item = cartItemRepository.findByIdAndUser_Id(cartItemId, user.getId())
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "장바구니에 없는 항목입니다: " + cartItemId));
 
         item.setQuantity(clampQuantity(quantity));
         cartItemRepository.save(item);
@@ -60,9 +60,9 @@ public class CartService {
     }
 
     @Transactional
-    public List<CartItemResponse> removeItem(String email, Long productId) {
+    public List<CartItemResponse> removeItem(String email, Long cartItemId) {
         User user = findUser(email);
-        cartItemRepository.deleteByUser_IdAndProduct_Id(user.getId(), productId);
+        cartItemRepository.deleteByIdAndUser_Id(cartItemId, user.getId());
         return getCart(email);
     }
 
@@ -78,7 +78,7 @@ public class CartService {
 
     private List<CartItemResponse> toResponses(List<CartItem> items) {
         return items.stream()
-            .map(item -> new CartItemResponse(item.getProduct(), item.getQuantity()))
+            .map(CartItemResponse::new)
             .toList();
     }
 

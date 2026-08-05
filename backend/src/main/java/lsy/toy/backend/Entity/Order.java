@@ -30,6 +30,9 @@ public class Order {
 
     private Integer totalPrice;
 
+    // 💡 쿠폰 적용으로 할인된 금액. totalPrice는 할인 반영 후 실제 결제 금액을 의미한다.
+    private Integer discountAmount = 0;
+
     // 💡 결제완료 → 배송준비중 → 배송중 → 배송완료 (주문취소는 언제든 가능)
     private String status = "결제완료";
 
@@ -60,6 +63,8 @@ public class Order {
     public Long getId() { return id; }
     public User getUser() { return user; }
     public Integer getTotalPrice() { return totalPrice; }
+    public Integer getDiscountAmount() { return discountAmount; }
+    public void setDiscountAmount(Integer discountAmount) { this.discountAmount = discountAmount; }
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
     public Instant getCreatedAt() { return createdAt; }

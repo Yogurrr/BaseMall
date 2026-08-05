@@ -5,6 +5,7 @@ import { Spinner } from '../../components/Spinner/Spinner';
 import { SelectFilter } from '../../components/SelectFilter/SelectFilter';
 import { Pagination } from '../../components/Pagination/Pagination';
 import { OrderDetailModal } from '../../components/OrderDetailModal/OrderDetailModal';
+import { ProductThumb } from '../../components/ProductThumb/ProductThumb';
 import { ORDER_STATUSES, fetchOrders, updateOrderStatus } from '../../api/orderApi';
 import { formatPrice } from '../../api/productApi';
 import type { Order } from '../../types/order';
@@ -121,7 +122,15 @@ export const AdminOrders = () => {
                   <td>
                     {order.items.map((item, index) => (
                       <div key={index}>
-                        {item.emoji} {item.name} × {item.quantity}
+                        <ProductThumb imageUrl={item.imageUrl} alt={item.name} size="sm" /> {item.name} × {item.quantity}
+                        {(item.size || item.markingName) && (
+                          <span className={styles.orderBuyerEmail}>
+                            {' '}
+                            ({[item.size && `사이즈 ${item.size}`, item.markingName && `마킹 ${item.markingName}`]
+                              .filter(Boolean)
+                              .join(' · ')})
+                          </span>
+                        )}
                       </div>
                     ))}
                   </td>

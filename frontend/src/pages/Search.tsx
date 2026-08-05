@@ -7,8 +7,10 @@ import { ProductCard } from '../components/ProductCard/ProductCard';
 import { Pagination } from '../components/Pagination/Pagination';
 import { Spinner } from '../components/Spinner/Spinner';
 import { SortSelect, type SortOption } from '../components/SortSelect/SortSelect';
+import { AddToCartModal } from '../components/AddToCartModal/AddToCartModal';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
+import { useAddToCartModal } from '../hooks/useAddToCartModal';
 import { fetchProductsPage } from '../api/productApi';
 import styles from './Search.module.css';
 
@@ -32,6 +34,7 @@ export const Search = () => {
   const [sort, setSort] = useState('');
   const { addItem } = useCart();
   const { isLiked, toggleWishlist } = useWishlist();
+  const { isAddToCartModalOpen, openAddToCartModal, closeAddToCartModal, goToCheckout } = useAddToCartModal();
 
   useEffect(() => {
     setPage(0);
@@ -84,7 +87,10 @@ export const Search = () => {
                     product={product}
                     liked={isLiked(product.id)}
                     onToggleLike={toggleWishlist}
-                    onAddToCart={() => addItem(product)}
+                    onAddToCart={() => {
+                      addItem(product);
+                      openAddToCartModal();
+                    }}
                   />
                 ))}
               </div>
@@ -102,6 +108,10 @@ export const Search = () => {
       </div>
 
       <SiteFooter />
+
+      {isAddToCartModalOpen && (
+        <AddToCartModal onClose={closeAddToCartModal} onCheckout={goToCheckout} />
+      )}
     </div>
   );
 };

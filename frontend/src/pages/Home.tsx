@@ -8,43 +8,23 @@ import { PerksBar, type Perk } from '../components/PerksBar/PerksBar';
 import { CategoryTabs } from '../components/CategoryTabs/CategoryTabs';
 import { ProductCard } from '../components/ProductCard/ProductCard';
 import { Pagination } from '../components/Pagination/Pagination';
+import { SortSelect, type SortOption } from '../components/SortSelect/SortSelect';
 import { SiteFooter } from '../components/SiteFooter/SiteFooter';
 import { Spinner } from '../components/Spinner/Spinner';
 import { RecommendedProducts } from '../components/RecommendedProducts/RecommendedProducts';
 import { useWishlist } from '../context/WishlistContext';
 import { useCurrentUser } from '../hooks/useCurrentUser';
 import { fetchCategories, fetchProductsPage, fetchTeams } from '../api/productApi';
-import { getPublicStorageUrl } from '../api/supabaseStorage';
+import { fetchActiveBanners } from '../api/bannerApi';
 import styles from './Home.module.css';
 
 const PAGE_SIZE = 10;
-const BANNER_BUCKET = 'banners';
 
-const AD_SLIDES: AdSlide[] = [
-  {
-    eyebrow: 'SEASON OPENING',
-    title: '🏆 2026 시즌 개막 기념 굿즈 최대 50% 할인',
-    description: '내가 응원하는 구단 굿즈, 지금이 기회!',
-    ctaLabel: '지금 쇼핑하기',
-    gradient: 'linear-gradient(120deg, #f97316, #dc2626)',
-    image: getPublicStorageUrl(BANNER_BUCKET, 'ad_banner_1.png'),
-  },
-  {
-    eyebrow: 'WELCOME GIFT',
-    title: '🎁 신규 회원 웰컴 혜택',
-    description: '첫 구매 시 15% 할인 쿠폰을 드려요',
-    ctaLabel: '혜택 받기',
-    gradient: 'linear-gradient(120deg, #7c3aed, #ec4899)',
-    image: getPublicStorageUrl(BANNER_BUCKET, 'welcome.jpg'),
-  },
-  {
-    eyebrow: 'FREE SHIPPING',
-    title: '⚾ 전 구단 굿즈 무료배송 이벤트',
-    description: '5만원 이상 구매 시 배송비 걱정 끝',
-    ctaLabel: '자세히 보기',
-    gradient: 'linear-gradient(120deg, #0891b2, #10b981)',
-    image: getPublicStorageUrl(BANNER_BUCKET, 'free-shipping.jpg'),
-  },
+const SORT_OPTIONS: SortOption[] = [
+  { value: '', label: '추천순' },
+  { value: 'newest', label: '최신순' },
+  { value: 'priceAsc', label: '낮은가격순' },
+  { value: 'priceDesc', label: '높은가격순' },
 ];
 
 const PERKS: Perk[] = [
@@ -58,22 +38,41 @@ export const Home = () => {
   const [activeCategory, setActiveCategory] = useState(() => searchParams.get('category') || '전체');
   const [activeTeam, setActiveTeam] = useState(() => searchParams.get('team') || '전체');
   const [page, setPage] = useState(0);
+  const [sort, setSort] = useState('');
   const { isLiked, toggleWishlist } = useWishlist();
   const { data: currentUser } = useCurrentUser();
 
   const { data: productPage, isLoading, isError } = useQuery({
-    queryKey: ['products', 'page', page, activeCategory, activeTeam],
+    queryKey: ['products', 'page', page, activeCategory, activeTeam, sort],
     queryFn: () =>
       fetchProductsPage({
         page,
         size: PAGE_SIZE,
         category: activeCategory === '전체' ? undefined : activeCategory,
         team: activeTeam === '전체' ? undefined : activeTeam,
+        sort,
       }),
   });
 
   const products = productPage?.content ?? [];
   const totalPages = productPage?.totalPages ?? 0;
+
+  const { data: banners = [] } = useQuery({
+    queryKey: ['banners'],
+    queryFn: fetchActiveBanners,
+  });
+  const adSlides: AdSlide[] = useMemo(
+    () =>
+      banners.map((banner) => ({
+        eyebrow: banner.eyebrow,
+        title: banner.title,
+        description: banner.description,
+        ctaLabel: banner.ctaLabel,
+        gradient: banner.gradient,
+        image: banner.imageUrl ?? undefined,
+      })),
+    [banners],
+  );
 
   const { data: categoryNames = [] } = useQuery({
     queryKey: ['categories'],
@@ -105,13 +104,18 @@ export const Home = () => {
     setPage(0);
   };
 
+  const handleSortChange = (value: string) => {
+    setSort(value);
+    setPage(0);
+  };
+
   return (
     <div className={styles.page}>
       <AnnouncementBar message="⚾ 전 구단 굿즈 모음 · 신규 가입 시 15% 할인 쿠폰 증정 · 5만원 이상 구매 시 무료배송" />
 
       <SiteHeader />
 
-      <AdBanner slides={AD_SLIDES} />
+      <AdBanner slides={adSlides} />
        
       {/* <PerksBar perks={PERKS} /> */}
 
@@ -129,7 +133,10 @@ export const Home = () => {
       <CategoryTabs categories={teamTabs} active={activeTeam} onSelect={handleSelectTeam} />
 
       <section id="best" className={styles.products}>
-        <h2>베스트 굿즈</h2>
+        <div className={styles.sectionHeader}>
+          <h2>베스트 굿즈</h2>
+          <SortSelect options={SORT_OPTIONS} value={sort} onChange={handleSortChange} />
+        </div>
         {isLoading ? (
           <div className={styles.empty}><Spinner /></div>
         ) : isError ? (

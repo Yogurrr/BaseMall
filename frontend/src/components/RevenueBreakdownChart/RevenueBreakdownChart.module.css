@@ -1,0 +1,23 @@
+.chartCard {
+  border: 0.05rem solid var(--border);
+  border-radius: 0.5rem;
+  padding: 1.2rem;
+  min-width: 0;
+}
+
+.chartCard h2 {
+  margin: 0 0 1.2rem;
+  font-size: 1rem;
+  color: var(--text-h);
+}
+
+.chart {
+  width: 100%;
+}
+
+.empty {
+  padding: 1.6rem 0;
+  text-align: center;
+  color: var(--text);
+  font-size: 0.85rem;
+}

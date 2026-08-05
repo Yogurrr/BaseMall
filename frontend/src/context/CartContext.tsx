@@ -5,14 +5,19 @@ import type { CartItem } from '../types/cart';
 import { addCartItem, clearCartApi, fetchCart, removeCartItem, updateCartItem } from '../api/cartApi';
 import { isLoggedIn, subscribeAuthChange } from '../api/authToken';
 
+interface CartItemOptions {
+  size?: string;
+  markingName?: string;
+}
+
 interface CartContextValue {
   items: CartItem[];
   totalCount: number;
   totalPrice: number;
   isLoading: boolean;
-  addItem: (product: Product, quantity?: number) => void;
-  removeItem: (id: number) => void;
-  updateQuantity: (id: number, quantity: number) => void;
+  addItem: (product: Product, quantity?: number, options?: CartItemOptions) => void;
+  removeItem: (cartItemId: number) => void;
+  updateQuantity: (cartItemId: number, quantity: number) => void;
   clearCart: () => void;
 }
 
@@ -31,6 +36,9 @@ const loadGuestItems = (): CartItem[] => {
 };
 
 const clampQuantity = (quantity: number) => Math.min(99, Math.max(1, quantity));
+
+// 💡 비회원 장바구니 줄은 서버 DB가 없어 클라이언트에서 임시 식별자를 만든다.
+const generateGuestCartItemId = () => Date.now() + Math.random();
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const queryClient = useQueryClient();
@@ -55,7 +63,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
     const mergeGuestCart = async () => {
       for (const item of guestItems) {
-        await addCartItem(item.id, item.quantity);
+        await addCartItem(item.id, item.quantity, item.size, item.markingName);
       }
       setGuestItems([]);
       queryClient.invalidateQueries({ queryKey: ['cart'] });
@@ -67,37 +75,51 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   const items = loggedIn ? serverItems : guestItems;
 
-  const addItem = (product: Product, quantity = 1) => {
+  const addItem = (product: Product, quantity = 1, options?: CartItemOptions) => {
+    const size = options?.size;
+    const markingName = options?.markingName;
+
     if (loggedIn) {
-      addCartItem(product.id, quantity).then((updated) => queryClient.setQueryData(['cart'], updated));
+      addCartItem(product.id, quantity, size, markingName).then((updated) =>
+        queryClient.setQueryData(['cart'], updated),
+      );
       return;
     }
     setGuestItems((prev) => {
-      const existing = prev.find((item) => item.id === product.id);
+      const existing = prev.find(
+        (item) => item.id === product.id && item.size === size && item.markingName === markingName,
+      );
       if (existing) {
         return prev.map((item) =>
-          item.id === product.id ? { ...item, quantity: clampQuantity(item.quantity + quantity) } : item,
+          item.cartItemId === existing.cartItemId
+            ? { ...item, quantity: clampQuantity(item.quantity + quantity) }
+            : item,
         );
       }
-      return [...prev, { ...product, quantity: clampQuantity(quantity) }];
+      return [
+        ...prev,
+        { ...product, cartItemId: generateGuestCartItemId(), quantity: clampQuantity(quantity), size, markingName },
+      ];
     });
   };
 
-  const removeItem = (id: number) => {
+  const removeItem = (cartItemId: number) => {
     if (loggedIn) {
-      removeCartItem(id).then((updated) => queryClient.setQueryData(['cart'], updated));
+      removeCartItem(cartItemId).then((updated) => queryClient.setQueryData(['cart'], updated));
       return;
     }
-    setGuestItems((prev) => prev.filter((item) => item.id !== id));
+    setGuestItems((prev) => prev.filter((item) => item.cartItemId !== cartItemId));
   };
 
-  const updateQuantity = (id: number, quantity: number) => {
+  const updateQuantity = (cartItemId: number, quantity: number) => {
     const clamped = clampQuantity(quantity);
     if (loggedIn) {
-      updateCartItem(id, clamped).then((updated) => queryClient.setQueryData(['cart'], updated));
+      updateCartItem(cartItemId, clamped).then((updated) => queryClient.setQueryData(['cart'], updated));
       return;
     }
-    setGuestItems((prev) => prev.map((item) => (item.id === id ? { ...item, quantity: clamped } : item)));
+    setGuestItems((prev) =>
+      prev.map((item) => (item.cartItemId === cartItemId ? { ...item, quantity: clamped } : item)),
+    );
   };
 
   const clearCart = () => {

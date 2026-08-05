@@ -1,20 +1,25 @@
 package lsy.toy.backend;
 
+import lsy.toy.backend.Entity.Banner;
 import lsy.toy.backend.Entity.Category;
 import lsy.toy.backend.Entity.Order;
 import lsy.toy.backend.Entity.OrderItem;
 import lsy.toy.backend.Entity.Product;
 import lsy.toy.backend.Entity.Team;
 import lsy.toy.backend.Entity.User;
+import lsy.toy.backend.Repository.BannerRepository;
 import lsy.toy.backend.Repository.CartItemRepository;
 import lsy.toy.backend.Repository.CategoryRepository;
 import lsy.toy.backend.Repository.OrderRepository;
 import lsy.toy.backend.Repository.ProductRepository;
 import lsy.toy.backend.Repository.TeamRepository;
 import lsy.toy.backend.Repository.UserRepository;
+import jakarta.persistence.EntityManager;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -47,7 +52,10 @@ public class DataSeeder implements CommandLineRunner {
     private final CartItemRepository cartItemRepository;
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
+    private final BannerRepository bannerRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EntityManager entityManager;
+    private final String supabaseStorageUrl;
 
     public DataSeeder(
         ProductRepository productRepository,
@@ -56,7 +64,10 @@ public class DataSeeder implements CommandLineRunner {
         CartItemRepository cartItemRepository,
         OrderRepository orderRepository,
         UserRepository userRepository,
-        PasswordEncoder passwordEncoder
+        BannerRepository bannerRepository,
+        PasswordEncoder passwordEncoder,
+        EntityManager entityManager,
+        @Value("${supabase.storage.url}") String supabaseStorageUrl
     ) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
@@ -64,11 +75,20 @@ public class DataSeeder implements CommandLineRunner {
         this.cartItemRepository = cartItemRepository;
         this.orderRepository = orderRepository;
         this.userRepository = userRepository;
+        this.bannerRepository = bannerRepository;
         this.passwordEncoder = passwordEncoder;
+        this.entityManager = entityManager;
+        this.supabaseStorageUrl = supabaseStorageUrl;
     }
 
     @Override
+    @Transactional
     public void run(String... args) {
+        // 💡 시딩은 로그인 요청이 아니라 앱 기동 시점에 실행되므로 RLS 세션 변수가 비어 있다.
+        // products/orders/users/reviews 정책은 모두 관리자(app_is_admin())를 예외로 허용하므로,
+        // 이 트랜잭션 안에서만 관리자 컨텍스트임을 명시해 시딩이 막히지 않게 한다.
+        entityManager.createNativeQuery("SELECT set_config('app.user_role', 'ADMIN', true)").getSingleResult();
+
         boolean hasLegacyCatalog = categoryRepository.findAll().stream()
             .anyMatch(category -> LEGACY_CATEGORY_NAMES.contains(category.getName()));
         // 💡 구단별 카테고리(team)가 새로 추가되기 전에 저장된 상품은 team이 비어 있다.
@@ -97,21 +117,21 @@ public class DataSeeder implements CommandLineRunner {
 
         if (productRepository.count() == 0) {
             productRepository.saveAll(List.of(
-                product("두산 베어스 홈 유니폼", categories.get("유니폼"), teams.get("두산 베어스"), 89000, 109000, 4.7, 231, "👕", "SALE"),
-                product("KIA 타이거즈 어웨이 유니폼", categories.get("유니폼"), teams.get("KIA 타이거즈"), 89000, 109000, 4.6, 198, "👕", "SALE"),
-                product("롯데 자이언츠 반팔 티셔츠", categories.get("유니폼"), teams.get("롯데 자이언츠"), 32000, null, 4.5, 156, "👕", "BEST"),
-                product("LG 트윈스 볼캡", categories.get("모자"), teams.get("LG 트윈스"), 35000, null, 4.6, 302, "🧢", "NEW"),
-                product("NC 다이노스 스냅백", categories.get("모자"), teams.get("NC 다이노스"), 38000, null, 4.4, 89, "🧢", null),
-                product("SSG 랜더스 응원 타월", categories.get("응원용품"), teams.get("SSG 랜더스"), 12000, null, 4.8, 267, "🏳️", "BEST"),
-                product("롯데 자이언츠 막대풍선 세트", categories.get("응원용품"), teams.get("롯데 자이언츠"), 8000, null, 4.5, 143, "🎈", "BEST"),
-                product("KT 위즈 응원 메가폰", categories.get("응원용품"), teams.get("KT 위즈"), 13000, null, 4.3, 71, "📣", null),
-                product("삼성 라이온즈 기념구", categories.get("스포츠용품"), teams.get("삼성 라이온즈"), 15000, null, 4.6, 118, "⚾", null),
-                product("LG 트윈스 야구 글러브", categories.get("스포츠용품"), teams.get("LG 트윈스"), 68000, 79000, 4.7, 94, "🧤", "SALE"),
-                product("키움 히어로즈 미니배트 키링", categories.get("잡화"), teams.get("키움 히어로즈"), 9900, null, 4.4, 205, "🔑", null),
-                product("두산 베어스 마스코트 인형", categories.get("잡화"), teams.get("두산 베어스"), 25000, null, 4.8, 176, "🧸", "BEST"),
-                product("SSG 랜더스 텀블러", categories.get("잡화"), teams.get("SSG 랜더스"), 18000, null, 4.5, 132, "🥤", "NEW"),
-                product("한화 이글스 무릎담요", categories.get("홈/리빙"), teams.get("한화 이글스"), 22000, null, 4.6, 87, "🧣", "NEW"),
-                product("KIA 타이거즈 방석 쿠션", categories.get("홈/리빙"), teams.get("KIA 타이거즈"), 19800, null, 4.3, 64, "🛋️", null)
+                product("두산 베어스 홈 유니폼", categories.get("유니폼"), teams.get("두산 베어스"), 89000, 109000, "SALE"),
+                product("KIA 타이거즈 어웨이 유니폼", categories.get("유니폼"), teams.get("KIA 타이거즈"), 89000, 109000, "SALE"),
+                product("롯데 자이언츠 반팔 티셔츠", categories.get("유니폼"), teams.get("롯데 자이언츠"), 32000, null, "BEST"),
+                product("LG 트윈스 볼캡", categories.get("모자"), teams.get("LG 트윈스"), 35000, null, "NEW"),
+                product("NC 다이노스 스냅백", categories.get("모자"), teams.get("NC 다이노스"), 38000, null, null),
+                product("SSG 랜더스 응원 타월", categories.get("응원용품"), teams.get("SSG 랜더스"), 12000, null, "BEST"),
+                product("롯데 자이언츠 막대풍선 세트", categories.get("응원용품"), teams.get("롯데 자이언츠"), 8000, null, "BEST"),
+                product("KT 위즈 응원 메가폰", categories.get("응원용품"), teams.get("KT 위즈"), 13000, null, null),
+                product("삼성 라이온즈 기념구", categories.get("스포츠용품"), teams.get("삼성 라이온즈"), 15000, null, null),
+                product("LG 트윈스 야구 글러브", categories.get("스포츠용품"), teams.get("LG 트윈스"), 68000, 79000, "SALE"),
+                product("키움 히어로즈 미니배트 키링", categories.get("잡화"), teams.get("키움 히어로즈"), 9900, null, null),
+                product("두산 베어스 마스코트 인형", categories.get("잡화"), teams.get("두산 베어스"), 25000, null, "BEST"),
+                product("SSG 랜더스 텀블러", categories.get("잡화"), teams.get("SSG 랜더스"), 18000, null, "NEW"),
+                product("한화 이글스 무릎담요", categories.get("홈/리빙"), teams.get("한화 이글스"), 22000, null, "NEW"),
+                product("KIA 타이거즈 방석 쿠션", categories.get("홈/리빙"), teams.get("KIA 타이거즈"), 19800, null, null)
             ));
         }
 
@@ -164,30 +184,58 @@ public class DataSeeder implements CommandLineRunner {
         if (orderRepository.count() == 0) {
             userRepository.findByEmail("lee@example.com").ifPresent(lee -> {
                 Order order1 = new Order(lee, 89000 + 12000 * 2);
-                order1.addItem(new OrderItem("두산 베어스 홈 유니폼", "유니폼", "👕", 89000, 1));
-                order1.addItem(new OrderItem("SSG 랜더스 응원 타월", "응원용품", "🏳️", 12000, 2));
+                order1.addItem(new OrderItem("두산 베어스 홈 유니폼", "유니폼", null, 89000, 1, null, null, "두산 베어스"));
+                order1.addItem(new OrderItem("SSG 랜더스 응원 타월", "응원용품", null, 12000, 2, null, null, "SSG 랜더스"));
                 order1.setStatus("배송완료");
                 orderRepository.save(order1);
             });
             userRepository.findByEmail("park@example.com").ifPresent(park -> {
                 Order order2 = new Order(park, 35000);
-                order2.addItem(new OrderItem("LG 트윈스 볼캡", "모자", "🧢", 35000, 1));
+                order2.addItem(new OrderItem("LG 트윈스 볼캡", "모자", null, 35000, 1, null, null, "LG 트윈스"));
                 order2.setStatus("배송중");
                 orderRepository.save(order2);
 
                 Order order3 = new Order(park, 9900 * 3);
-                order3.addItem(new OrderItem("키움 히어로즈 미니배트 키링", "잡화", "🔑", 9900, 3));
+                order3.addItem(new OrderItem("키움 히어로즈 미니배트 키링", "잡화", null, 9900, 3, null, null, "키움 히어로즈"));
                 order3.setStatus("결제완료");
                 orderRepository.save(order3);
             });
         }
+
+        // 💡 기존에 Home.tsx에 하드코딩되어 있던 배너 3종을 그대로 초기 데이터로 옮긴다.
+        // 이미지는 Supabase Storage의 banners 버킷에 이미 업로드되어 있던 고정 파일명을 그대로 참조한다.
+        if (bannerRepository.count() == 0) {
+            bannerRepository.saveAll(List.of(
+                new Banner(
+                    "SEASON OPENING", "🏆 2026 시즌 개막 기념 굿즈 최대 50% 할인",
+                    "내가 응원하는 구단 굿즈, 지금이 기회!", "지금 쇼핑하기",
+                    "linear-gradient(120deg, #f97316, #dc2626)", bannerImageUrl("ad_banner_1.png"), 0
+                ),
+                new Banner(
+                    "WELCOME GIFT", "🎁 신규 회원 웰컴 혜택",
+                    "첫 구매 시 15% 할인 쿠폰을 드려요", "혜택 받기",
+                    "linear-gradient(120deg, #7c3aed, #ec4899)", bannerImageUrl("welcome.jpg"), 1
+                ),
+                new Banner(
+                    "FREE SHIPPING", "⚾ 전 구단 굿즈 무료배송 이벤트",
+                    "5만원 이상 구매 시 배송비 걱정 끝", "자세히 보기",
+                    "linear-gradient(120deg, #0891b2, #10b981)", bannerImageUrl("free-shipping.jpg"), 2
+                )
+            ));
+        }
+    }
+
+    private String bannerImageUrl(String fileName) {
+        return supabaseStorageUrl + "/storage/v1/object/public/banners/" + fileName;
     }
 
     private Product product(
-        String name, Category category, Team team, Integer price, Integer originalPrice,
-        double rating, int reviewCount, String emoji, String badge
+        String name, Category category, Team team, Integer price, Integer originalPrice, String badge
     ) {
-        Product product = new Product(name, category, price, originalPrice, rating, reviewCount, emoji, badge);
+        // 💡 데모 시드 데이터에는 실제 업로드 이미지가 없으므로 imageUrl은 null로 두고,
+        // 프론트엔드가 플레이스홀더를 보여준다. 관리자가 상품 수정 화면에서 이미지를 올리면 채워진다.
+        // 💡 평점/리뷰 개수는 더 이상 임의값을 넣지 않는다 — ReviewService가 실제 리뷰 기준으로 채운다.
+        Product product = new Product(name, category, price, originalPrice, 0, 0, null, badge);
         product.setTeam(team);
         return product;
     }

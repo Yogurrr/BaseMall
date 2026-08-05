@@ -1,5 +1,6 @@
 package lsy.toy.backend.Entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -25,20 +26,35 @@ public class OrderItem {
 
     private String productName;
     private String category;
-    private String emoji;
+
+    @Column(name = "image_url")
+    private String imageUrl;
+
     private Integer unitPrice;
     private int quantity;
+
+    // 💡 주문 시점 유니폼 옵션 스냅샷 (장바구니와 동일한 의미).
+    private String size;
+
+    @Column(name = "marking_name")
+    private String markingName;
+
+    // 💡 매출 통계의 구단별 집계용 스냅샷. category와 마찬가지로 Product를 참조하지 않는다.
+    private String team;
 
     protected OrderItem() {
         // JPA
     }
 
-    public OrderItem(String productName, String category, String emoji, Integer unitPrice, int quantity) {
+    public OrderItem(String productName, String category, String imageUrl, Integer unitPrice, int quantity, String size, String markingName, String team) {
         this.productName = productName;
         this.category = category;
-        this.emoji = emoji;
+        this.imageUrl = imageUrl;
         this.unitPrice = unitPrice;
         this.quantity = quantity;
+        this.size = size;
+        this.markingName = markingName;
+        this.team = team;
     }
 
     public Long getId() { return id; }
@@ -48,7 +64,10 @@ public class OrderItem {
 
     public String getProductName() { return productName; }
     public String getCategory() { return category; }
-    public String getEmoji() { return emoji; }
+    public String getImageUrl() { return imageUrl; }
     public Integer getUnitPrice() { return unitPrice; }
     public int getQuantity() { return quantity; }
+    public String getSize() { return size; }
+    public String getMarkingName() { return markingName; }
+    public String getTeam() { return team; }
 }

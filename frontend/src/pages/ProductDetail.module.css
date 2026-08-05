@@ -158,6 +158,46 @@
   color: var(--text-h);
 }
 
+.optionGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-bottom: 0.8rem;
+}
+
+.optionRow {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-size: 0.8rem;
+  color: var(--text-h);
+}
+
+.optionRow > span {
+  min-width: 5.5rem;
+}
+
+.optionSelect {
+  box-sizing: border-box;
+  height: 2.2rem;
+  font: inherit;
+  font-size: 0.8rem;
+  padding: 0 0.8rem;
+  border-radius: 0.5rem;
+  border: 0.05rem solid var(--border);
+  background: var(--bg);
+  color: var(--text-h);
+  cursor: pointer;
+  min-width: 9rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.optionSelect:focus {
+  outline: none;
+  border-color: var(--accent-border);
+  box-shadow: 0 0 0 0.15rem var(--accent-bg);
+}
+
 .quantityRow {
   display: flex;
   align-items: center;
@@ -204,11 +244,29 @@
   margin-bottom: 0.8rem;
 }
 
-.toast {
-  font-size: 0.75rem;
-  color: var(--accent);
-  font-weight: 600;
-  margin-bottom: 0.8rem;
+.description {
+  margin-top: 2.4rem;
+  padding-top: 1.6rem;
+  border-top: 0.05rem solid var(--border);
+}
+
+.descriptionTitle {
+  font-size: 1.1rem;
+  margin: 0 0 0.8rem;
+}
+
+.descriptionImage {
+  display: block;
+  max-width: 100%;
+  border-radius: 0.6rem;
+  margin-bottom: 1.2rem;
+}
+
+.descriptionText {
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: var(--text-h);
+  white-space: pre-wrap;
 }
 
 .backLink {

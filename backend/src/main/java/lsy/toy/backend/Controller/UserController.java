@@ -1,5 +1,6 @@
 package lsy.toy.backend.Controller;
 
+import lsy.toy.backend.Dto.MemberStatsResponse;
 import lsy.toy.backend.Entity.User;
 import lsy.toy.backend.Service.UserService;
 import org.springframework.web.bind.annotation.*;
@@ -25,5 +26,11 @@ public class UserController {
         Thread.sleep(1000);
 
         return userService.getUsers();
+    }
+
+    // 2. 회원 통계 - 신규 가입/탈퇴/등급 분포 (관리자 통계 페이지, GET)
+    @GetMapping("/stats")
+    public MemberStatsResponse getStats() {
+        return userService.getStats();
     }
 }

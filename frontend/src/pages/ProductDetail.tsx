@@ -5,9 +5,15 @@ import { SiteHeader } from '../components/SiteHeader/SiteHeader';
 import { SiteFooter } from '../components/SiteFooter/SiteFooter';
 import { Button } from '../components/Button/Button';
 import { Spinner } from '../components/Spinner/Spinner';
+import { ProductThumb } from '../components/ProductThumb/ProductThumb';
+import { ProductReviews } from '../components/ProductReviews/ProductReviews';
+import { AddToCartModal } from '../components/AddToCartModal/AddToCartModal';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
+import { useAddToCartModal } from '../hooks/useAddToCartModal';
 import { fetchProduct, formatPrice } from '../api/productApi';
+import { fetchBadges, getBadgeGradient } from '../api/badgeApi';
+import { UNIFORM_CATEGORY_NAME, UNIFORM_MARKING_NAMES, UNIFORM_SIZES } from '../constants/uniformOptions';
 import styles from './ProductDetail.module.css';
 
 export const ProductDetail = () => {
@@ -16,9 +22,11 @@ export const ProductDetail = () => {
   const navigate = useNavigate();
   const { addItem } = useCart();
   const { isLiked, toggleWishlist } = useWishlist();
+  const { isAddToCartModalOpen, openAddToCartModal, closeAddToCartModal, goToCheckout } = useAddToCartModal();
 
   const [quantity, setQuantity] = useState(1);
-  const [addedMessage, setAddedMessage] = useState(false);
+  const [size, setSize] = useState<string>(UNIFORM_SIZES[0]);
+  const [markingName, setMarkingName] = useState<string>(UNIFORM_MARKING_NAMES[0]);
 
   const {
     data: product,
@@ -30,6 +38,10 @@ export const ProductDetail = () => {
     enabled: Number.isFinite(productId),
   });
 
+  const { data: badges = [] } = useQuery({ queryKey: ['badges'], queryFn: fetchBadges, staleTime: 5 * 60 * 1000 });
+
+  const isUniform = product?.category === UNIFORM_CATEGORY_NAME;
+
   const discountPercent = product?.originalPrice
     ? Math.round((1 - product.price / product.originalPrice) * 100)
     : 0;
@@ -38,16 +50,17 @@ export const ProductDetail = () => {
     setQuantity((prev) => Math.min(99, Math.max(1, prev + delta)));
   };
 
+  const uniformOptions = isUniform ? { size, markingName } : undefined;
+
   const handleAddToCart = () => {
     if (!product) return;
-    addItem(product, quantity);
-    setAddedMessage(true);
-    window.setTimeout(() => setAddedMessage(false), 1500);
+    addItem(product, quantity, uniformOptions);
+    openAddToCartModal();
   };
 
   const handleBuyNow = () => {
     if (!product) return;
-    addItem(product, quantity);
+    addItem(product, quantity, uniformOptions);
     navigate('/cart');
   };
 
@@ -76,9 +89,11 @@ export const ProductDetail = () => {
         ) : (
           <div className={styles.detail}>
             <div className={styles.thumb}>
-              <span>{product.emoji}</span>
+              <ProductThumb imageUrl={product.imageUrl} alt={product.name} size="lg" />
               {product.badge && (
-                <span className={`${styles.badge} ${styles[`badge${product.badge}`]}`}>{product.badge}</span>
+                <span className={styles.badge} style={{ background: getBadgeGradient(badges, product.badge) }}>
+                  {product.badge}
+                </span>
               )}
             </div>
 
@@ -99,6 +114,41 @@ export const ProductDetail = () => {
                   <span className={styles.originalPrice}>{formatPrice(product.originalPrice)}</span>
                 )}
               </div>
+
+              {isUniform && (
+                <div className={styles.optionGroup}>
+                  <div className={styles.optionRow}>
+                    <span>사이즈</span>
+                    <select
+                      className={styles.optionSelect}
+                      value={size}
+                      onChange={(e) => setSize(e.target.value)}
+                      aria-label="사이즈 선택"
+                    >
+                      {UNIFORM_SIZES.map((option) => (
+                        <option key={option} value={option}>
+                          {option}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className={styles.optionRow}>
+                    <span>마킹 선수 이름</span>
+                    <select
+                      className={styles.optionSelect}
+                      value={markingName}
+                      onChange={(e) => setMarkingName(e.target.value)}
+                      aria-label="마킹 선수 이름 선택"
+                    >
+                      {UNIFORM_MARKING_NAMES.map((option) => (
+                        <option key={option} value={option}>
+                          {option}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              )}
 
               <div className={styles.quantityRow}>
                 <span>수량</span>
@@ -132,17 +182,31 @@ export const ProductDetail = () => {
                 </Button>
               </div>
 
-              {addedMessage && <p className={styles.toast}>장바구니에 담았습니다.</p>}
-
               <Link to="/" className={styles.backLink}>
                 ← 목록으로 돌아가기
               </Link>
             </div>
           </div>
         )}
+
+        {!isLoading && !isError && product && (product.description || product.detailImageUrl) && (
+          <section className={styles.description}>
+            <h2 className={styles.descriptionTitle}>상세 설명</h2>
+            {product.detailImageUrl && (
+              <img src={product.detailImageUrl} alt={`${product.name} 상세 이미지`} className={styles.descriptionImage} />
+            )}
+            {product.description && <p className={styles.descriptionText}>{product.description}</p>}
+          </section>
+        )}
+
+        {!isLoading && !isError && product && <ProductReviews productId={product.id} />}
       </div>
 
       <SiteFooter />
+
+      {isAddToCartModalOpen && (
+        <AddToCartModal onClose={closeAddToCartModal} onCheckout={goToCheckout} />
+      )}
     </div>
   );
 };

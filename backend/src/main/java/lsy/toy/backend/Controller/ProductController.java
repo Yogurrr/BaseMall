@@ -1,12 +1,16 @@
 package lsy.toy.backend.Controller;
 
+import lsy.toy.backend.Dto.ImageUploadResponse;
 import lsy.toy.backend.Dto.ProductRequest;
+import lsy.toy.backend.Dto.ProductStatsResponse;
 import lsy.toy.backend.Dto.UpdateProductStatusRequest;
 import lsy.toy.backend.Dto.UpdateStockRequest;
 import lsy.toy.backend.Entity.Product;
 import lsy.toy.backend.Service.ProductService;
+import lsy.toy.backend.Service.SupabaseStorageService;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -16,9 +20,11 @@ import java.util.List;
 public class ProductController {
 
     private final ProductService productService;
+    private final SupabaseStorageService supabaseStorageService;
 
-    public ProductController(ProductService productService) {
+    public ProductController(ProductService productService, SupabaseStorageService supabaseStorageService) {
         this.productService = productService;
+        this.supabaseStorageService = supabaseStorageService;
     }
 
     // 1. 상품 목록 조회 (GET)
@@ -52,6 +58,12 @@ public class ProductController {
         return productService.getProduct(id);
     }
 
+    // 1-4. 상품 통계 - 인기상품 TOP10/카테고리별 판매량/품절 수 (관리자 통계 페이지, GET)
+    @GetMapping("/stats")
+    public ProductStatsResponse getStats() {
+        return productService.getStats();
+    }
+
     // 2. 신규 상품 등록 (POST)
     @PostMapping
     public Product createProduct(@RequestBody ProductRequest request) {
@@ -61,9 +73,11 @@ public class ProductController {
             request.getTeam(),
             request.getPrice(),
             request.getOriginalPrice(),
-            request.getEmoji(),
+            request.getImageUrl(),
             request.getBadge(),
-            request.getStock()
+            request.getStock(),
+            request.getDescription(),
+            request.getDetailImageUrl()
         );
     }
 
@@ -77,10 +91,18 @@ public class ProductController {
             request.getTeam(),
             request.getPrice(),
             request.getOriginalPrice(),
-            request.getEmoji(),
+            request.getImageUrl(),
             request.getBadge(),
-            request.getStock()
+            request.getStock(),
+            request.getDescription(),
+            request.getDetailImageUrl()
         );
+    }
+
+    // 8. 상품 이미지 업로드 (POST) - Supabase Storage에 업로드하고 public URL을 반환한다.
+    @PostMapping("/image-upload")
+    public ImageUploadResponse uploadImage(@RequestParam("file") MultipartFile file) {
+        return new ImageUploadResponse(supabaseStorageService.uploadProductImage(file));
     }
 
     // 4. 상품 삭제 (DELETE)

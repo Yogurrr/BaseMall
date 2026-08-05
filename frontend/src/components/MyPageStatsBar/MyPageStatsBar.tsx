@@ -2,9 +2,10 @@ import styles from './MyPageStatsBar.module.css';
 
 interface MyPageStatsBarProps {
   wishlistCount: number;
+  couponCount: number;
 }
 
-export const MyPageStatsBar = ({ wishlistCount }: MyPageStatsBarProps) => (
+export const MyPageStatsBar = ({ wishlistCount, couponCount }: MyPageStatsBarProps) => (
   <section className={styles.bar}>
     <div className={styles.stat}>
       <span className={styles.label}>적립금</span>
@@ -12,7 +13,7 @@ export const MyPageStatsBar = ({ wishlistCount }: MyPageStatsBarProps) => (
     </div>
     <div className={styles.stat}>
       <span className={styles.label}>쿠폰</span>
-      <span className={styles.value}>0개</span>
+      <span className={styles.value}>{couponCount}개</span>
     </div>
     <div className={styles.stat}>
       <span className={styles.label}>찜한 상품</span>

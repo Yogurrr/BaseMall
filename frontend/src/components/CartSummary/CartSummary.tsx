@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { Button } from '../Button/Button';
 import { formatPrice } from '../../api/productApi';
 import styles from './CartSummary.module.css';
@@ -7,28 +8,15 @@ const SHIPPING_FEE = 3000;
 
 interface CartSummaryProps {
   totalPrice: number;
-  address: string;
-  onAddressChange: (value: string) => void;
-  onCheckout: () => void;
-  isSubmitting?: boolean;
 }
 
-export const CartSummary = ({ totalPrice, address, onAddressChange, onCheckout, isSubmitting }: CartSummaryProps) => {
+export const CartSummary = ({ totalPrice }: CartSummaryProps) => {
   const shippingFee = totalPrice === 0 || totalPrice >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
-  const grandTotal = totalPrice + shippingFee;
+  const estimatedTotal = totalPrice + shippingFee;
 
   return (
     <aside className={styles.summary}>
       <h2>주문 요약</h2>
-
-      <label className={styles.addressField}>
-        배송지
-        <input
-          value={address}
-          onChange={(e) => onAddressChange(e.target.value)}
-          placeholder="배송받으실 주소를 입력하세요"
-        />
-      </label>
 
       <div className={styles.row}>
         <span>상품 금액</span>
@@ -45,13 +33,14 @@ export const CartSummary = ({ totalPrice, address, onAddressChange, onCheckout, 
       )}
 
       <div className={styles.totalRow}>
-        <span>총 결제금액</span>
-        <span>{formatPrice(grandTotal)}</span>
+        <span>예상 결제금액</span>
+        <span>{formatPrice(estimatedTotal)}</span>
       </div>
+      <p className={styles.hint}>쿠폰 할인은 주문/결제 페이지에서 적용할 수 있어요.</p>
 
-      <Button size="lg" onClick={onCheckout} disabled={totalPrice === 0 || !address.trim()} isLoading={isSubmitting}>
-        결제하기
-      </Button>
+      <Link to="/checkout" className={styles.checkoutLink}>
+        <Button size="lg">주문하기</Button>
+      </Link>
     </aside>
   );
 };

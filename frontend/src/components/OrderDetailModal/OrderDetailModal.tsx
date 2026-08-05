@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '../Button/Button';
+import { ProductThumb } from '../ProductThumb/ProductThumb';
 import { updateTrackingNumber } from '../../api/orderApi';
 import type { Order } from '../../types/order';
 import { formatPrice } from '../../api/productApi';
@@ -104,8 +105,15 @@ export const OrderDetailModal = ({ order, onClose, readOnly = false }: OrderDeta
             {order.items.map((item, index) => (
               <tr key={index}>
                 <td>
-                  {item.emoji} {item.name}
+                  <ProductThumb imageUrl={item.imageUrl} alt={item.name} size="sm" /> {item.name}
                   {item.category && <span className={styles.itemCategory}>{item.category}</span>}
+                  {(item.size || item.markingName) && (
+                    <span className={styles.itemCategory}>
+                      {[item.size && `사이즈 ${item.size}`, item.markingName && `마킹 ${item.markingName}`]
+                        .filter(Boolean)
+                        .join(' · ')}
+                    </span>
+                  )}
                 </td>
                 <td>{formatPrice(item.price)}</td>
                 <td>{item.quantity}</td>

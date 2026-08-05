@@ -1,12 +1,15 @@
 import { ProductCard } from '../../components/ProductCard/ProductCard';
 import { Spinner } from '../../components/Spinner/Spinner';
+import { AddToCartModal } from '../../components/AddToCartModal/AddToCartModal';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
+import { useAddToCartModal } from '../../hooks/useAddToCartModal';
 import styles from './MyPage.module.css';
 
 export const MyPageWishlist = () => {
   const { addItem } = useCart();
   const { items: wishlistItems, isLoading, toggleWishlist } = useWishlist();
+  const { isAddToCartModalOpen, openAddToCartModal, closeAddToCartModal, goToCheckout } = useAddToCartModal();
 
   return (
     <div className={styles.wishlistSection}>
@@ -26,10 +29,17 @@ export const MyPageWishlist = () => {
               product={product}
               liked
               onToggleLike={toggleWishlist}
-              onAddToCart={(p) => addItem(p)}
+              onAddToCart={(p) => {
+                addItem(p);
+                openAddToCartModal();
+              }}
             />
           ))}
         </div>
+      )}
+
+      {isAddToCartModalOpen && (
+        <AddToCartModal onClose={closeAddToCartModal} onCheckout={goToCheckout} />
       )}
     </div>
   );

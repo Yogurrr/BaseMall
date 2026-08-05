@@ -22,7 +22,8 @@
   color: var(--text);
 }
 
-.addressField input {
+.addressField input,
+.addressField select {
   font: inherit;
   font-size: 0.75rem;
   padding: 0.5rem 0.6rem;
@@ -55,4 +56,13 @@
   padding-top: 0.6rem;
   margin-top: 0.2rem;
   border-top: 0.05rem solid var(--border);
+}
+
+.checkoutLink {
+  display: block;
+  text-decoration: none;
+}
+
+.checkoutLink button {
+  width: 100%;
 }

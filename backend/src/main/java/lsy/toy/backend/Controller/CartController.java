@@ -26,27 +26,33 @@ public class CartController {
         return cartService.getCart(authentication.getName());
     }
 
-    // 2. 장바구니에 상품 담기 (POST) - 이미 있으면 수량 누적
+    // 2. 장바구니에 상품 담기 (POST) - 같은 상품+옵션 조합이 이미 있으면 수량 누적
     @PostMapping("/items")
     public List<CartItemResponse> addItem(Authentication authentication, @RequestBody AddCartItemRequest request) {
         int quantity = request.getQuantity() != null ? request.getQuantity() : 1;
-        return cartService.addItem(authentication.getName(), request.getProductId(), quantity);
+        return cartService.addItem(
+            authentication.getName(),
+            request.getProductId(),
+            quantity,
+            request.getSize(),
+            request.getMarkingName()
+        );
     }
 
-    // 3. 특정 상품 수량 변경 (PUT)
-    @PutMapping("/items/{productId}")
+    // 3. 특정 장바구니 항목 수량 변경 (PUT)
+    @PutMapping("/items/{cartItemId}")
     public List<CartItemResponse> updateQuantity(
         Authentication authentication,
-        @PathVariable Long productId,
+        @PathVariable Long cartItemId,
         @RequestBody UpdateCartItemRequest request
     ) {
-        return cartService.updateQuantity(authentication.getName(), productId, request.getQuantity());
+        return cartService.updateQuantity(authentication.getName(), cartItemId, request.getQuantity());
     }
 
-    // 4. 특정 상품 삭제 (DELETE)
-    @DeleteMapping("/items/{productId}")
-    public List<CartItemResponse> removeItem(Authentication authentication, @PathVariable Long productId) {
-        return cartService.removeItem(authentication.getName(), productId);
+    // 4. 특정 장바구니 항목 삭제 (DELETE)
+    @DeleteMapping("/items/{cartItemId}")
+    public List<CartItemResponse> removeItem(Authentication authentication, @PathVariable Long cartItemId) {
+        return cartService.removeItem(authentication.getName(), cartItemId);
     }
 
     // 5. 장바구니 비우기 (DELETE, 결제 완료 시 호출)

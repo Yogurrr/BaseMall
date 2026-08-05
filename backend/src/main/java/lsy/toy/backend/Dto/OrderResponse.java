@@ -11,6 +11,7 @@ public class OrderResponse {
     private final String buyerEmail;
     private final String status;
     private final Integer totalPrice;
+    private final Integer discountAmount;
     private final Instant createdAt;
     private final List<OrderItemResponse> items;
     private final String shippingAddress;
@@ -22,6 +23,7 @@ public class OrderResponse {
         this.buyerEmail = order.getUser().getEmail();
         this.status = order.getStatus();
         this.totalPrice = order.getTotalPrice();
+        this.discountAmount = order.getDiscountAmount();
         this.createdAt = order.getCreatedAt();
         this.items = order.getItems().stream().map(OrderItemResponse::new).toList();
         this.shippingAddress = order.getShippingAddress();
@@ -33,6 +35,7 @@ public class OrderResponse {
     public String getBuyerEmail() { return buyerEmail; }
     public String getStatus() { return status; }
     public Integer getTotalPrice() { return totalPrice; }
+    public Integer getDiscountAmount() { return discountAmount; }
     public Instant getCreatedAt() { return createdAt; }
     public List<OrderItemResponse> getItems() { return items; }
     public String getShippingAddress() { return shippingAddress; }

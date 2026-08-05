@@ -1,6 +1,28 @@
+# 💡 V10 마이그레이션(Row Level Security)부터는 두 계정을 분리해서 쓴다.
+# - spring.datasource.* : Hibernate/Hikari가 실제 API 요청을 처리할 때 쓰는, RLS가 적용되는
+#   제한된 런타임 전용 계정(app_runtime). 테이블 소유자가 아니라서 정책이 그대로 적용된다.
+# - spring.flyway.* : 마이그레이션(DDL/GRANT/정책 생성)을 실행하는 기존 소유자 계정.
+#   테이블 소유자는 RLS의 영향을 받지 않으므로 스키마 변경 권한을 그대로 유지해야 한다.
+#
+# 처음 설정할 때 순서:
+#   1) 기존에 쓰던 소유자 계정 정보를 spring.flyway.user/password에 옮겨 적는다.
+#   2) 앱을 한 번 띄워 V10 마이그레이션이 app_runtime 역할을 만들게 한다.
+#   3) DB에 접속해서 직접 비밀번호를 설정한다: ALTER ROLE app_runtime WITH PASSWORD '...';
+#   4) 그 비밀번호를 spring.datasource.password에 넣는다.
 spring.datasource.url=jdbc:postgresql://<host>:5432/postgres
-spring.datasource.username=<username>
-spring.datasource.password=<password>
+spring.datasource.username=app_runtime
+spring.datasource.password=<app_runtime 비밀번호 - 위 3번 단계에서 직접 설정한 값>
+
+spring.flyway.url=jdbc:postgresql://<host>:5432/postgres
+spring.flyway.user=<기존에 쓰던 소유자 계정 username>
+spring.flyway.password=<기존에 쓰던 소유자 계정 password>
 
 # 💡 HS256 서명 키 (최소 256bit/32byte 필요)
 jwt.secret=<random-32byte-hex-string>
+
+# 💡 상품 이미지 업로드용 Supabase Storage 설정.
+# Supabase 대시보드 > Storage에서 <bucket> 이름의 public 버킷을 먼저 만들고,
+# Settings > API의 service_role 키를 <service-role-key>에 넣을 것 (프론트에는 절대 노출하지 않음).
+supabase.storage.url=https://<project-ref>.supabase.co
+supabase.storage.bucket=product-images
+supabase.storage.service-role-key=<service-role-key>
