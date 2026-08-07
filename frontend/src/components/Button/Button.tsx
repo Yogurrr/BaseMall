@@ -1,4 +1,4 @@
-import React, { type ButtonHTMLAttributes, type ReactNode } from 'react';
+import { type ButtonHTMLAttributes, type ReactNode } from 'react';
 import styles from './Button.module.css'; // CSS 모듈 import
 
 // 1. Button 컴포넌트의 Props 타입 정의

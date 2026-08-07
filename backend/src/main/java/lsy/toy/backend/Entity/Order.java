@@ -38,10 +38,30 @@ public class Order {
 
     private Instant createdAt = Instant.now();
 
-    private String shippingAddress;
-
     // 💡 배송 시작 후 관리자가 입력하는 운송장 번호. 그 전까지는 null.
     private String trackingNumber;
+
+    private String recipientName;
+    private String recipientPhone;
+    private String zipCode;
+    private String address;
+    private String addressDetail;
+
+    // 💡 주문자가 입력한 배송 요청사항 (예: "부재 시 연락 부탁드려요"). 없으면 null.
+    private String deliveryRequest;
+
+    // 💡 공동현관 출입방법: 비밀번호/경비실호출/자유출입가능/기타사항 중 하나. OrderService.VALID_ENTRY_METHODS로 검증.
+    private String entryMethod;
+
+    // 💡 entryMethod가 "비밀번호"면 출입 비밀번호, "기타사항"이면 자유 텍스트. 그 외에는 null.
+    private String entryNote;
+
+    // 💡 카카오페이/토스페이먼츠 중 하나. OrderService.VALID_PAYMENT_METHODS로 검증.
+    private String paymentMethod;
+
+    // 💡 이 주문에서 사용/적립된 적립금. totalPrice는 pointsUsed까지 차감된 실제 결제 금액이다.
+    private Integer pointsUsed = 0;
+    private Integer pointsEarned = 0;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<OrderItem> items = new ArrayList<>();
@@ -70,9 +90,39 @@ public class Order {
     public Instant getCreatedAt() { return createdAt; }
     public List<OrderItem> getItems() { return items; }
 
-    public String getShippingAddress() { return shippingAddress; }
-    public void setShippingAddress(String shippingAddress) { this.shippingAddress = shippingAddress; }
-
     public String getTrackingNumber() { return trackingNumber; }
     public void setTrackingNumber(String trackingNumber) { this.trackingNumber = trackingNumber; }
+
+    public String getRecipientName() { return recipientName; }
+    public void setRecipientName(String recipientName) { this.recipientName = recipientName; }
+
+    public String getRecipientPhone() { return recipientPhone; }
+    public void setRecipientPhone(String recipientPhone) { this.recipientPhone = recipientPhone; }
+
+    public String getZipCode() { return zipCode; }
+    public void setZipCode(String zipCode) { this.zipCode = zipCode; }
+
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
+
+    public String getAddressDetail() { return addressDetail; }
+    public void setAddressDetail(String addressDetail) { this.addressDetail = addressDetail; }
+
+    public String getDeliveryRequest() { return deliveryRequest; }
+    public void setDeliveryRequest(String deliveryRequest) { this.deliveryRequest = deliveryRequest; }
+
+    public String getEntryMethod() { return entryMethod; }
+    public void setEntryMethod(String entryMethod) { this.entryMethod = entryMethod; }
+
+    public String getEntryNote() { return entryNote; }
+    public void setEntryNote(String entryNote) { this.entryNote = entryNote; }
+
+    public String getPaymentMethod() { return paymentMethod; }
+    public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
+
+    public Integer getPointsUsed() { return pointsUsed; }
+    public void setPointsUsed(Integer pointsUsed) { this.pointsUsed = pointsUsed; }
+
+    public Integer getPointsEarned() { return pointsEarned; }
+    public void setPointsEarned(Integer pointsEarned) { this.pointsEarned = pointsEarned; }
 }

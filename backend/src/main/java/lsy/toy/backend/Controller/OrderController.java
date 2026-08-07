@@ -29,7 +29,7 @@ public class OrderController {
     // 1. 장바구니 기반 주문 생성 (결제하기, POST, JWT 필요)
     @PostMapping
     public OrderResponse createOrder(Authentication authentication, @RequestBody CreateOrderRequest request) {
-        return orderService.createOrderFromCart(authentication.getName(), request.getAddress(), request.getCouponId());
+        return orderService.createOrderFromCart(authentication.getName(), request);
     }
 
     // 2. 전체 주문 목록 조회 (관리자 주문 관리 화면, GET)
@@ -42,6 +42,12 @@ public class OrderController {
     @GetMapping("/me")
     public List<OrderResponse> getMyOrders(Authentication authentication) {
         return orderService.getMyOrders(authentication.getName());
+    }
+
+    // 2-1-1. 특정 회원의 주문 목록 조회 (관리자 회원 상세 화면, GET)
+    @GetMapping("/user/{userId}")
+    public List<OrderResponse> getOrdersByUser(@PathVariable Long userId) {
+        return orderService.getOrdersByUserId(userId);
     }
 
     // 2-2. 매출 통계 - 일/월/연 매출 및 월별 추이 (관리자 매출 페이지, GET)

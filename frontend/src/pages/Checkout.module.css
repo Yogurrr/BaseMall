@@ -7,7 +7,7 @@
 
 .content {
   flex: 1;
-  max-width: 54rem;
+  max-width: 62rem;
   width: 100%;
   margin: 0 auto;
   padding: 1.2rem 1.2rem 3.6rem;
@@ -16,7 +16,7 @@
 
 .layout {
   display: grid;
-  grid-template-columns: 1fr 16rem;
+  grid-template-columns: 1fr 18rem;
   gap: 2rem;
   align-items: start;
 }
@@ -27,9 +27,22 @@
   }
 }
 
+.itemsSection {
+  margin-bottom: 1.6rem;
+}
+
+.sectionTitle {
+  font-size: 1.1rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 0.1rem solid var(--text-h);
+}
+
 .items {
   display: flex;
   flex-direction: column;
+  border: 0.05rem solid var(--border);
+  border-radius: 0.4rem;
+  padding: 0 0.8rem;
 }
 
 .empty {

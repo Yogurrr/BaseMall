@@ -47,11 +47,11 @@ const DAY_OPTIONS = Array.from({ length: 31 }, (_, i) => i + 1);
 
 export const OrderHistoryPanel = ({ orders }: OrderHistoryPanelProps) => {
   const [activePreset, setActivePreset] = useState<Preset | null>('1');
-  const [fromDate, setFromDate] = useState<DateParts>(() => toParts(monthsAgo(today, 1)));
-  const [toDate, setToDate] = useState<DateParts>(() => toParts(today));
+  const [fromDate, setFromDate] = useState<DateParts>(() => toParts(monthsAgo(new Date(), 1)));
+  const [toDate, setToDate] = useState<DateParts>(() => toParts(new Date()));
   const [appliedRange, setAppliedRange] = useState(() => ({
-    from: monthsAgo(today, 1),
-    to: today,
+    from: monthsAgo(new Date(), 1),
+    to: new Date(),
   }));
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const queryClient = useQueryClient();
@@ -70,11 +70,12 @@ export const OrderHistoryPanel = ({ orders }: OrderHistoryPanelProps) => {
 
   const handlePreset = (preset: Preset, months: number) => {
     setActivePreset(preset);
-    const from = monthsAgo(today, months);
-    const to = new Date(today);
+    const now = new Date();
+    const from = monthsAgo(now, months);
+    const to = new Date(now);
     to.setHours(23, 59, 59, 999);
     setFromDate(toParts(from));
-    setToDate(toParts(today));
+    setToDate(toParts(now));
     setAppliedRange({ from, to });
   };
 

@@ -109,7 +109,7 @@ public class AuthService {
         String favoriteTeamName = user.getFavoriteTeam() != null ? user.getFavoriteTeam().getName() : null;
         // 💡 ADMIN은 고객이 아니라 운영자라 구매 등급 개념이 없으므로 null로 둔다.
         String grade = "ADMIN".equals(user.getRole()) ? null : userService.getMemberGrade(user.getId());
-        return new UserInfoResponse(user.getId(), user.getName(), user.getEmail(), user.getRole(), favoriteTeamName, grade);
+        return new UserInfoResponse(user.getId(), user.getName(), user.getEmail(), user.getRole(), favoriteTeamName, grade, user.getPoints());
     }
 
     // 💡 회원 탈퇴. 비밀번호 재확인 후 장바구니를 먼저 비우고, 계정은 실제로 지우지 않고

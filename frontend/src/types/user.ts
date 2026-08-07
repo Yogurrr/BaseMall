@@ -13,12 +13,26 @@ export interface UserInfo {
   role: 'USER' | 'ADMIN';
   favoriteTeam?: string;
   grade?: string | null;
+  points: number;
 }
 
 export interface User {
   id?: number;
   name: string;
   email: string;
+}
+
+export interface UserDetail {
+  id: number;
+  name: string;
+  email: string;
+  role: 'USER' | 'ADMIN';
+  favoriteTeam: string | null;
+  grade: string | null;
+  points: number;
+  createdAt: string;
+  useAt: 'Y' | 'N';
+  withdrawnAt: string | null;
 }
 
 export interface MemberGradeCount {

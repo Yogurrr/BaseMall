@@ -75,6 +75,9 @@ public class SecurityConfig {
                 // 로그인만 하면 누구나 호출 가능했던 걸 막아, 다른 회원의 이름/이메일/배송지가 새는 것을 방지한다.
                 .requestMatchers(HttpMethod.POST, "/api/orders").authenticated()
                 .requestMatchers(HttpMethod.GET, "/api/orders/me").authenticated()
+                // 💡 카카오페이/토스페이먼츠 결제 준비/승인은 로그인한 본인만 호출 가능해야 한다 (서비스 계층에서 소유권도 다시 검증).
+                .requestMatchers(HttpMethod.POST, "/api/payments/kakao/**").authenticated()
+                .requestMatchers(HttpMethod.POST, "/api/payments/toss/**").authenticated()
                 // 💡 내 쿠폰 조회는 로그인만 하면 되지만, 등급별 일괄 발급은 관리자 전용 기능이다.
                 .requestMatchers(HttpMethod.GET, "/api/coupons/me").authenticated()
                 .requestMatchers(HttpMethod.POST, "/api/coupons/issue").hasAuthority("ADMIN")
@@ -84,8 +87,11 @@ public class SecurityConfig {
                 // anyRequest().authenticated()에 걸려 로그인만 하면 누구나 호출 가능했던 걸 막는다.
                 // (RLS도 동일 의도로 본인/관리자만 보이게 막지만, 그건 비관리자에게 텅 빈/자기
                 // 결과만 조용히 돌려주므로, 여기서 먼저 명확한 403으로 막는 게 API 사용자에게 더 낫다)
-                .requestMatchers(HttpMethod.GET, "/api/users", "/api/users/stats").hasAuthority("ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/users", "/api/users/stats", "/api/users/*").hasAuthority("ADMIN")
                 .requestMatchers(HttpMethod.GET, "/api/orders/count-stats").hasAuthority("ADMIN")
+                // 💡 특정 회원의 주문 내역 조회(회원 상세 화면)도 관리자 전용. 이게 없으면
+                // anyRequest().authenticated()에 걸려 로그인한 누구나 다른 회원의 주문을 볼 수 있게 된다.
+                .requestMatchers(HttpMethod.GET, "/api/orders/user/*").hasAuthority("ADMIN")
                 // 💡 본인 주문 취소는 로그인한 고객이면 누구나 호출 가능해야 하니, 더 구체적인 이 규칙을
                 // 아래의 관리자 전용 PATCH 규칙보다 먼저 선언한다(서비스 계층에서 소유권/상태를 다시 검증).
                 .requestMatchers(HttpMethod.PATCH, "/api/orders/*/cancel").authenticated()

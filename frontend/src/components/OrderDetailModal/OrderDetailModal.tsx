@@ -59,8 +59,28 @@ export const OrderDetailModal = ({ order, onClose, readOnly = false }: OrderDeta
           <dd>{order.buyerName}</dd>
           <dt>이메일</dt>
           <dd>{order.buyerEmail}</dd>
+          <dt>받는분</dt>
+          <dd>{order.recipientName ?? '-'} {order.recipientPhone && `(${order.recipientPhone})`}</dd>
           <dt>배송지</dt>
-          <dd>{order.shippingAddress ?? '-'}</dd>
+          <dd>
+            {order.zipCode && `(${order.zipCode}) `}
+            {order.address ?? '-'} {order.addressDetail}
+          </dd>
+          <dt>배송 요청사항</dt>
+          <dd>{order.deliveryRequest ?? '-'}</dd>
+          <dt>공동현관</dt>
+          <dd>
+            {order.entryMethod ?? '-'}
+            {order.entryNote && ` (${order.entryNote})`}
+          </dd>
+          <dt>결제수단</dt>
+          <dd>{order.paymentMethod ?? '-'}</dd>
+          {(order.pointsUsed ?? 0) > 0 && (
+            <>
+              <dt>적립금 사용</dt>
+              <dd>{formatPrice(order.pointsUsed ?? 0)}</dd>
+            </>
+          )}
         </dl>
 
         {readOnly ? (

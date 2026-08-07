@@ -1,6 +1,7 @@
 package lsy.toy.backend.Controller;
 
 import lsy.toy.backend.Dto.MemberStatsResponse;
+import lsy.toy.backend.Dto.UserDetailResponse;
 import lsy.toy.backend.Entity.User;
 import lsy.toy.backend.Service.UserService;
 import org.springframework.web.bind.annotation.*;
@@ -32,5 +33,11 @@ public class UserController {
     @GetMapping("/stats")
     public MemberStatsResponse getStats() {
         return userService.getStats();
+    }
+
+    // 3. 회원 상세 조회 (관리자 회원 관리 페이지, GET, JWT 필요)
+    @GetMapping("/{id}")
+    public UserDetailResponse getUser(@PathVariable Long id) {
+        return userService.getUserDetail(id);
     }
 }

@@ -17,8 +17,18 @@ export interface Order {
   discountAmount: number;
   createdAt: string;
   items: OrderItem[];
-  shippingAddress?: string;
   trackingNumber?: string;
+  recipientName?: string;
+  recipientPhone?: string;
+  zipCode?: string;
+  address?: string;
+  addressDetail?: string;
+  deliveryRequest?: string;
+  entryMethod?: string;
+  entryNote?: string;
+  paymentMethod?: string;
+  pointsUsed?: number;
+  pointsEarned?: number;
 }
 
 export interface MonthlyRevenuePoint {

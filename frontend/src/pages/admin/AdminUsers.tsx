@@ -3,6 +3,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { Button } from '../../components/Button/Button';
 import { Spinner } from '../../components/Spinner/Spinner';
 import { Pagination } from '../../components/Pagination/Pagination';
+import { UserDetailModal } from '../../components/UserDetailModal/UserDetailModal';
 import { fetchUsers } from '../../api/userApi';
 import { register } from '../../api/authApi';
 import type { User } from '../../types/user';
@@ -20,6 +21,7 @@ export const AdminUsers = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
 
   const mutation = useMutation({
     // 💡 register()는 발급된 토큰을 함께 반환하지만, 여기서는 관리자가
@@ -109,7 +111,11 @@ export const AdminUsers = () => {
             </thead>
             <tbody>
               {pagedUsers.map((user) => (
-                <tr key={user.id}>
+                <tr
+                  key={user.id}
+                  className={styles.clickableRow}
+                  onClick={() => user.id !== undefined && setSelectedUserId(user.id)}
+                >
                   <td>{user.id}</td>
                   <td>{user.name}</td>
                   <td>{user.email}</td>
@@ -122,6 +128,10 @@ export const AdminUsers = () => {
 
       {!isLoading && !isError && allUsers.length > 0 && (
         <Pagination page={page} totalPages={totalPages} onChange={setPage} />
+      )}
+
+      {selectedUserId !== null && (
+        <UserDetailModal userId={selectedUserId} onClose={() => setSelectedUserId(null)} />
       )}
     </>
   );

@@ -46,6 +46,10 @@ public class User {
     // 💡 탈퇴 시각. 탈퇴 전에는 null, "이번 달 탈퇴 회원" 같은 기간 집계에 쓴다.
     private Instant withdrawnAt;
 
+    // 💡 적립금 잔액. 주문 시 사용해 결제금액을 차감하고, 결제 완료 시 결제금액의 1%가 적립된다.
+    @Column(nullable = false)
+    private Integer points = 0;
+
     protected User() {
         // JPA
     }
@@ -74,6 +78,9 @@ public class User {
     public String getUseAt() { return useAt; }
 
     public Instant getWithdrawnAt() { return withdrawnAt; }
+
+    public Integer getPoints() { return points; }
+    public void setPoints(Integer points) { this.points = points; }
 
     // 💡 실제로 행을 지우지 않고 use_at을 'N'으로 바꾸는 소프트 삭제 (Product.deleteProduct와 동일한 패턴).
     public void withdraw() {

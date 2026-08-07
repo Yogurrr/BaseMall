@@ -1,0 +1,70 @@
+.section {
+  text-align: left;
+  margin-bottom: 1.6rem;
+}
+
+.sectionTitle {
+  font-size: 1.1rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 0.1rem solid var(--text-h);
+}
+
+.table {
+  border: 0.05rem solid var(--border);
+  border-radius: 0.4rem;
+  overflow: hidden;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 6.5rem 1fr;
+}
+
+.label {
+  background: var(--code-bg);
+  padding: 0.7rem 0.8rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-h);
+  display: flex;
+  align-items: center;
+}
+
+.value {
+  padding: 0.7rem 0.8rem;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.value input,
+.value select {
+  font: inherit;
+  font-size: 0.8rem;
+  padding: 0.5rem 0.6rem;
+  border-radius: 0.3rem;
+  border: 0.05rem solid var(--border);
+  background: var(--bg);
+  color: var(--text-h);
+}
+
+.value input[type='number'] {
+  width: 8rem;
+}
+
+.discountAmount {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.balance {
+  font-size: 0.75rem;
+  color: var(--text);
+}
+
+.muted {
+  font-size: 0.8rem;
+  color: var(--text);
+}

@@ -26,3 +26,12 @@ jwt.secret=<random-32byte-hex-string>
 supabase.storage.url=https://<project-ref>.supabase.co
 supabase.storage.bucket=product-images
 supabase.storage.service-role-key=<service-role-key>
+
+# 💡 카카오페이 테스트 결제 연동. developers.kakao.com 콘솔 > 내 애플리케이션 > 카카오페이 탭에서
+# 발급되는 시크릿 키(대문자+숫자 40자). 일반 "앱 키" 탭의 Admin key와는 다른 별도 키라 주의할 것.
+# 사업자 등록 없이도 카카오가 제공하는 테스트 CID(TC0ONETIME, application.properties에 설정됨)로 결제 테스트가 가능하다.
+kakaopay.secret-key=<카카오페이 탭에서 발급받은 시크릿 키>
+
+# 💡 토스페이먼츠 테스트 결제 연동. 가입 없이도 토스 공식 문서에 공개된 테스트 시크릿 키로 결제 테스트가 가능하다.
+# 실제 가맹점 계정을 만들면 developers.tosspayments.com 개발자센터 > 내 개발정보에서 발급받는 키로 교체할 것.
+tosspayments.secret-key=test_sk_zXLkKEypNArWmo50nX3lmeaxYG5R

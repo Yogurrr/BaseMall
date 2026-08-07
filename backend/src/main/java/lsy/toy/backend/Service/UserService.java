@@ -2,11 +2,14 @@ package lsy.toy.backend.Service;
 
 import lsy.toy.backend.Dto.MemberGradeCount;
 import lsy.toy.backend.Dto.MemberStatsResponse;
+import lsy.toy.backend.Dto.UserDetailResponse;
 import lsy.toy.backend.Dto.UserSpendRow;
 import lsy.toy.backend.Entity.User;
 import lsy.toy.backend.Repository.OrderRepository;
 import lsy.toy.backend.Repository.UserRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -38,6 +41,21 @@ public class UserService {
 
     public List<User> getUsers() {
         return userRepository.findByUseAt("Y");
+    }
+
+    // 💡 회원 관리 페이지의 상세 보기용. 목록(getUsers)과 달리 탈퇴 회원도 조회할 수 있어야
+    // 관리자가 탈퇴 이력을 확인할 수 있다.
+    public UserDetailResponse getUserDetail(Long id) {
+        User user = userRepository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "회원을 찾을 수 없습니다: " + id));
+
+        String favoriteTeamName = user.getFavoriteTeam() != null ? user.getFavoriteTeam().getName() : null;
+        String grade = "ADMIN".equals(user.getRole()) ? null : getMemberGrade(user.getId());
+
+        return new UserDetailResponse(
+            user.getId(), user.getName(), user.getEmail(), user.getRole(), favoriteTeamName,
+            grade, user.getPoints(), user.getCreatedAt(), user.getUseAt(), user.getWithdrawnAt()
+        );
     }
 
     public MemberStatsResponse getStats() {

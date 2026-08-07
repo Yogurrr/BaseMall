@@ -4,6 +4,10 @@ import { ProductDetail } from './pages/ProductDetail';
 import { Search } from './pages/Search';
 import { Cart } from './pages/Cart';
 import { Checkout } from './pages/Checkout';
+import { KakaoPayApprove } from './pages/KakaoPayApprove';
+import { KakaoPayNotice } from './pages/KakaoPayNotice';
+import { TossPayApprove } from './pages/TossPayApprove';
+import { TossPayNotice } from './pages/TossPayNotice';
 import { MyPageLayout } from './pages/mypage/MyPageLayout';
 import { MyPageHome } from './pages/mypage/MyPageHome';
 import { MyPageOrders } from './pages/mypage/MyPageOrders';
@@ -11,6 +15,7 @@ import { MyPageReturns } from './pages/mypage/MyPageReturns';
 import { MyPageWishlist } from './pages/mypage/MyPageWishlist';
 import { MyPageWithdraw } from './pages/mypage/MyPageWithdraw';
 import { MyPageCoupons } from './pages/mypage/MyPageCoupons';
+import { MyPagePoints } from './pages/mypage/MyPagePoints';
 import { MyPagePlaceholder } from './pages/mypage/MyPagePlaceholder';
 import { AdminLayout } from './pages/admin/AdminLayout';
 import { AdminProducts } from './pages/admin/AdminProducts';
@@ -40,6 +45,11 @@ function App() {
             <Route path="/search" element={<Search />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
+            <Route path="/checkout/kakao/approve" element={<KakaoPayApprove />} />
+            <Route path="/checkout/kakao/cancel" element={<KakaoPayNotice status="cancel" />} />
+            <Route path="/checkout/kakao/fail" element={<KakaoPayNotice status="fail" />} />
+            <Route path="/checkout/toss/approve" element={<TossPayApprove />} />
+            <Route path="/checkout/toss/fail" element={<TossPayNotice />} />
             <Route
               path="/mypage"
               element={
@@ -54,6 +64,7 @@ function App() {
               <Route path="wishlist" element={<MyPageWishlist />} />
               <Route path="withdraw" element={<MyPageWithdraw />} />
               <Route path="coupons" element={<MyPageCoupons />} />
+              <Route path="points" element={<MyPagePoints />} />
               <Route path=":section" element={<MyPagePlaceholder />} />
             </Route>
             <Route path="/login" element={<Login />} />

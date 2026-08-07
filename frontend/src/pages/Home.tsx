@@ -4,7 +4,6 @@ import { useQuery } from '@tanstack/react-query';
 import { AnnouncementBar } from '../components/AnnouncementBar/AnnouncementBar';
 import { SiteHeader } from '../components/SiteHeader/SiteHeader';
 import { AdBanner, type AdSlide } from '../components/AdBanner/AdBanner';
-import { PerksBar, type Perk } from '../components/PerksBar/PerksBar';
 import { CategoryTabs } from '../components/CategoryTabs/CategoryTabs';
 import { ProductCard } from '../components/ProductCard/ProductCard';
 import { Pagination } from '../components/Pagination/Pagination';
@@ -25,12 +24,6 @@ const SORT_OPTIONS: SortOption[] = [
   { value: 'newest', label: '최신순' },
   { value: 'priceAsc', label: '낮은가격순' },
   { value: 'priceDesc', label: '높은가격순' },
-];
-
-const PERKS: Perk[] = [
-  { icon: '🚚', title: '무료배송', description: '5만원 이상 구매 시' },
-  { icon: '⚡', title: '당일출고', description: '오후 2시 이전 주문 건' },
-  { icon: '💳', title: '무이자할부', description: '카드사 최대 6개월' },
 ];
 
 export const Home = () => {

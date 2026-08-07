@@ -14,8 +14,18 @@ public class OrderResponse {
     private final Integer discountAmount;
     private final Instant createdAt;
     private final List<OrderItemResponse> items;
-    private final String shippingAddress;
     private final String trackingNumber;
+    private final String recipientName;
+    private final String recipientPhone;
+    private final String zipCode;
+    private final String address;
+    private final String addressDetail;
+    private final String deliveryRequest;
+    private final String entryMethod;
+    private final String entryNote;
+    private final String paymentMethod;
+    private final Integer pointsUsed;
+    private final Integer pointsEarned;
 
     public OrderResponse(Order order) {
         this.id = order.getId();
@@ -26,8 +36,18 @@ public class OrderResponse {
         this.discountAmount = order.getDiscountAmount();
         this.createdAt = order.getCreatedAt();
         this.items = order.getItems().stream().map(OrderItemResponse::new).toList();
-        this.shippingAddress = order.getShippingAddress();
         this.trackingNumber = order.getTrackingNumber();
+        this.recipientName = order.getRecipientName();
+        this.recipientPhone = order.getRecipientPhone();
+        this.zipCode = order.getZipCode();
+        this.address = order.getAddress();
+        this.addressDetail = order.getAddressDetail();
+        this.deliveryRequest = order.getDeliveryRequest();
+        this.entryMethod = order.getEntryMethod();
+        this.entryNote = order.getEntryNote();
+        this.paymentMethod = order.getPaymentMethod();
+        this.pointsUsed = order.getPointsUsed();
+        this.pointsEarned = order.getPointsEarned();
     }
 
     public Long getId() { return id; }
@@ -38,6 +58,16 @@ public class OrderResponse {
     public Integer getDiscountAmount() { return discountAmount; }
     public Instant getCreatedAt() { return createdAt; }
     public List<OrderItemResponse> getItems() { return items; }
-    public String getShippingAddress() { return shippingAddress; }
     public String getTrackingNumber() { return trackingNumber; }
+    public String getRecipientName() { return recipientName; }
+    public String getRecipientPhone() { return recipientPhone; }
+    public String getZipCode() { return zipCode; }
+    public String getAddress() { return address; }
+    public String getAddressDetail() { return addressDetail; }
+    public String getDeliveryRequest() { return deliveryRequest; }
+    public String getEntryMethod() { return entryMethod; }
+    public String getEntryNote() { return entryNote; }
+    public String getPaymentMethod() { return paymentMethod; }
+    public Integer getPointsUsed() { return pointsUsed; }
+    public Integer getPointsEarned() { return pointsEarned; }
 }
