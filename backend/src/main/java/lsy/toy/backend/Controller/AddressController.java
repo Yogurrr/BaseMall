@@ -3,6 +3,8 @@ package lsy.toy.backend.Controller;
 import lsy.toy.backend.Dto.AddressRequest;
 import lsy.toy.backend.Dto.AddressResponse;
 import lsy.toy.backend.Service.AddressService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,8 +29,9 @@ public class AddressController {
 
     // 2. 배송지 저장 (주문/결제 화면의 "배송지 저장" 체크박스, POST)
     @PostMapping
-    public AddressResponse createAddress(Authentication authentication, @RequestBody AddressRequest request) {
-        return addressService.createAddress(authentication.getName(), request);
+    public ResponseEntity<AddressResponse> createAddress(Authentication authentication, @RequestBody AddressRequest request) {
+        AddressResponse created = addressService.createAddress(authentication.getName(), request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     // 3. 저장된 배송지 삭제 (DELETE)

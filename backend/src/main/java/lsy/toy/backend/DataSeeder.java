@@ -184,19 +184,19 @@ public class DataSeeder implements CommandLineRunner {
         if (orderRepository.count() == 0) {
             userRepository.findByEmail("lee@example.com").ifPresent(lee -> {
                 Order order1 = new Order(lee, 89000 + 12000 * 2);
-                order1.addItem(new OrderItem("두산 베어스 홈 유니폼", "유니폼", null, 89000, 1, null, null, "두산 베어스"));
-                order1.addItem(new OrderItem("SSG 랜더스 응원 타월", "응원용품", null, 12000, 2, null, null, "SSG 랜더스"));
+                order1.addItem(new OrderItem(null, "두산 베어스 홈 유니폼", "유니폼", null, 89000, 1, null, null, "두산 베어스"));
+                order1.addItem(new OrderItem(null, "SSG 랜더스 응원 타월", "응원용품", null, 12000, 2, null, null, "SSG 랜더스"));
                 order1.setStatus("배송완료");
                 orderRepository.save(order1);
             });
             userRepository.findByEmail("park@example.com").ifPresent(park -> {
                 Order order2 = new Order(park, 35000);
-                order2.addItem(new OrderItem("LG 트윈스 볼캡", "모자", null, 35000, 1, null, null, "LG 트윈스"));
+                order2.addItem(new OrderItem(null, "LG 트윈스 볼캡", "모자", null, 35000, 1, null, null, "LG 트윈스"));
                 order2.setStatus("배송중");
                 orderRepository.save(order2);
 
                 Order order3 = new Order(park, 9900 * 3);
-                order3.addItem(new OrderItem("키움 히어로즈 미니배트 키링", "잡화", null, 9900, 3, null, null, "키움 히어로즈"));
+                order3.addItem(new OrderItem(null, "키움 히어로즈 미니배트 키링", "잡화", null, 9900, 3, null, null, "키움 히어로즈"));
                 order3.setStatus("결제완료");
                 orderRepository.save(order3);
             });

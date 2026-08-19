@@ -1,0 +1,194 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  padding: 4rem 0;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.count {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-h);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  border: 0.05rem solid var(--border);
+  border-radius: 0.8rem;
+  padding: 1.2rem;
+}
+
+.formRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.form input,
+.form select {
+  font: inherit;
+  font-size: 0.8rem;
+  padding: 0.5rem 0.6rem;
+  border-radius: 0.3rem;
+  border: 0.05rem solid var(--border);
+  background: var(--bg);
+  color: var(--text-h);
+}
+
+.form input[readonly] {
+  background: var(--code-bg);
+}
+
+.labelInput {
+  width: 12rem;
+}
+
+.phonePart {
+  width: 4.5rem;
+  height: 2.2rem;
+  box-sizing: border-box;
+}
+
+.phonePrefix {
+  width: 4.5rem;
+  height: 2.2rem;
+  box-sizing: border-box;
+}
+
+.zipInput {
+  width: 6rem;
+  flex-shrink: 0;
+}
+
+.addressInput {
+  width: 100%;
+}
+
+.checkboxRow {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: var(--text);
+}
+
+.formError {
+  margin: 0;
+  font-size: 0.75rem;
+  color: #dc2626;
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.4rem;
+  margin-top: 0.2rem;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border: 0.05rem solid var(--border);
+  border-radius: 0.8rem;
+  padding: 1rem 1.2rem;
+}
+
+.info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.recipient {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-h);
+}
+
+.labelBadge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text);
+  border: 0.05rem solid var(--border);
+  border-radius: 0.4rem;
+  padding: 0.15rem 0.4rem;
+  white-space: nowrap;
+}
+
+.defaultBadge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #dc2626;
+  border: 0.05rem solid #dc2626;
+  border-radius: 0.4rem;
+  padding: 0.15rem 0.4rem;
+  white-space: nowrap;
+}
+
+.phone {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text);
+}
+
+.address {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text);
+}
+
+.cardActions {
+  display: flex;
+  flex-shrink: 0;
+  gap: 0.4rem;
+}
+
+.empty {
+  padding: 2rem 0;
+}
+
+@media (max-width: 560px) {
+  .card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .cardActions {
+    width: 100%;
+  }
+}

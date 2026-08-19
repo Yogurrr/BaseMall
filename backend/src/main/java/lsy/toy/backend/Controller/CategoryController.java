@@ -3,6 +3,8 @@ package lsy.toy.backend.Controller;
 import lsy.toy.backend.Dto.CategoryRequest;
 import lsy.toy.backend.Entity.Category;
 import lsy.toy.backend.Service.CategoryService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -34,8 +36,9 @@ public class CategoryController {
 
     // 3. 카테고리 등록 (POST, 관리자 전용)
     @PostMapping
-    public Category createCategory(@RequestBody CategoryRequest request) {
-        return categoryService.createCategory(request.getName());
+    public ResponseEntity<Category> createCategory(@RequestBody CategoryRequest request) {
+        Category created = categoryService.createCategory(request.getName());
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     // 4. 카테고리 수정 (PUT, 관리자 전용)
@@ -46,7 +49,8 @@ public class CategoryController {
 
     // 5. 카테고리 삭제 (DELETE, 관리자 전용)
     @DeleteMapping("/{id}")
-    public void deleteCategory(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
         categoryService.deleteCategory(id);
+        return ResponseEntity.noContent().build();
     }
 }

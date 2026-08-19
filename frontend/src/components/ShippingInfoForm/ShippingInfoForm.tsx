@@ -128,7 +128,11 @@ export const ShippingInfoForm = ({
         <div className={styles.row}>
           <div className={styles.label}>연락처</div>
           <div className={styles.value}>
-            <select value={phonePrefix} onChange={(e) => onPhonePrefixChange(e.target.value)}>
+            <select
+              className={styles.phonePrefix}
+              value={phonePrefix}
+              onChange={(e) => onPhonePrefixChange(e.target.value)}
+            >
               {PHONE_PREFIXES.map((prefix) => (
                 <option key={prefix} value={prefix}>
                   {prefix}

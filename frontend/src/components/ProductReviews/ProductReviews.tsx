@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import axios from 'axios';
 import { useCurrentUser } from '../../hooks/useCurrentUser';
 import { isLoggedIn } from '../../api/authToken';
 import { createReview, deleteReview, fetchReviews, updateReview } from '../../api/reviewApi';
@@ -67,7 +68,13 @@ export const ProductReviews = ({ productId }: ProductReviewsProps) => {
             />
           )}
 
-          {createMutation.isError && <p className={styles.error}>리뷰 등록에 실패했습니다.</p>}
+          {createMutation.isError && (
+            <p className={styles.error}>
+              {axios.isAxiosError(createMutation.error) && createMutation.error.response?.data?.message
+                ? createMutation.error.response.data.message
+                : '리뷰 등록에 실패했습니다.'}
+            </p>
+          )}
 
           <ReviewList
             reviews={reviews}

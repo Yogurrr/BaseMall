@@ -3,6 +3,8 @@ package lsy.toy.backend.Controller;
 import lsy.toy.backend.Dto.ReviewRequest;
 import lsy.toy.backend.Dto.ReviewResponse;
 import lsy.toy.backend.Service.ReviewService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,12 +29,13 @@ public class ReviewController {
 
     // 2. 리뷰 작성 (POST, JWT 필요, 상품당 1인 1리뷰)
     @PostMapping
-    public ReviewResponse createReview(
+    public ResponseEntity<ReviewResponse> createReview(
         @PathVariable Long productId,
         Authentication authentication,
         @RequestBody ReviewRequest request
     ) {
-        return reviewService.createReview(productId, authentication.getName(), request.getRating(), request.getContent());
+        ReviewResponse created = reviewService.createReview(productId, authentication.getName(), request.getRating(), request.getContent());
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     // 3. 내 리뷰 수정 (PUT, JWT 필요, 작성자 본인만)
@@ -48,7 +51,7 @@ public class ReviewController {
 
     // 4. 리뷰 삭제 (DELETE, JWT 필요, 작성자 본인 또는 관리자)
     @DeleteMapping("/{reviewId}")
-    public void deleteReview(
+    public ResponseEntity<Void> deleteReview(
         @PathVariable Long productId,
         @PathVariable Long reviewId,
         Authentication authentication
@@ -56,5 +59,6 @@ public class ReviewController {
         boolean isAdmin = authentication.getAuthorities().stream()
             .anyMatch(authority -> authority.getAuthority().equals("ADMIN"));
         reviewService.deleteReview(productId, reviewId, authentication.getName(), isAdmin);
+        return ResponseEntity.noContent().build();
     }
 }

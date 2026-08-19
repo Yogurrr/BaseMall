@@ -5,6 +5,8 @@ import lsy.toy.backend.Dto.KakaoApproveRequest;
 import lsy.toy.backend.Dto.KakaoReadyResponse;
 import lsy.toy.backend.Dto.OrderResponse;
 import lsy.toy.backend.Service.KakaoPayService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,7 +29,8 @@ public class PaymentController {
 
     // 2. 카카오페이 결제 승인 - 결제창에서 돌아온 뒤 승인 처리하고 실제 주문을 생성한다 (POST, JWT 필요)
     @PostMapping("/approve")
-    public OrderResponse approve(Authentication authentication, @RequestBody KakaoApproveRequest request) {
-        return kakaoPayService.approve(authentication.getName(), request.getOrderId(), request.getPgToken());
+    public ResponseEntity<OrderResponse> approve(Authentication authentication, @RequestBody KakaoApproveRequest request) {
+        OrderResponse created = kakaoPayService.approve(authentication.getName(), request.getOrderId(), request.getPgToken());
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 }

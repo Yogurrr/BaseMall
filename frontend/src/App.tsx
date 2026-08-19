@@ -13,9 +13,11 @@ import { MyPageHome } from './pages/mypage/MyPageHome';
 import { MyPageOrders } from './pages/mypage/MyPageOrders';
 import { MyPageReturns } from './pages/mypage/MyPageReturns';
 import { MyPageWishlist } from './pages/mypage/MyPageWishlist';
+import { MyPageReviews } from './pages/mypage/MyPageReviews';
 import { MyPageWithdraw } from './pages/mypage/MyPageWithdraw';
 import { MyPageCoupons } from './pages/mypage/MyPageCoupons';
 import { MyPagePoints } from './pages/mypage/MyPagePoints';
+import { MyPageAddresses } from './pages/mypage/MyPageAddresses';
 import { MyPagePlaceholder } from './pages/mypage/MyPagePlaceholder';
 import { AdminLayout } from './pages/admin/AdminLayout';
 import { AdminProducts } from './pages/admin/AdminProducts';
@@ -62,9 +64,11 @@ function App() {
               <Route path="orders" element={<MyPageOrders />} />
               <Route path="returns" element={<MyPageReturns />} />
               <Route path="wishlist" element={<MyPageWishlist />} />
+              <Route path="reviews" element={<MyPageReviews />} />
               <Route path="withdraw" element={<MyPageWithdraw />} />
               <Route path="coupons" element={<MyPageCoupons />} />
               <Route path="points" element={<MyPagePoints />} />
+              <Route path="refund-account" element={<MyPageAddresses />} />
               <Route path=":section" element={<MyPagePlaceholder />} />
             </Route>
             <Route path="/login" element={<Login />} />

@@ -9,6 +9,8 @@ import lsy.toy.backend.Dto.UpdateOrderStatusRequest;
 import lsy.toy.backend.Dto.UpdateTrackingNumberRequest;
 import lsy.toy.backend.Service.OrderService;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,8 +30,9 @@ public class OrderController {
 
     // 1. 장바구니 기반 주문 생성 (결제하기, POST, JWT 필요)
     @PostMapping
-    public OrderResponse createOrder(Authentication authentication, @RequestBody CreateOrderRequest request) {
-        return orderService.createOrderFromCart(authentication.getName(), request);
+    public ResponseEntity<OrderResponse> createOrder(Authentication authentication, @RequestBody CreateOrderRequest request) {
+        OrderResponse created = orderService.createOrderFromCart(authentication.getName(), request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     // 2. 전체 주문 목록 조회 (관리자 주문 관리 화면, GET)
@@ -44,11 +47,7 @@ public class OrderController {
         return orderService.getMyOrders(authentication.getName());
     }
 
-    // 2-1-1. 특정 회원의 주문 목록 조회 (관리자 회원 상세 화면, GET)
-    @GetMapping("/user/{userId}")
-    public List<OrderResponse> getOrdersByUser(@PathVariable Long userId) {
-        return orderService.getOrdersByUserId(userId);
-    }
+    // 💡 특정 회원의 주문 목록 조회는 리소스 계층상 GET /api/users/{userId}/orders (UserController)로 이동
 
     // 2-2. 매출 통계 - 일/월/연 매출 및 월별 추이 (관리자 매출 페이지, GET)
     @GetMapping("/sales")

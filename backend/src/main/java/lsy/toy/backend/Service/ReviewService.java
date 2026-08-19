@@ -1,9 +1,13 @@
 package lsy.toy.backend.Service;
 
+import lsy.toy.backend.Dto.MyReviewResponse;
 import lsy.toy.backend.Dto.ReviewResponse;
+import lsy.toy.backend.Dto.ReviewableItemResponse;
+import lsy.toy.backend.Entity.OrderItem;
 import lsy.toy.backend.Entity.Product;
 import lsy.toy.backend.Entity.Review;
 import lsy.toy.backend.Entity.User;
+import lsy.toy.backend.Repository.OrderItemRepository;
 import lsy.toy.backend.Repository.ProductRepository;
 import lsy.toy.backend.Repository.ReviewRepository;
 import lsy.toy.backend.Repository.UserRepository;
@@ -12,7 +16,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class ReviewService {
@@ -20,20 +26,46 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
+    private final OrderItemRepository orderItemRepository;
 
     public ReviewService(
         ReviewRepository reviewRepository,
         ProductRepository productRepository,
-        UserRepository userRepository
+        UserRepository userRepository,
+        OrderItemRepository orderItemRepository
     ) {
         this.reviewRepository = reviewRepository;
         this.productRepository = productRepository;
         this.userRepository = userRepository;
+        this.orderItemRepository = orderItemRepository;
     }
 
     public List<ReviewResponse> getReviews(Long productId) {
         return reviewRepository.findByProduct_IdOrderByCreatedAtDesc(productId).stream()
             .map(ReviewResponse::new)
+            .toList();
+    }
+
+    public List<MyReviewResponse> getMyReviews(String email) {
+        User user = findUser(email);
+        return reviewRepository.findByUser_IdOrderByCreatedAtDesc(user.getId()).stream()
+            .map(MyReviewResponse::new)
+            .toList();
+    }
+
+    // 💡 구매했지만 아직 리뷰를 쓰지 않은 상품 목록. 같은 상품을 여러 번 샀을 수 있어
+    // 최신 주문 항목 하나만 남기고 상품 기준으로 중복 제거한다(쿼리가 이미 최신순 정렬).
+    public List<ReviewableItemResponse> getReviewableItems(String email) {
+        User user = findUser(email);
+        List<OrderItem> items = orderItemRepository.findReviewableItemsByUserId(user.getId());
+
+        Map<Long, OrderItem> latestByProduct = new LinkedHashMap<>();
+        for (OrderItem item : items) {
+            latestByProduct.putIfAbsent(item.getProductId(), item);
+        }
+
+        return latestByProduct.values().stream()
+            .map(ReviewableItemResponse::new)
             .toList();
     }
 
@@ -44,6 +76,10 @@ public class ReviewService {
 
         Product product = findProduct(productId);
         User user = findUser(email);
+
+        if (!orderItemRepository.existsByProductIdAndOrder_User_IdAndOrder_StatusNot(productId, user.getId(), "주문취소")) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "구매한 상품만 리뷰를 작성할 수 있습니다.");
+        }
 
         if (reviewRepository.findByProduct_IdAndUser_Id(productId, user.getId()).isPresent()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 이 상품에 리뷰를 작성했습니다.");

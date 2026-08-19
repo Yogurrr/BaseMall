@@ -1,5 +1,15 @@
 import { api } from './axiosInstance';
-import type { Review } from '../types/review';
+import type { MyReview, Review, ReviewableItem } from '../types/review';
+
+export const fetchMyReviews = async (): Promise<MyReview[]> => {
+  const response = await api.get<MyReview[]>('/reviews/me');
+  return response.data;
+};
+
+export const fetchReviewableItems = async (): Promise<ReviewableItem[]> => {
+  const response = await api.get<ReviewableItem[]>('/reviews/me/reviewable');
+  return response.data;
+};
 
 export const fetchReviews = async (productId: number): Promise<Review[]> => {
   const response = await api.get<Review[]>(`/products/${productId}/reviews`);

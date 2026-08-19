@@ -4,6 +4,7 @@ import lsy.toy.backend.Dto.AddCartItemRequest;
 import lsy.toy.backend.Dto.CartItemResponse;
 import lsy.toy.backend.Dto.UpdateCartItemRequest;
 import lsy.toy.backend.Service.CartService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -57,7 +58,8 @@ public class CartController {
 
     // 5. 장바구니 비우기 (DELETE, 결제 완료 시 호출)
     @DeleteMapping
-    public void clearCart(Authentication authentication) {
+    public ResponseEntity<Void> clearCart(Authentication authentication) {
         cartService.clearCart(authentication.getName());
+        return ResponseEntity.noContent().build();
     }
 }

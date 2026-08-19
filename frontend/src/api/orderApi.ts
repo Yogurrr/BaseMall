@@ -37,7 +37,7 @@ export const fetchMyOrders = async (): Promise<Order[]> => {
 };
 
 export const fetchOrdersByUserId = async (userId: number): Promise<Order[]> => {
-  const response = await api.get<Order[]>(`/orders/user/${userId}`);
+  const response = await api.get<Order[]>(`/users/${userId}/orders`);
   return response.data;
 };
 

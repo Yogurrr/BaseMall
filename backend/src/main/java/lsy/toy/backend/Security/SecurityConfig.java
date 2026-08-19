@@ -71,6 +71,10 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/products/*/reviews").authenticated()
                 .requestMatchers(HttpMethod.PUT, "/api/products/*/reviews/*").authenticated()
                 .requestMatchers(HttpMethod.DELETE, "/api/products/*/reviews/*").authenticated()
+                // 💡 마이페이지 "내가 쓴 리뷰" 목록은 로그인한 본인만 조회 가능해야 한다.
+                .requestMatchers(HttpMethod.GET, "/api/reviews/me").authenticated()
+                // 💡 마이페이지 "리뷰 쓰러가기" 대상(구매했지만 미작성) 목록도 로그인한 본인만 조회 가능해야 한다.
+                .requestMatchers(HttpMethod.GET, "/api/reviews/me/reviewable").authenticated()
                 // 💡 주문 전체 조회/상태 변경은 관리자 전용 기능(어드민 페이지에서만 사용).
                 // 로그인만 하면 누구나 호출 가능했던 걸 막아, 다른 회원의 이름/이메일/배송지가 새는 것을 방지한다.
                 .requestMatchers(HttpMethod.POST, "/api/orders").authenticated()
@@ -80,7 +84,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/payments/toss/**").authenticated()
                 // 💡 내 쿠폰 조회는 로그인만 하면 되지만, 등급별 일괄 발급은 관리자 전용 기능이다.
                 .requestMatchers(HttpMethod.GET, "/api/coupons/me").authenticated()
-                .requestMatchers(HttpMethod.POST, "/api/coupons/issue").hasAuthority("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/coupons").hasAuthority("ADMIN")
                 .requestMatchers(HttpMethod.GET, "/api/orders/sales/**").hasAuthority("ADMIN")
                 .requestMatchers(HttpMethod.GET, "/api/orders").hasAuthority("ADMIN")
                 // 💡 관리자 전용으로 의도된 회원 목록/통계, 주문 건수 통계 엔드포인트가

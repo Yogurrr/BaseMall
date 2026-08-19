@@ -2,6 +2,8 @@ package lsy.toy.backend.Entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -31,6 +33,20 @@ public class TossPendingPayment {
 
     private Instant createdAt = Instant.now();
 
+    @Enumerated(EnumType.STRING)
+    private PendingPaymentStatus status = PendingPaymentStatus.READY;
+
+    // 💡 PG 취소 API 호출에 필요한 값. confirm 요청이 들어올 때(승인 직전) 채워 넣는다.
+    private String paymentKey;
+
+    // 💡 PG 승인에 성공한 시각. 정합성 배치가 "이 시각 이후로 오래 방치된 APPROVED 건"을 고른다.
+    private Instant approvedAt;
+
+    private int retryCount = 0;
+
+    @Column(columnDefinition = "text")
+    private String lastError;
+
     protected TossPendingPayment() {
         // JPA
     }
@@ -48,4 +64,20 @@ public class TossPendingPayment {
     public int getAmount() { return amount; }
     public String getRequestPayload() { return requestPayload; }
     public Instant getCreatedAt() { return createdAt; }
+    public PendingPaymentStatus getStatus() { return status; }
+    public String getPaymentKey() { return paymentKey; }
+    public Instant getApprovedAt() { return approvedAt; }
+    public int getRetryCount() { return retryCount; }
+    public String getLastError() { return lastError; }
+
+    public void markApproved(String paymentKey) {
+        this.paymentKey = paymentKey;
+        this.status = PendingPaymentStatus.APPROVED;
+        this.approvedAt = Instant.now();
+    }
+
+    public void recordRetryFailure(String error) {
+        this.retryCount++;
+        this.lastError = error;
+    }
 }

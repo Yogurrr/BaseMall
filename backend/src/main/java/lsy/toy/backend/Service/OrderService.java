@@ -113,6 +113,7 @@ public class OrderService {
         order.setPointsEarned(pricing.earnedPoints());
         for (CartItem cartItem : cartItems) {
             order.addItem(new OrderItem(
+                cartItem.getProduct().getId(),
                 cartItem.getProduct().getName(),
                 cartItem.getProduct().getCategoryName(),
                 cartItem.getProduct().getImageUrl(),

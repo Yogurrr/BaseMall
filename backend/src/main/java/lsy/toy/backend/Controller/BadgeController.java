@@ -3,6 +3,8 @@ package lsy.toy.backend.Controller;
 import lsy.toy.backend.Dto.BadgeRequest;
 import lsy.toy.backend.Entity.Badge;
 import lsy.toy.backend.Service.BadgeService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,8 +28,9 @@ public class BadgeController {
 
     // 2. 뱃지 등록 (POST, 관리자 전용)
     @PostMapping
-    public Badge createBadge(@RequestBody BadgeRequest request) {
-        return badgeService.createBadge(request.getName(), request.getColorFrom(), request.getColorTo());
+    public ResponseEntity<Badge> createBadge(@RequestBody BadgeRequest request) {
+        Badge created = badgeService.createBadge(request.getName(), request.getColorFrom(), request.getColorTo());
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     // 3. 뱃지 수정 (PUT, 관리자 전용)
@@ -38,7 +41,8 @@ public class BadgeController {
 
     // 4. 뱃지 삭제 (DELETE, 관리자 전용)
     @DeleteMapping("/{id}")
-    public void deleteBadge(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteBadge(@PathVariable Long id) {
         badgeService.deleteBadge(id);
+        return ResponseEntity.noContent().build();
     }
 }

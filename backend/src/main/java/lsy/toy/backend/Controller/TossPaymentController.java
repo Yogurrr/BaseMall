@@ -5,6 +5,8 @@ import lsy.toy.backend.Dto.OrderResponse;
 import lsy.toy.backend.Dto.TossConfirmRequest;
 import lsy.toy.backend.Dto.TossReadyResponse;
 import lsy.toy.backend.Service.TossPayService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,7 +29,8 @@ public class TossPaymentController {
 
     // 2. 토스페이먼츠 결제 승인 - 결제위젯에서 돌아온 뒤 승인 처리하고 실제 주문을 생성한다 (POST, JWT 필요)
     @PostMapping("/confirm")
-    public OrderResponse confirm(Authentication authentication, @RequestBody TossConfirmRequest request) {
-        return tossPayService.confirm(authentication.getName(), request);
+    public ResponseEntity<OrderResponse> confirm(Authentication authentication, @RequestBody TossConfirmRequest request) {
+        OrderResponse created = tossPayService.confirm(authentication.getName(), request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 }

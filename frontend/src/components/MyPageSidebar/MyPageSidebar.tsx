@@ -20,7 +20,6 @@ export const MYPAGE_MENU: MyPageMenuGroup[] = [
       { key: 'cart', label: '장바구니' },
       { key: 'points', label: '적립금 내역' },
       { key: 'coupons', label: '쿠폰 내역' },
-      { key: 'addresses', label: '배송 주소록 관리' },
     ],
   },
   {
@@ -28,13 +27,14 @@ export const MYPAGE_MENU: MyPageMenuGroup[] = [
     items: [
       { key: 'recent', label: '최근 본 상품' },
       { key: 'wishlist', label: '나의 위시리스트' },
+      { key: 'reviews', label: '내가 쓴 리뷰' },
     ],
   },
   {
     title: '나의 정보',
     items: [
       { key: 'profile-edit', label: '회원 정보 수정' },
-      { key: 'refund-account', label: '배송지/환불계좌 관리' },
+      { key: 'refund-account', label: '배송지 관리' },
       { key: 'withdraw', label: '회원 탈퇴' },
       { key: 'logout', label: '로그아웃' },
     ],

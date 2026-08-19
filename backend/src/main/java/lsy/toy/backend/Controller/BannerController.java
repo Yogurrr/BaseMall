@@ -6,6 +6,8 @@ import lsy.toy.backend.Dto.UpdateBannerActiveRequest;
 import lsy.toy.backend.Entity.Banner;
 import lsy.toy.backend.Service.BannerService;
 import lsy.toy.backend.Service.SupabaseStorageService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -41,12 +43,13 @@ public class BannerController {
 
     // 3. 배너 등록 (POST)
     @PostMapping
-    public Banner createBanner(@RequestBody BannerRequest request) {
-        return bannerService.createBanner(
+    public ResponseEntity<Banner> createBanner(@RequestBody BannerRequest request) {
+        Banner created = bannerService.createBanner(
             request.getEyebrow(), request.getTitle(), request.getDescription(),
             request.getCtaLabel(), request.getGradient(), request.getImageUrl(),
             request.getSortOrder(), request.getActive()
         );
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     // 4. 배너 수정 (PUT)
@@ -67,12 +70,13 @@ public class BannerController {
 
     // 6. 배너 삭제 (DELETE)
     @DeleteMapping("/{id}")
-    public void deleteBanner(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteBanner(@PathVariable Long id) {
         bannerService.deleteBanner(id);
+        return ResponseEntity.noContent().build();
     }
 
     // 7. 배너 이미지 업로드 (POST) - banners 버킷에 업로드하고 public URL을 반환한다.
-    @PostMapping("/image-upload")
+    @PostMapping("/images")
     public ImageUploadResponse uploadImage(@RequestParam("file") MultipartFile file) {
         return new ImageUploadResponse(supabaseStorageService.uploadImage(file, BANNER_BUCKET));
     }

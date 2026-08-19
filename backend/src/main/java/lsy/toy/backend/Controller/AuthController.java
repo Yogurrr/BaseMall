@@ -7,6 +7,8 @@ import lsy.toy.backend.Dto.RegisterRequest;
 import lsy.toy.backend.Dto.UpdateFavoriteTeamRequest;
 import lsy.toy.backend.Dto.UserInfoResponse;
 import lsy.toy.backend.Service.AuthService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,8 +25,9 @@ public class AuthController {
 
     // 1. 회원가입 (POST)
     @PostMapping("/register")
-    public AuthResponse register(@RequestBody RegisterRequest request) {
-        return authService.register(request.getName(), request.getEmail(), request.getPassword());
+    public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest request) {
+        AuthResponse created = authService.register(request.getName(), request.getEmail(), request.getPassword());
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     // 2. 로그인 (POST)
@@ -41,8 +44,9 @@ public class AuthController {
 
     // 4. 회원 탈퇴 (DELETE, JWT 필요, 비밀번호 재확인)
     @DeleteMapping("/me")
-    public void deleteAccount(Authentication authentication, @RequestBody DeleteAccountRequest request) {
+    public ResponseEntity<Void> deleteAccount(Authentication authentication, @RequestBody DeleteAccountRequest request) {
         authService.deleteAccount(authentication.getName(), request.getPassword());
+        return ResponseEntity.noContent().build();
     }
 
     // 5. 응원팀 설정/변경 (PATCH, JWT 필요, 마이페이지)

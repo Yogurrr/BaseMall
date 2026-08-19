@@ -24,6 +24,10 @@ public class OrderItem {
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;
 
+    // 💡 표시용 스냅샷과 별개로, 리뷰 작성 시 "이 상품을 실제로 구매했는지" 검증하는 용도로만 쓴다.
+    @Column(name = "product_id")
+    private Long productId;
+
     private String productName;
     private String category;
 
@@ -46,7 +50,8 @@ public class OrderItem {
         // JPA
     }
 
-    public OrderItem(String productName, String category, String imageUrl, Integer unitPrice, int quantity, String size, String markingName, String team) {
+    public OrderItem(Long productId, String productName, String category, String imageUrl, Integer unitPrice, int quantity, String size, String markingName, String team) {
+        this.productId = productId;
         this.productName = productName;
         this.category = category;
         this.imageUrl = imageUrl;
@@ -61,6 +66,8 @@ public class OrderItem {
 
     public Order getOrder() { return order; }
     public void setOrder(Order order) { this.order = order; }
+
+    public Long getProductId() { return productId; }
 
     public String getProductName() { return productName; }
     public String getCategory() { return category; }

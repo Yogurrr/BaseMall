@@ -90,7 +90,7 @@ export const uploadProductImage = async (file: File): Promise<{ imageUrl: string
   formData.append('file', file);
   // 💡 axiosInstance가 기본 Content-Type을 application/json으로 고정해두므로,
   // multipart 경계(boundary)를 브라우저가 직접 채우도록 여기서만 헤더를 비워준다.
-  const response = await api.post<{ imageUrl: string }>('/products/image-upload', formData, {
+  const response = await api.post<{ imageUrl: string }>('/products/images', formData, {
     headers: { 'Content-Type': undefined },
   });
   return response.data;

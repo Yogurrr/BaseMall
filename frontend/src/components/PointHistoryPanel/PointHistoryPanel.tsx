@@ -1,6 +1,7 @@
-import { StatusMessage } from '../StatusMessage/StatusMessage';
+import { useMemo, useState } from 'react';
 import { formatPrice } from '../../api/productApi';
 import type { Order } from '../../types/order';
+import { MonthRangeFilter, defaultMonthRange, type DateRange } from '../MonthRangeFilter/MonthRangeFilter';
 import styles from './PointHistoryPanel.module.css';
 
 const formatDate = (iso: string) => {
@@ -52,30 +53,44 @@ interface PointHistoryPanelProps {
 }
 
 export const PointHistoryPanel = ({ orders }: PointHistoryPanelProps) => {
-  const entries = buildEntries(orders);
+  const [appliedRange, setAppliedRange] = useState<DateRange>(defaultMonthRange);
 
-  if (entries.length === 0) {
-    return (
-      <div className={styles.empty}>
-        <StatusMessage icon="🐾">적립금 내역이 없습니다.</StatusMessage>
-      </div>
-    );
-  }
+  const filteredEntries = useMemo(() => {
+    return buildEntries(orders).filter((entry) => {
+      const date = new Date(entry.date);
+      return date >= appliedRange.from && date <= appliedRange.to;
+    });
+  }, [orders, appliedRange]);
 
   return (
-    <ul className={styles.list}>
-      {entries.map((entry) => (
-        <li key={entry.key} className={styles.row}>
-          <div className={styles.info}>
-            <p className={styles.label}>{entry.label}</p>
-            <p className={styles.date}>{formatDate(entry.date)}</p>
-          </div>
-          <span className={`${styles.amount} ${entry.amount >= 0 ? styles.plus : styles.minus}`}>
-            {entry.amount >= 0 ? '+' : '-'}
-            {formatPrice(Math.abs(entry.amount))}
-          </span>
-        </li>
-      ))}
-    </ul>
+    <div className={styles.panel}>
+      <MonthRangeFilter
+        label="조회기간"
+        notice="최근 5년 이내 적립금 내역만 조회할 수 있습니다."
+        onApply={setAppliedRange}
+      />
+
+      {filteredEntries.length === 0 ? (
+        <div className={styles.empty}>
+          <span className={styles.emptyIcon}>!</span>
+          <p>기간 내 적립금 내역이 없습니다</p>
+        </div>
+      ) : (
+        <ul className={styles.list}>
+          {filteredEntries.map((entry) => (
+            <li key={entry.key} className={styles.row}>
+              <div className={styles.info}>
+                <p className={styles.label}>{entry.label}</p>
+                <p className={styles.date}>{formatDate(entry.date)}</p>
+              </div>
+              <span className={`${styles.amount} ${entry.amount >= 0 ? styles.plus : styles.minus}`}>
+                {entry.amount >= 0 ? '+' : '-'}
+                {formatPrice(Math.abs(entry.amount))}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   );
 };

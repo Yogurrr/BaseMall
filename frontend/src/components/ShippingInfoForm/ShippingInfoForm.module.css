@@ -83,6 +83,14 @@
 
 .phonePart {
   width: 4.5rem;
+  height: 2.2rem;
+  box-sizing: border-box;
+}
+
+.phonePrefix {
+  width: 4.5rem;
+  height: 2.2rem;
+  box-sizing: border-box;
 }
 
 .saveBox {

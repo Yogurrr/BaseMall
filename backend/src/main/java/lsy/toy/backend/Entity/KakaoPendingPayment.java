@@ -2,6 +2,8 @@ package lsy.toy.backend.Entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -28,15 +30,30 @@ public class KakaoPendingPayment {
 
     private Instant createdAt = Instant.now();
 
+    @Enumerated(EnumType.STRING)
+    private PendingPaymentStatus status = PendingPaymentStatus.READY;
+
+    // 💡 PG 승인/취소 API에 그대로 넘길 청구 금액. ready 시점에 계산해 둔다.
+    private Integer amount;
+
+    // 💡 PG 승인에 성공한 시각. 정합성 배치가 "이 시각 이후로 오래 방치된 APPROVED 건"을 고른다.
+    private Instant approvedAt;
+
+    private int retryCount = 0;
+
+    @Column(columnDefinition = "text")
+    private String lastError;
+
     protected KakaoPendingPayment() {
         // JPA
     }
 
-    public KakaoPendingPayment(String tid, String partnerOrderId, Long userId, String requestPayload) {
+    public KakaoPendingPayment(String tid, String partnerOrderId, Long userId, String requestPayload, Integer amount) {
         this.tid = tid;
         this.partnerOrderId = partnerOrderId;
         this.userId = userId;
         this.requestPayload = requestPayload;
+        this.amount = amount;
     }
 
     public Long getId() { return id; }
@@ -45,4 +62,19 @@ public class KakaoPendingPayment {
     public Long getUserId() { return userId; }
     public String getRequestPayload() { return requestPayload; }
     public Instant getCreatedAt() { return createdAt; }
+    public PendingPaymentStatus getStatus() { return status; }
+    public Integer getAmount() { return amount; }
+    public Instant getApprovedAt() { return approvedAt; }
+    public int getRetryCount() { return retryCount; }
+    public String getLastError() { return lastError; }
+
+    public void markApproved() {
+        this.status = PendingPaymentStatus.APPROVED;
+        this.approvedAt = Instant.now();
+    }
+
+    public void recordRetryFailure(String error) {
+        this.retryCount++;
+        this.lastError = error;
+    }
 }

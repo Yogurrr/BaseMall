@@ -1,8 +1,11 @@
 package lsy.toy.backend.Controller;
 
 import lsy.toy.backend.Dto.CouponResponse;
+import lsy.toy.backend.Dto.IssueCouponRequest;
 import lsy.toy.backend.Dto.IssueCouponResponse;
 import lsy.toy.backend.Service.CouponService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,8 +29,9 @@ public class CouponController {
     }
 
     // 2. 등급별 쿠폰 일괄 발급 (관리자 쿠폰 관리, POST)
-    @PostMapping("/issue")
-    public IssueCouponResponse issueCoupons(@RequestParam String grade) {
-        return new IssueCouponResponse(couponService.issueByGrade(grade));
+    @PostMapping
+    public ResponseEntity<IssueCouponResponse> issueCoupons(@RequestBody IssueCouponRequest request) {
+        IssueCouponResponse response = new IssueCouponResponse(couponService.issueByGrade(request.getGrade()));
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }
