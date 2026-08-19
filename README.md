@@ -65,7 +65,3 @@ KBO(한국프로야구) 구단 굿즈를 사고파는 온라인 쇼핑몰입니�
 | kim@example.com | password123 | ADMIN |
 | lee@example.com | password123 | USER |
 | park@example.com | password123 | USER |
-
-### 로컬 개발 환경 설정
-
-DB 접속정보, JWT 시크릿, 카카오페이/토스페이먼츠 결제 키 등 민감한 값은 git에 올라가지 않는다. 새로 클론한 환경에서 채워야 할 값과 순서는 [SETUP.md](SETUP.md) 참고.
