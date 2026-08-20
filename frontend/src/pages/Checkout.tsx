@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import axios from 'axios';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -11,7 +11,7 @@ import { CouponPointsForm } from '../components/CouponPointsForm/CouponPointsFor
 import { PaymentMethodForm } from '../components/PaymentMethodForm/PaymentMethodForm';
 import { CheckoutSummary } from '../components/CheckoutSummary/CheckoutSummary';
 import { Spinner } from '../components/Spinner/Spinner';
-import { useCart } from '../context/CartContext';
+import { useCart } from '../hooks/useCart';
 import { useCurrentUser } from '../hooks/useCurrentUser';
 import { isLoggedIn } from '../api/authToken';
 import { createOrder } from '../api/orderApi';
@@ -81,13 +81,12 @@ export const Checkout = () => {
   };
 
   // 💡 저장된 배송지가 있으면 기본 배송지(없으면 가장 최근 배송지)를 최초 1회만 자동으로 채워준다.
-  useEffect(() => {
-    if (hasAutoFilledAddress || savedAddresses.length === 0) return;
+  // effect 대신 렌더링 중에 아직 채우지 않았고 데이터가 막 도착했을 때만 채운다.
+  if (!hasAutoFilledAddress && savedAddresses.length > 0) {
+    setHasAutoFilledAddress(true);
     const defaultAddress = savedAddresses.find((item) => item.isDefault) ?? savedAddresses[0];
     applySavedAddress(defaultAddress);
-    setHasAutoFilledAddress(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [savedAddresses, hasAutoFilledAddress]);
+  }
 
   const handleDeleteSavedAddress = async (id: number) => {
     try {
@@ -105,19 +104,16 @@ export const Checkout = () => {
   const discountAmount = selectedCoupon ? Math.floor((totalPrice * selectedCoupon.discountPercent) / 100) : 0;
   const availablePoints = currentUser?.points ?? 0;
   const maxUsablePoints = Math.max(0, Math.min(availablePoints, totalPrice - discountAmount));
+  // 💡 쿠폰을 바꿔 maxUsablePoints가 줄어들면 이미 입력해둔 pointsUsed가 초과될 수 있다.
+  // effect로 state를 되돌리는 대신 렌더링 중에 상한선으로 계산해서 쓴다.
+  const effectivePointsUsed = Math.min(pointsUsed, maxUsablePoints);
 
   const isTossSelected = paymentMethod === '토스페이먼츠';
   const { isReady: tossWidgetReady, requestPayment: requestTossPayment } = useTossPaymentWidget({
     enabled: isTossSelected,
     customerKey: currentUser?.email,
-    initialAmount: Math.max(totalPrice - discountAmount - pointsUsed, 0),
+    initialAmount: Math.max(totalPrice - discountAmount - effectivePointsUsed, 0),
   });
-
-  useEffect(() => {
-    if (pointsUsed > maxUsablePoints) {
-      setPointsUsed(maxUsablePoints);
-    }
-  }, [maxUsablePoints, pointsUsed]);
 
   const canSubmit = Boolean(
     recipientName.trim() &&
@@ -156,7 +152,7 @@ export const Checkout = () => {
       deliveryRequest: deliveryRequest || undefined,
       entryMethod: entryMethod || undefined,
       entryNote: showEntryNote ? entryNote.trim() || undefined : undefined,
-      pointsUsed,
+      pointsUsed: effectivePointsUsed,
     };
 
     setIsCheckingOut(true);
@@ -297,7 +293,7 @@ export const Checkout = () => {
                 onCouponChange={setSelectedCouponId}
                 discountAmount={discountAmount}
                 availablePoints={availablePoints}
-                pointsUsed={pointsUsed}
+                pointsUsed={effectivePointsUsed}
                 maxUsablePoints={maxUsablePoints}
                 onPointsUsedChange={setPointsUsed}
               />
@@ -316,7 +312,7 @@ export const Checkout = () => {
               <CheckoutSummary
                 totalPrice={totalPrice}
                 discountAmount={discountAmount}
-                pointsUsed={pointsUsed}
+                pointsUsed={effectivePointsUsed}
                 canSubmit={canSubmit}
                 agreeToTerms={agreeToTerms}
                 onAgreeToTermsChange={setAgreeToTerms}

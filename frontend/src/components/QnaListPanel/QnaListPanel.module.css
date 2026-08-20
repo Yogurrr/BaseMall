@@ -1,0 +1,97 @@
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.card {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  border: 0.05rem solid var(--border);
+  border-radius: 0.8rem;
+  padding: 1rem 1.2rem;
+}
+
+.thumb {
+  aspect-ratio: 1 / 1;
+  width: 4.4rem;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.6rem;
+  overflow: hidden;
+  background: radial-gradient(circle at 30% 20%, var(--accent-bg), var(--code-bg));
+  text-decoration: none;
+}
+
+.info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.metaRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.productName {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-h);
+  text-decoration: none;
+}
+
+.productName:hover {
+  text-decoration: underline;
+}
+
+.statusPending {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #dc2626;
+}
+
+.statusDone {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #16a34a;
+}
+
+.question {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-h);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.answer {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text);
+  white-space: pre-wrap;
+  word-break: break-word;
+  padding: 0.5rem 0.7rem;
+  border-radius: 0.4rem;
+  background: var(--code-bg);
+}
+
+.meta {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--text);
+}
+
+.empty {
+  padding: 2rem 0;
+}

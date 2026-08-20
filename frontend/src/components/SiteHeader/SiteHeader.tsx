@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useCart } from '../../context/CartContext';
+import { useCart } from '../../hooks/useCart';
 import { useCurrentUser } from '../../hooks/useCurrentUser';
 import { clearToken, isLoggedIn, subscribeAuthChange } from '../../api/authToken';
 import { fetchCategories, fetchTeams } from '../../api/productApi';

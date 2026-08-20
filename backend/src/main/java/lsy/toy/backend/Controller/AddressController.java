@@ -34,13 +34,19 @@ public class AddressController {
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
-    // 3. 저장된 배송지 삭제 (DELETE)
+    // 3. 저장된 배송지 수정 (PUT)
+    @PutMapping("/{id}")
+    public AddressResponse updateAddress(Authentication authentication, @PathVariable Long id, @RequestBody AddressRequest request) {
+        return addressService.updateAddress(authentication.getName(), id, request);
+    }
+
+    // 4. 저장된 배송지 삭제 (DELETE)
     @DeleteMapping("/{id}")
     public List<AddressResponse> deleteAddress(Authentication authentication, @PathVariable Long id) {
         return addressService.deleteAddress(authentication.getName(), id);
     }
 
-    // 4. 기본 배송지로 지정 (PATCH)
+    // 5. 기본 배송지로 지정 (PATCH)
     @PatchMapping("/{id}/default")
     public AddressResponse setDefaultAddress(Authentication authentication, @PathVariable Long id) {
         return addressService.setDefaultAddress(authentication.getName(), id);

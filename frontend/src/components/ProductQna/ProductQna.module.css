@@ -1,0 +1,141 @@
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-top: 2.4rem;
+  padding-top: 1.6rem;
+  border-top: 0.05rem solid var(--border);
+}
+
+.title {
+  font-size: 1.1rem;
+  margin: 0;
+  color: var(--text-h);
+}
+
+.notice {
+  font-size: 0.8rem;
+  color: var(--text);
+}
+
+.error {
+  font-size: 0.8rem;
+  color: #dc2626;
+}
+
+.empty {
+  padding: 1.6rem 0;
+  text-align: center;
+  color: var(--text);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  border: 0.05rem solid var(--border);
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+
+.textarea {
+  width: 100%;
+  box-sizing: border-box;
+  resize: vertical;
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 0.6rem 0.8rem;
+  border-radius: 0.4rem;
+  border: 0.05rem solid var(--border);
+  background: var(--bg);
+  color: var(--text-h);
+}
+
+.textarea:focus {
+  outline: none;
+  border-color: var(--accent-border);
+  box-shadow: 0 0 0 0.15rem var(--accent-bg);
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.item {
+  border: 0.05rem solid var(--border);
+  border-radius: 0.5rem;
+  padding: 0.9rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.userName {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-h);
+}
+
+.statusPending {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #dc2626;
+}
+
+.statusDone {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #16a34a;
+}
+
+.date {
+  font-size: 0.7rem;
+  color: var(--text);
+}
+
+.question {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-h);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.answer {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text);
+  white-space: pre-wrap;
+  word-break: break-word;
+  padding: 0.6rem 0.8rem;
+  border-radius: 0.4rem;
+  background: var(--code-bg);
+}
+
+.actions {
+  display: flex;
+  gap: 0.4rem;
+}

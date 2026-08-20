@@ -67,19 +67,22 @@ public class OrderService {
     private final CartItemRepository cartItemRepository;
     private final UserRepository userRepository;
     private final CouponRepository couponRepository;
+    private final PointService pointService;
 
     public OrderService(
         OrderRepository orderRepository,
         OrderItemRepository orderItemRepository,
         CartItemRepository cartItemRepository,
         UserRepository userRepository,
-        CouponRepository couponRepository
+        CouponRepository couponRepository,
+        PointService pointService
     ) {
         this.orderRepository = orderRepository;
         this.orderItemRepository = orderItemRepository;
         this.cartItemRepository = cartItemRepository;
         this.userRepository = userRepository;
         this.couponRepository = couponRepository;
+        this.pointService = pointService;
     }
 
     @Transactional
@@ -93,9 +96,6 @@ public class OrderService {
         }
 
         PricingResult pricing = calculatePricing(user, cartItems, request);
-
-        user.setPoints(user.getPoints() - pricing.usedPoints() + pricing.earnedPoints());
-        userRepository.save(user);
 
         String entryMethod = request.getEntryMethod();
         Order order = new Order(user, pricing.totalPrice());
@@ -129,6 +129,13 @@ public class OrderService {
 
         Order saved = orderRepository.save(order);
         cartItemRepository.deleteByUser_Id(user.getId());
+
+        if (pricing.usedPoints() > 0) {
+            pointService.record(user, -pricing.usedPoints(), "ORDER_USE", saved, null, "주문 #" + saved.getId() + " 사용");
+        }
+        if (pricing.earnedPoints() > 0) {
+            pointService.record(user, pricing.earnedPoints(), "ORDER_EARN", saved, null, "주문 #" + saved.getId() + " 적립");
+        }
 
         if (pricing.coupon() != null) {
             pricing.coupon().markUsed(saved);
@@ -293,8 +300,12 @@ public class OrderService {
     // 💡 주문취소 시 사용했던 적립금은 돌려주고, 그 주문으로 적립됐던 포인트는 회수한다.
     private void refundPoints(Order order) {
         User user = order.getUser();
-        user.setPoints(user.getPoints() + order.getPointsUsed() - order.getPointsEarned());
-        userRepository.save(user);
+        if (order.getPointsUsed() > 0) {
+            pointService.record(user, order.getPointsUsed(), "ORDER_CANCEL", order, null, "주문 #" + order.getId() + " 사용 취소(환불)");
+        }
+        if (order.getPointsEarned() > 0) {
+            pointService.record(user, -order.getPointsEarned(), "ORDER_CANCEL", order, null, "주문 #" + order.getId() + " 적립 취소(회수)");
+        }
     }
 
     public OrderResponse updateTrackingNumber(Long orderId, String trackingNumber) {

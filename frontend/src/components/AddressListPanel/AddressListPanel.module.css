@@ -32,6 +32,13 @@
   padding: 1.2rem;
 }
 
+.formTitle {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-h);
+}
+
 .formRow {
   display: flex;
   align-items: center;

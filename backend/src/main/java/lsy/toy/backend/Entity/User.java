@@ -12,6 +12,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 import java.time.Instant;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "users") // 💡 "user"는 Postgres 예약어라 복수형 테이블명 사용
@@ -23,6 +24,9 @@ public class User {
 
     private String name;
     private String email;
+
+    private LocalDate birthDate;
+    private String phoneNumber;
 
     // 💡 bcrypt로 해싱된 값만 저장. 응답 JSON에는 절대 포함하지 않는다.
     private String password;
@@ -61,7 +65,14 @@ public class User {
 
     public Long getId() { return id; }
     public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
     public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+
+    public LocalDate getBirthDate() { return birthDate; }
+    public void setBirthDate(LocalDate birthDate) { this.birthDate = birthDate; }
+    public String getPhoneNumber() { return phoneNumber; }
+    public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
 
     @JsonIgnore
     public String getPassword() { return password; }

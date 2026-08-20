@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '../Button/Button';
 import { ProductThumb } from '../ProductThumb/ProductThumb';
@@ -15,11 +15,15 @@ interface OrderDetailModalProps {
 
 export const OrderDetailModal = ({ order, onClose, readOnly = false }: OrderDetailModalProps) => {
   const queryClient = useQueryClient();
+  // 💡 order.trackingNumber는 저장 성공 후 캐시 무효화로 뒤늦게 갱신될 수 있다.
+  // effect 대신 렌더링 중에 이전 값과 비교해 바뀐 경우에만 입력값을 다시 맞춘다
+  // (React 문서의 "prop이 바뀔 때 state를 조정하기" 패턴).
+  const [prevTrackingNumber, setPrevTrackingNumber] = useState(order.trackingNumber);
   const [trackingInput, setTrackingInput] = useState(order.trackingNumber ?? '');
-
-  useEffect(() => {
+  if (order.trackingNumber !== prevTrackingNumber) {
+    setPrevTrackingNumber(order.trackingNumber);
     setTrackingInput(order.trackingNumber ?? '');
-  }, [order.trackingNumber]);
+  }
 
   const trackingMutation = useMutation({
     mutationFn: (trackingNumber: string) => updateTrackingNumber(order.id, trackingNumber),

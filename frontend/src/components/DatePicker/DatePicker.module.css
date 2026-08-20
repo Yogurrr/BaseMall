@@ -1,0 +1,199 @@
+.wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.trigger {
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  font: inherit;
+  font-size: 0.95rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.6rem;
+  border: 0.05rem solid var(--border);
+  background: var(--bg);
+  color: var(--text-h);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.trigger:hover {
+  border-color: var(--accent-border);
+}
+
+.triggerOpen {
+  border-color: var(--accent-border);
+  box-shadow: 0 0 0 0.15rem var(--accent-bg);
+}
+
+.placeholder {
+  color: var(--text);
+}
+
+.icon {
+  flex-shrink: 0;
+  color: var(--text);
+  font-size: 1.05rem;
+}
+
+.panel {
+  position: absolute;
+  top: calc(100% + 0.6rem);
+  left: 0;
+  z-index: 30;
+  width: 21rem;
+  max-width: 90vw;
+  box-sizing: border-box;
+  background: var(--bg);
+  border: 0.05rem solid var(--border);
+  border-radius: 0.9rem;
+  box-shadow: var(--shadow);
+  padding: 1rem;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.9rem;
+}
+
+.navButton {
+  flex-shrink: 0;
+  width: 2.1rem;
+  height: 2.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: none;
+  background: none;
+  color: var(--text-h);
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.navButton:hover {
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
+.selects {
+  display: flex;
+  flex: 1;
+  gap: 0.4rem;
+}
+
+.selects select {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 0.4rem 0.4rem;
+  border-radius: 0.5rem;
+  border: 0.05rem solid var(--border);
+  background: var(--code-bg);
+  color: var(--text-h);
+  cursor: pointer;
+}
+
+.weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 0.5rem;
+}
+
+.weekdaySun {
+  color: #dc2626;
+}
+
+.weekdaySat {
+  color: #2563eb;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.25rem;
+}
+
+.day {
+  aspect-ratio: 1;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--text-h);
+  cursor: pointer;
+}
+
+.day:hover:not(:disabled) {
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
+.dayOutside {
+  color: var(--border);
+}
+
+.daySun {
+  color: #dc2626;
+}
+
+.daySat {
+  color: #2563eb;
+}
+
+.dayToday {
+  font-weight: 700;
+  box-shadow: inset 0 0 0 0.06rem var(--accent-border);
+}
+
+.daySelected,
+.daySelected:hover {
+  background: var(--accent);
+  color: #fff;
+  font-weight: 700;
+}
+
+.day:disabled {
+  color: var(--border);
+  cursor: not-allowed;
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.9rem;
+  padding-top: 0.7rem;
+  border-top: 0.05rem solid var(--border);
+}
+
+.footerButton {
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: none;
+  border: none;
+  color: var(--accent);
+  cursor: pointer;
+  padding: 0.2rem 0.4rem;
+}
+
+.footerButton:hover {
+  text-decoration: underline;
+}

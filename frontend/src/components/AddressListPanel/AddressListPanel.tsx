@@ -4,7 +4,15 @@ import { Button } from '../Button/Button';
 import { StatusMessage } from '../StatusMessage/StatusMessage';
 import { Spinner } from '../Spinner/Spinner';
 import { openDaumPostcode } from '../../utils/daumPostcode';
-import { deleteAddress, fetchMyAddresses, saveAddress, setDefaultAddress } from '../../api/addressApi';
+import {
+  deleteAddress,
+  fetchMyAddresses,
+  saveAddress,
+  setDefaultAddress,
+  updateAddress,
+  type SaveAddressParams,
+} from '../../api/addressApi';
+import type { Address } from '../../types/address';
 import styles from './AddressListPanel.module.css';
 
 const PHONE_PREFIXES = ['010', '011', '016', '017', '018', '019'] as const;
@@ -21,11 +29,27 @@ const emptyForm = {
   isDefault: false,
 };
 
+const toFormFromAddress = (item: Address) => {
+  const [phonePrefix = '010', phoneMiddle = '', phoneLast = ''] = item.recipientPhone.split('-');
+  return {
+    label: item.label ?? '',
+    recipientName: item.recipientName,
+    phonePrefix,
+    phoneMiddle,
+    phoneLast,
+    zipCode: item.zipCode,
+    address: item.address,
+    addressDetail: item.addressDetail ?? '',
+    isDefault: item.isDefault,
+  };
+};
+
 export const AddressListPanel = () => {
   const queryClient = useQueryClient();
   const { data: addresses = [], isLoading } = useQuery({ queryKey: ['addresses', 'me'], queryFn: fetchMyAddresses });
 
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -38,6 +62,18 @@ export const AddressListPanel = () => {
       setFormError(null);
     },
     onError: () => setFormError('배송지를 저장하지 못했습니다. 잠시 후 다시 시도해주세요.'),
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, params }: { id: number; params: SaveAddressParams }) => updateAddress(id, params),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['addresses', 'me'] });
+      setIsFormOpen(false);
+      setEditingId(null);
+      setForm(emptyForm);
+      setFormError(null);
+    },
+    onError: () => setFormError('배송지를 수정하지 못했습니다. 잠시 후 다시 시도해주세요.'),
   });
 
   const deleteMutation = useMutation({
@@ -55,13 +91,22 @@ export const AddressListPanel = () => {
   });
 
   const openForm = () => {
+    setEditingId(null);
     setForm(emptyForm);
+    setFormError(null);
+    setIsFormOpen(true);
+  };
+
+  const openEditForm = (item: Address) => {
+    setEditingId(item.id);
+    setForm(toFormFromAddress(item));
     setFormError(null);
     setIsFormOpen(true);
   };
 
   const closeForm = () => {
     setIsFormOpen(false);
+    setEditingId(null);
     setFormError(null);
   };
 
@@ -87,7 +132,7 @@ export const AddressListPanel = () => {
       return;
     }
 
-    saveMutation.mutate({
+    const params: SaveAddressParams = {
       label: form.label.trim() || undefined,
       recipientName: form.recipientName.trim(),
       recipientPhone: `${form.phonePrefix}-${form.phoneMiddle}-${form.phoneLast}`,
@@ -95,7 +140,13 @@ export const AddressListPanel = () => {
       address: form.address.trim(),
       addressDetail: form.addressDetail.trim() || undefined,
       isDefault: form.isDefault,
-    });
+    };
+
+    if (editingId !== null) {
+      updateMutation.mutate({ id: editingId, params });
+    } else {
+      saveMutation.mutate(params);
+    }
   };
 
   const handleDelete = (id: number) => {
@@ -125,6 +176,7 @@ export const AddressListPanel = () => {
 
       {isFormOpen && (
         <form className={styles.form} onSubmit={handleSubmit}>
+          <p className={styles.formTitle}>{editingId !== null ? '배송지 수정' : '새 배송지 추가'}</p>
           <div className={styles.formRow}>
             <input
               className={styles.labelInput}
@@ -217,8 +269,8 @@ export const AddressListPanel = () => {
             <Button type="button" variant="outline" size="sm" onClick={closeForm}>
               취소
             </Button>
-            <Button type="submit" size="md" isLoading={saveMutation.isPending}>
-              저장
+            <Button type="submit" size="md" isLoading={saveMutation.isPending || updateMutation.isPending}>
+              {editingId !== null ? '수정 완료' : '저장'}
             </Button>
           </div>
         </form>
@@ -255,6 +307,9 @@ export const AddressListPanel = () => {
                     기본으로 설정
                   </Button>
                 )}
+                <Button type="button" variant="outline" size="sm" onClick={() => openEditForm(item)}>
+                  수정
+                </Button>
                 <Button
                   type="button"
                   variant="outline"

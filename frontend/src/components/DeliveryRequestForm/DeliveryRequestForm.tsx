@@ -1,7 +1,7 @@
 import { ENTRY_METHODS } from '../../api/orderApi';
 import styles from './DeliveryRequestForm.module.css';
 
-export const DELIVERY_REQUEST_OPTIONS = [
+const DELIVERY_REQUEST_OPTIONS = [
   '문 앞에 놓아주세요',
   '부재 시 연락 부탁드려요',
   '배송 전 미리 연락해주세요',

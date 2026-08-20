@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Button } from '../../components/Button/Button';
 import { Spinner } from '../../components/Spinner/Spinner';
@@ -6,6 +6,7 @@ import { Pagination } from '../../components/Pagination/Pagination';
 import { UserDetailModal } from '../../components/UserDetailModal/UserDetailModal';
 import { fetchUsers } from '../../api/userApi';
 import { register } from '../../api/authApi';
+import { PASSWORD_INPUT_PATTERN, PASSWORD_PATTERN, PASSWORD_RULE_MESSAGE } from '../../constants/validation';
 import type { User } from '../../types/user';
 import styles from './Admin.module.css';
 
@@ -21,14 +22,14 @@ export const AdminUsers = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [passwordError, setPasswordError] = useState<string | null>(null);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
 
   const mutation = useMutation({
     // 💡 register()는 발급된 토큰을 함께 반환하지만, 여기서는 관리자가
     // 남 대신 계정을 만드는 것이므로 그 토큰으로 로그인 세션을 바꾸면 안 된다.
     // id/name/email만 취해 목록에 반영하고 토큰은 버린다.
-    mutationFn: (payload: { name: string; email: string; password: string }) =>
-      register(payload.name, payload.email, payload.password),
+    mutationFn: (payload: { name: string; email: string; password: string }) => register(payload),
     onSuccess: (newUser) => {
       setCreatedUsers((prev) => [...prev, { id: newUser.id, name: newUser.name, email: newUser.email }]);
       setName('');
@@ -40,16 +41,22 @@ export const AdminUsers = () => {
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
     if (!name.trim() || !email.trim() || !password) return;
+
+    if (!PASSWORD_PATTERN.test(password)) {
+      setPasswordError(PASSWORD_RULE_MESSAGE);
+      return;
+    }
+    setPasswordError(null);
+
     mutation.mutate({ name: name.trim(), email: email.trim(), password });
   };
 
   const allUsers = [...(users ?? []), ...createdUsers];
   const totalPages = Math.max(1, Math.ceil(allUsers.length / USERS_PAGE_SIZE));
-  const pagedUsers = allUsers.slice(page * USERS_PAGE_SIZE, page * USERS_PAGE_SIZE + USERS_PAGE_SIZE);
-
-  useEffect(() => {
-    setPage((p) => Math.min(p, totalPages - 1));
-  }, [totalPages]);
+  // 💡 회원이 줄어 totalPages가 작아지면 그만큼 현재 페이지도 같이 줄여야 하는데,
+  // 렌더링 중에 바로 계산하면 되는 값이라 별도 effect로 state를 동기화할 필요가 없다.
+  const currentPage = Math.min(page, totalPages - 1);
+  const pagedUsers = allUsers.slice(currentPage * USERS_PAGE_SIZE, currentPage * USERS_PAGE_SIZE + USERS_PAGE_SIZE);
 
   return (
     <>
@@ -83,7 +90,9 @@ export const AdminUsers = () => {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            minLength={4}
+            minLength={8}
+            pattern={PASSWORD_INPUT_PATTERN}
+            title={PASSWORD_RULE_MESSAGE}
             required
           />
         </label>
@@ -92,6 +101,7 @@ export const AdminUsers = () => {
             회원 추가
           </Button>
         </div>
+        {passwordError && <p className={styles.error}>{passwordError}</p>}
         {mutation.isError && <p className={styles.error}>회원 추가에 실패했습니다.</p>}
       </form>
 
@@ -127,7 +137,7 @@ export const AdminUsers = () => {
       </div>
 
       {!isLoading && !isError && allUsers.length > 0 && (
-        <Pagination page={page} totalPages={totalPages} onChange={setPage} />
+        <Pagination page={currentPage} totalPages={totalPages} onChange={setPage} />
       )}
 
       {selectedUserId !== null && (

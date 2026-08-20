@@ -23,21 +23,27 @@ import java.util.Map;
 @Service
 public class ReviewService {
 
+    // 💡 리뷰 작성 1건당 지급하는 고정 적립금.
+    private static final int REVIEW_REWARD_POINTS = 500;
+
     private final ReviewRepository reviewRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
     private final OrderItemRepository orderItemRepository;
+    private final PointService pointService;
 
     public ReviewService(
         ReviewRepository reviewRepository,
         ProductRepository productRepository,
         UserRepository userRepository,
-        OrderItemRepository orderItemRepository
+        OrderItemRepository orderItemRepository,
+        PointService pointService
     ) {
         this.reviewRepository = reviewRepository;
         this.productRepository = productRepository;
         this.userRepository = userRepository;
         this.orderItemRepository = orderItemRepository;
+        this.pointService = pointService;
     }
 
     public List<ReviewResponse> getReviews(Long productId) {
@@ -87,6 +93,7 @@ public class ReviewService {
 
         Review saved = reviewRepository.save(new Review(product, user, rating, trimmedContent));
         refreshProductRating(product);
+        pointService.record(user, REVIEW_REWARD_POINTS, "REVIEW_REWARD", null, saved, "리뷰 작성 적립: " + product.getName());
 
         return new ReviewResponse(saved);
     }
@@ -111,8 +118,12 @@ public class ReviewService {
             : findOwnedReview(productId, reviewId, email);
 
         Product product = review.getProduct();
+        User author = review.getUser();
         reviewRepository.delete(review);
         refreshProductRating(product);
+        // 💡 리뷰가 없어졌으니 그 리뷰로 받았던 적립금도 회수한다. 안 그러면 리뷰를 쓰고 지우고
+        // 다시 쓰는 걸 반복해서 같은 상품으로 적립금을 무한정 받아갈 수 있다.
+        pointService.record(author, -REVIEW_REWARD_POINTS, "REVIEW_REWARD_REVOKE", null, null, "리뷰 삭제 적립금 회수: " + product.getName());
     }
 
     // 💡 리뷰 삭제 직후 남은 리뷰로 평점/개수를 다시 계산한다. 매번 재계산이라 편집/삭제에서도 항상 정확하다.

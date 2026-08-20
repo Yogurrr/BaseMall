@@ -1,6 +1,6 @@
 import { useParams } from 'react-router-dom';
 import { StatusMessage } from '../../components/StatusMessage/StatusMessage';
-import { ADMIN_MENU } from '../../components/AdminSidebar/AdminSidebar';
+import { ADMIN_MENU } from '../../constants/adminMenu';
 import styles from './Admin.module.css';
 
 export const AdminPlaceholder = () => {

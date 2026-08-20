@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from '../../components/Button/Button';
 import { Spinner } from '../../components/Spinner/Spinner';
@@ -54,9 +54,14 @@ export const AdminOrders = () => {
   const totalPages = Math.ceil(filteredOrders.length / ORDERS_PAGE_SIZE);
   const pagedOrders = filteredOrders.slice(page * ORDERS_PAGE_SIZE, page * ORDERS_PAGE_SIZE + ORDERS_PAGE_SIZE);
 
-  useEffect(() => {
+  // 💡 상태/검색어 필터가 바뀌면 페이지도 처음부터 다시 봐야 하는데, effect 대신 렌더링 중에
+  // 이전 필터 조합과 비교해 바뀐 경우에만 조정한다.
+  const filterKey = `${statusFilter}|${trimmedKeyword}`;
+  const [prevFilterKey, setPrevFilterKey] = useState(filterKey);
+  if (filterKey !== prevFilterKey) {
+    setPrevFilterKey(filterKey);
     setPage(0);
-  }, [statusFilter, trimmedKeyword]);
+  }
 
   return (
     <>

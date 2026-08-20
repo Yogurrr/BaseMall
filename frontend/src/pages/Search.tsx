@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { SiteHeader } from '../components/SiteHeader/SiteHeader';
@@ -8,8 +8,8 @@ import { Pagination } from '../components/Pagination/Pagination';
 import { Spinner } from '../components/Spinner/Spinner';
 import { SortSelect, type SortOption } from '../components/SortSelect/SortSelect';
 import { AddToCartModal } from '../components/AddToCartModal/AddToCartModal';
-import { useCart } from '../context/CartContext';
-import { useWishlist } from '../context/WishlistContext';
+import { useCart } from '../hooks/useCart';
+import { useWishlist } from '../hooks/useWishlist';
 import { useAddToCartModal } from '../hooks/useAddToCartModal';
 import { fetchProductsPage } from '../api/productApi';
 import styles from './Search.module.css';
@@ -36,9 +36,13 @@ export const Search = () => {
   const { isLiked, toggleWishlist } = useWishlist();
   const { isAddToCartModalOpen, openAddToCartModal, closeAddToCartModal, goToCheckout } = useAddToCartModal();
 
-  useEffect(() => {
+  // 💡 검색어가 바뀌면 페이지도 처음부터 다시 봐야 하는데, effect 대신 렌더링 중에
+  // 이전 검색어와 비교해 바뀐 경우에만 조정한다.
+  const [prevQuery, setPrevQuery] = useState(query);
+  if (query !== prevQuery) {
+    setPrevQuery(query);
     setPage(0);
-  }, [query]);
+  }
 
   const handleSortChange = (value: string) => {
     setSort(value);

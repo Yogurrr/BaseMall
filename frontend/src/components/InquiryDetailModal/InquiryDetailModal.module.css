@@ -1,0 +1,154 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.8rem;
+  z-index: 100;
+}
+
+.modal {
+  width: 100%;
+  max-width: 28rem;
+  max-height: 85vh;
+  overflow-y: auto;
+  background: var(--bg);
+  border: 0.05rem solid var(--border);
+  border-radius: 0.6rem;
+  box-shadow: 0 0.6rem 1.6rem rgba(0, 0, 0, 0.2);
+  padding: 1.2rem;
+  text-align: left;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  margin-bottom: 0.8rem;
+}
+
+.header h2 {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--text-h);
+}
+
+.closeButton {
+  font: inherit;
+  font-size: 0.8rem;
+  line-height: 1;
+  border: none;
+  background: none;
+  color: var(--text);
+  cursor: pointer;
+  padding: 0.3rem;
+  border-radius: 0.3rem;
+  flex-shrink: 0;
+}
+
+.closeButton:hover {
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
+.infoGrid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.4rem 0.8rem;
+  margin: 0 0 1rem;
+  padding: 0.8rem;
+  border: 0.05rem solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--code-bg);
+}
+
+.infoGrid dt {
+  font-size: 0.7rem;
+  color: var(--text);
+}
+
+.infoGrid dd {
+  margin: 0;
+  font-size: 0.7rem;
+  color: var(--text-h);
+  font-weight: 600;
+}
+
+.content {
+  font-size: 0.85rem;
+  color: var(--text-h);
+  line-height: 1.6;
+  white-space: pre-wrap;
+  margin: 0 0 0.8rem;
+}
+
+.attachedImage {
+  max-width: 100%;
+  border-radius: 0.5rem;
+  margin: 0 0 1rem;
+}
+
+.answerSection {
+  border-top: 0.05rem solid var(--border);
+  padding-top: 0.8rem;
+  margin-top: 0.4rem;
+}
+
+.answerSection h3 {
+  margin: 0 0 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-h);
+}
+
+.answeredAt {
+  margin: -0.4rem 0 0;
+  font-size: 0.7rem;
+  color: var(--text);
+}
+
+.pendingNotice {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text);
+}
+
+.answerForm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.textarea {
+  width: 100%;
+  box-sizing: border-box;
+  resize: vertical;
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 0.6rem 0.8rem;
+  border-radius: 0.4rem;
+  border: 0.05rem solid var(--border);
+  background: var(--bg);
+  color: var(--text-h);
+}
+
+.textarea:focus {
+  outline: none;
+  border-color: var(--accent-border);
+  box-shadow: 0 0 0 0.15rem var(--accent-bg);
+}
+
+.error {
+  font-size: 0.75rem;
+  color: #dc2626;
+  margin: 0;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.8rem;
+}

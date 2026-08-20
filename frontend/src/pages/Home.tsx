@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { AnnouncementBar } from '../components/AnnouncementBar/AnnouncementBar';
@@ -11,7 +11,7 @@ import { SortSelect, type SortOption } from '../components/SortSelect/SortSelect
 import { SiteFooter } from '../components/SiteFooter/SiteFooter';
 import { Spinner } from '../components/Spinner/Spinner';
 import { RecommendedProducts } from '../components/RecommendedProducts/RecommendedProducts';
-import { useWishlist } from '../context/WishlistContext';
+import { useWishlist } from '../hooks/useWishlist';
 import { useCurrentUser } from '../hooks/useCurrentUser';
 import { fetchCategories, fetchProductsPage, fetchTeams } from '../api/productApi';
 import { fetchActiveBanners } from '../api/bannerApi';
@@ -79,13 +79,15 @@ export const Home = () => {
   });
   const teamTabs = useMemo(() => ['전체', ...teamNames], [teamNames]);
 
-  useEffect(() => {
-    const paramCategory = searchParams.get('category') || '전체';
-    const paramTeam = searchParams.get('team') || '전체';
-    setActiveCategory((current) => (current === paramCategory ? current : paramCategory));
-    setActiveTeam((current) => (current === paramTeam ? current : paramTeam));
+  // 💡 카테고리/구단 네비게이션 링크를 눌러 URL 쿼리가 바뀌면(같은 라우트라 리마운트되지 않음)
+  // 탭 선택 상태도 맞춰야 하는데, effect 대신 렌더링 중에 이전 searchParams와 비교해 조정한다.
+  const [prevSearchParams, setPrevSearchParams] = useState(searchParams);
+  if (searchParams !== prevSearchParams) {
+    setPrevSearchParams(searchParams);
+    setActiveCategory(searchParams.get('category') || '전체');
+    setActiveTeam(searchParams.get('team') || '전체');
     setPage(0);
-  }, [searchParams]);
+  }
 
   const handleSelectCategory = (category: string) => {
     setActiveCategory(category);

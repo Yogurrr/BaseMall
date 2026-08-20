@@ -20,9 +20,17 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final RestAuthenticationEntryPoint restAuthenticationEntryPoint;
+    private final RestAccessDeniedHandler restAccessDeniedHandler;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+    public SecurityConfig(
+        JwtAuthenticationFilter jwtAuthenticationFilter,
+        RestAuthenticationEntryPoint restAuthenticationEntryPoint,
+        RestAccessDeniedHandler restAccessDeniedHandler
+    ) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.restAuthenticationEntryPoint = restAuthenticationEntryPoint;
+        this.restAccessDeniedHandler = restAccessDeniedHandler;
     }
 
     @Bean
@@ -36,12 +44,20 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .exceptionHandling(handling -> handling
+                .authenticationEntryPoint(restAuthenticationEntryPoint)
+                .accessDeniedHandler(restAccessDeniedHandler)
+            )
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                // 💡 ResponseStatusException은 서블릿 컨테이너가 /error로 내부 포워드하는데,
-                // 이 경로를 permitAll 해두지 않으면 시큐리티가 그 포워드 요청을 다시 막아
-                // 원래 상태 코드(401/409 등)가 403으로 덮어써진다.
+                // 💡 매핑되지 않은 경로 등 컨트롤러까지 도달하지 못한 요청은 여전히 서블릿 컨테이너가
+                // /error로 내부 포워드할 수 있어 permitAll이 필요하다. ResponseStatusException과
+                // 인증/인가 실패는 각각 GlobalExceptionHandler / RestAuthenticationEntryPoint·
+                // RestAccessDeniedHandler가 직접 응답을 써서 더 이상 이 포워드를 타지 않는다.
                 .requestMatchers("/error").permitAll()
+                // 💡 API 문서(Swagger UI/OpenAPI 스펙)는 열람 목적이라 인증 없이 공개한다.
+                // 데모용 토이 프로젝트라 허용하는 것이고, 운영 배포 시에는 별도 보호가 필요하다.
+                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                 .requestMatchers("/api/auth/register", "/api/auth/login").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/products", "/api/products/page").permitAll()
                 // 💡 상품 상세는 비로그인 사용자도 봐야 하는 페이지. {id}는 숫자만 매칭해서
@@ -75,6 +91,20 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/reviews/me").authenticated()
                 // 💡 마이페이지 "리뷰 쓰러가기" 대상(구매했지만 미작성) 목록도 로그인한 본인만 조회 가능해야 한다.
                 .requestMatchers(HttpMethod.GET, "/api/reviews/me/reviewable").authenticated()
+                // 💡 상품 Q&A 목록은 구매 전 고객도 볼 수 있어야 하니 공개, 질문 작성/삭제는 로그인 필요.
+                .requestMatchers(HttpMethod.GET, "/api/products/*/qna").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/products/*/qna").authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/api/products/*/qna/*").authenticated()
+                // 💡 마이페이지 "상품 Q&A 내역"은 로그인한 본인만 조회 가능해야 한다.
+                .requestMatchers(HttpMethod.GET, "/api/qna/me").authenticated()
+                // 💡 Q&A 답변 등록과 전체 목록 조회는 관리자 전용.
+                .requestMatchers(HttpMethod.PATCH, "/api/qna/*/answer").hasAuthority("ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/qna").hasAuthority("ADMIN")
+                // 💡 마이페이지 적립금 내역도 로그인한 본인만 조회 가능해야 한다.
+                .requestMatchers(HttpMethod.GET, "/api/points/me").authenticated()
+                // 💡 최근 본 상품 조회/기록도 로그인한 본인만 가능해야 한다(서비스 계층에서 본인 계정으로만 저장/조회).
+                .requestMatchers(HttpMethod.GET, "/api/recent-views").authenticated()
+                .requestMatchers(HttpMethod.POST, "/api/recent-views/*").authenticated()
                 // 💡 주문 전체 조회/상태 변경은 관리자 전용 기능(어드민 페이지에서만 사용).
                 // 로그인만 하면 누구나 호출 가능했던 걸 막아, 다른 회원의 이름/이메일/배송지가 새는 것을 방지한다.
                 .requestMatchers(HttpMethod.POST, "/api/orders").authenticated()
@@ -100,6 +130,16 @@ public class SecurityConfig {
                 // 아래의 관리자 전용 PATCH 규칙보다 먼저 선언한다(서비스 계층에서 소유권/상태를 다시 검증).
                 .requestMatchers(HttpMethod.PATCH, "/api/orders/*/cancel").authenticated()
                 .requestMatchers(HttpMethod.PATCH, "/api/orders/**").hasAuthority("ADMIN")
+                // 💡 1:1 문의 작성/내 목록/상세/삭제는 로그인한 본인이면 가능(서비스 계층에서 소유권 재검증).
+                // 답변 등록과 전체 목록 조회는 관리자 전용이라 더 구체적인 위 규칙들보다 뒤에 둬도 충돌하지 않는다
+                // (경로 패턴 자체가 다르므로 매칭 순서가 결과에 영향을 주지 않음).
+                .requestMatchers(HttpMethod.POST, "/api/inquiries/images").authenticated()
+                .requestMatchers(HttpMethod.POST, "/api/inquiries").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/inquiries/me").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/inquiries/*").authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/api/inquiries/*").authenticated()
+                .requestMatchers(HttpMethod.PATCH, "/api/inquiries/*/answer").hasAuthority("ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/inquiries").hasAuthority("ADMIN")
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

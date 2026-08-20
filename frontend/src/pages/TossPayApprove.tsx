@@ -3,7 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { SiteHeader } from '../components/SiteHeader/SiteHeader';
 import { SiteFooter } from '../components/SiteFooter/SiteFooter';
 import { Spinner } from '../components/Spinner/Spinner';
-import { useCart } from '../context/CartContext';
+import { useCart } from '../hooks/useCart';
 import { confirmTossPayment } from '../api/paymentApi';
 import styles from './Checkout.module.css';
 
@@ -22,6 +22,7 @@ export const TossPayApprove = () => {
     const orderId = searchParams.get('orderId');
     const amount = searchParams.get('amount');
     if (!paymentKey || !orderId || !amount) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- 결제 승인 API 호출(외부 시스템) 결과를 반영하는 effect라 렌더링 중에 계산할 수 없다.
       setStatus('error');
       return;
     }

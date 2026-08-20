@@ -2,8 +2,18 @@ import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Button } from '../components/Button/Button';
+import { DatePicker } from '../components/DatePicker/DatePicker';
+import { todayIso } from '../utils/todayIso';
 import { login, register } from '../api/authApi';
 import { setToken } from '../api/authToken';
+import {
+  PASSWORD_INPUT_PATTERN,
+  PASSWORD_PATTERN,
+  PASSWORD_RULE_MESSAGE,
+  PHONE_INPUT_PATTERN,
+  PHONE_PATTERN,
+  PHONE_RULE_MESSAGE,
+} from '../constants/validation';
 import styles from './Login.module.css';
 
 type Mode = 'login' | 'register';
@@ -14,16 +24,38 @@ export const Login = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [birthDate, setBirthDate] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     setError(null);
+
+    if (mode === 'register' && !PASSWORD_PATTERN.test(password)) {
+      setError(PASSWORD_RULE_MESSAGE);
+      return;
+    }
+
+    if (mode === 'register' && phoneNumber && !PHONE_PATTERN.test(phoneNumber)) {
+      setError(PHONE_RULE_MESSAGE);
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      const result = mode === 'login' ? await login(email, password) : await register(name, email, password);
+      const result =
+        mode === 'login'
+          ? await login(email, password)
+          : await register({
+              name,
+              email,
+              password,
+              birthDate: birthDate || null,
+              phoneNumber: phoneNumber || null,
+            });
       setToken(result.token);
       navigate('/');
     } catch (err) {
@@ -64,10 +96,33 @@ export const Login = () => {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            minLength={4}
+            minLength={mode === 'register' ? 8 : undefined}
+            pattern={mode === 'register' ? PASSWORD_INPUT_PATTERN : undefined}
+            title={mode === 'register' ? PASSWORD_RULE_MESSAGE : undefined}
+            placeholder={mode === 'register' ? '영문/숫자/특수문자 중 2가지 이상, 8자 이상' : undefined}
             required
           />
         </label>
+
+        {mode === 'register' && (
+          <>
+            <label className={styles.field}>
+              생년월일
+              <DatePicker value={birthDate} onChange={setBirthDate} max={todayIso} placeholder="생년월일 선택" />
+            </label>
+            <label className={styles.field}>
+              휴대폰번호
+              <input
+                type="tel"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                pattern={PHONE_INPUT_PATTERN}
+                title={PHONE_RULE_MESSAGE}
+                placeholder="010-1234-5678"
+              />
+            </label>
+          </>
+        )}
 
         {error && <p className={styles.error}>{error}</p>}
 

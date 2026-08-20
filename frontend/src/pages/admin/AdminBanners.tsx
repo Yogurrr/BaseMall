@@ -1,9 +1,10 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from '../../components/Button/Button';
 import { Spinner } from '../../components/Spinner/Spinner';
 import { ProductThumb } from '../../components/ProductThumb/ProductThumb';
 import { InfoModal } from '../../components/InfoModal/InfoModal';
+import { useObjectUrlPreview } from '../../hooks/useObjectUrlPreview';
 import {
   createBanner,
   deleteBanner,
@@ -53,20 +54,11 @@ export const AdminBanners = () => {
   const [form, setForm] = useState(EMPTY_FORM);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!imageFile) {
-      setImagePreview(form.imageUrl || null);
-      return;
-    }
-    const objectUrl = URL.createObjectURL(imageFile);
-    setImagePreview(objectUrl);
-    return () => URL.revokeObjectURL(objectUrl);
-  }, [imageFile, form.imageUrl]);
+  const imagePreview = useObjectUrlPreview(imageFile, form.imageUrl || null);
 
   const resetForm = () => {
     setForm(EMPTY_FORM);

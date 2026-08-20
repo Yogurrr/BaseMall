@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { SiteHeader } from '../components/SiteHeader/SiteHeader';
@@ -7,12 +7,15 @@ import { Button } from '../components/Button/Button';
 import { Spinner } from '../components/Spinner/Spinner';
 import { ProductThumb } from '../components/ProductThumb/ProductThumb';
 import { ProductReviews } from '../components/ProductReviews/ProductReviews';
+import { ProductQna } from '../components/ProductQna/ProductQna';
 import { AddToCartModal } from '../components/AddToCartModal/AddToCartModal';
-import { useCart } from '../context/CartContext';
-import { useWishlist } from '../context/WishlistContext';
+import { useCart } from '../hooks/useCart';
+import { useWishlist } from '../hooks/useWishlist';
 import { useAddToCartModal } from '../hooks/useAddToCartModal';
 import { fetchProduct, formatPrice } from '../api/productApi';
 import { fetchBadges, getBadgeGradient } from '../api/badgeApi';
+import { recordRecentView } from '../api/recentViewApi';
+import { isLoggedIn } from '../api/authToken';
 import { UNIFORM_CATEGORY_NAME, UNIFORM_MARKING_NAMES, UNIFORM_SIZES } from '../constants/uniformOptions';
 import styles from './ProductDetail.module.css';
 
@@ -39,6 +42,12 @@ export const ProductDetail = () => {
   });
 
   const { data: badges = [] } = useQuery({ queryKey: ['badges'], queryFn: fetchBadges, staleTime: 5 * 60 * 1000 });
+
+  // 💡 로그인 사용자가 상품 상세를 실제로 조회했을 때만 "최근 본 상품" 이력을 남긴다(비로그인은 대상 없음).
+  useEffect(() => {
+    if (!product || !isLoggedIn()) return;
+    recordRecentView(product.id).catch(() => {});
+  }, [product]);
 
   const isUniform = product?.category === UNIFORM_CATEGORY_NAME;
 
@@ -200,6 +209,7 @@ export const ProductDetail = () => {
         )}
 
         {!isLoading && !isError && product && <ProductReviews productId={product.id} />}
+        {!isLoading && !isError && product && <ProductQna productId={product.id} />}
       </div>
 
       <SiteFooter />

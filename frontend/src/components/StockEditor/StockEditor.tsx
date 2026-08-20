@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import { Button } from '../Button/Button';
 import styles from './StockEditor.module.css';
 
@@ -9,11 +9,14 @@ interface StockEditorProps {
 }
 
 export const StockEditor = ({ value, onSave, isSaving }: StockEditorProps) => {
+  // 💡 value(서버에 저장된 재고)가 바뀌면 입력값도 맞춰야 하는데, effect 대신 렌더링 중에
+  // 이전 값과 비교해 바뀐 경우에만 조정한다(React 문서의 "prop이 바뀔 때 state를 조정하기" 패턴).
+  const [prevValue, setPrevValue] = useState(value);
   const [input, setInput] = useState(String(value));
-
-  useEffect(() => {
+  if (value !== prevValue) {
+    setPrevValue(value);
     setInput(String(value));
-  }, [value]);
+  }
 
   const nextValue = Math.max(0, Math.floor(Number(input) || 0));
 

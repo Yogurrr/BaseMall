@@ -61,11 +61,14 @@ export const ProductReviews = ({ productId }: ProductReviewsProps) => {
           {!isLoggedIn() && <p className={styles.notice}>로그인 후 리뷰를 작성할 수 있습니다.</p>}
 
           {isLoggedIn() && !myReview && (
-            <ReviewForm
-              submitLabel="리뷰 등록"
-              isSubmitting={createMutation.isPending}
-              onSubmit={(rating, content) => createMutation.mutate({ rating, content })}
-            />
+            <>
+              <p className={styles.notice}>리뷰를 작성하면 적립금 500원이 지급됩니다.</p>
+              <ReviewForm
+                submitLabel="리뷰 등록"
+                isSubmitting={createMutation.isPending}
+                onSubmit={(rating, content) => createMutation.mutate({ rating, content })}
+              />
+            </>
           )}
 
           {createMutation.isError && (

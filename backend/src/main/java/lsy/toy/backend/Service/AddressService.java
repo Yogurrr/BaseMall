@@ -55,6 +55,27 @@ public class AddressService {
         return new AddressResponse(addressRepository.save(address));
     }
 
+    @Transactional
+    public AddressResponse updateAddress(String email, Long id, AddressRequest request) {
+        validateAddressRequest(request);
+        User user = findUser(email);
+        Address address = findOwnedAddress(id, user.getId());
+
+        if (Boolean.TRUE.equals(request.getIsDefault()) && !address.getIsDefault()) {
+            clearDefault(addressRepository.findByUser_IdOrderByIsDefaultDescCreatedAtDesc(user.getId()));
+            address.setIsDefault(true);
+        }
+
+        address.setLabel(isBlank(request.getLabel()) ? null : request.getLabel().trim());
+        address.setRecipientName(request.getRecipientName().trim());
+        address.setRecipientPhone(request.getRecipientPhone().trim());
+        address.setZipCode(request.getZipCode().trim());
+        address.setAddress(request.getAddress().trim());
+        address.setAddressDetail(isBlank(request.getAddressDetail()) ? null : request.getAddressDetail().trim());
+
+        return new AddressResponse(addressRepository.save(address));
+    }
+
     // 💡 삭제한 배송지가 기본 배송지였다면, 남은 것 중 가장 최근 저장된 배송지를 새 기본으로 승격한다.
     @Transactional
     public List<AddressResponse> deleteAddress(String email, Long id) {

@@ -1,0 +1,88 @@
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  border: 0.05rem solid var(--border);
+  border-radius: 0.8rem;
+  padding: 1rem 1.2rem;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.row:hover {
+  border-color: var(--accent-border);
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.metaRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.category {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text);
+  background: var(--code-bg);
+  border-radius: 0.3rem;
+  padding: 0.15rem 0.5rem;
+}
+
+.statusPending {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #dc2626;
+}
+
+.statusDone {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #16a34a;
+}
+
+.title {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-h);
+}
+
+.date {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--text);
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 64px 0;
+  color: var(--text);
+}
+
+.emptyIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--border);
+}

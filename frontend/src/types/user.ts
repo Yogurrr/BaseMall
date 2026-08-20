@@ -10,6 +10,8 @@ export interface UserInfo {
   id: number;
   name: string;
   email: string;
+  birthDate?: string | null;
+  phoneNumber?: string | null;
   role: 'USER' | 'ADMIN';
   favoriteTeam?: string;
   grade?: string | null;
@@ -20,6 +22,22 @@ export interface User {
   id?: number;
   name: string;
   email: string;
+}
+
+export interface RegisterRequest {
+  name: string;
+  email: string;
+  password: string;
+  birthDate?: string | null;
+  phoneNumber?: string | null;
+}
+
+export interface UpdateProfileRequest {
+  name: string;
+  birthDate?: string | null;
+  phoneNumber?: string | null;
+  currentPassword?: string;
+  newPassword?: string;
 }
 
 export interface UserDetail {

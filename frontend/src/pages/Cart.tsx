@@ -4,7 +4,7 @@ import { SiteFooter } from '../components/SiteFooter/SiteFooter';
 import { CartItemRow } from '../components/CartItemRow/CartItemRow';
 import { CartSummary } from '../components/CartSummary/CartSummary';
 import { Spinner } from '../components/Spinner/Spinner';
-import { useCart } from '../context/CartContext';
+import { useCart } from '../hooks/useCart';
 import styles from './Cart.module.css';
 
 export const Cart = () => {

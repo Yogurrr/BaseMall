@@ -1,6 +1,6 @@
 import { useParams } from 'react-router-dom';
 import { StatusMessage } from '../../components/StatusMessage/StatusMessage';
-import { MYPAGE_MENU } from '../../components/MyPageSidebar/MyPageSidebar';
+import { MYPAGE_MENU } from '../../constants/myPageMenu';
 import styles from './MyPage.module.css';
 
 export const MyPagePlaceholder = () => {

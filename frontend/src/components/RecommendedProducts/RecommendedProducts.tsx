@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { ProductCard } from '../ProductCard/ProductCard';
 import { Spinner } from '../Spinner/Spinner';
-import { useWishlist } from '../../context/WishlistContext';
+import { useWishlist } from '../../hooks/useWishlist';
 import { fetchProductsPage } from '../../api/productApi';
 import styles from './RecommendedProducts.module.css';
 

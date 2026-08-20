@@ -1,8 +1,8 @@
 import { ProductCard } from '../../components/ProductCard/ProductCard';
 import { Spinner } from '../../components/Spinner/Spinner';
 import { AddToCartModal } from '../../components/AddToCartModal/AddToCartModal';
-import { useCart } from '../../context/CartContext';
-import { useWishlist } from '../../context/WishlistContext';
+import { useCart } from '../../hooks/useCart';
+import { useWishlist } from '../../hooks/useWishlist';
 import { useAddToCartModal } from '../../hooks/useAddToCartModal';
 import styles from './MyPage.module.css';
 

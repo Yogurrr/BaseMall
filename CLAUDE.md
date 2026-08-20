@@ -17,6 +17,16 @@ KBO(한국프로야구) 굿즈 쇼핑몰. Spring Boot 4(Java 17) 백엔드 + Rea
 ```
 현재 `BackendApplicationTests`(컨텍스트 로드 확인) 외 비즈니스 로직 테스트는 없다. 기능 검증은 로컬 실행 후 데모 계정으로 수동 확인하는 것이 현재 이 저장소의 실질적인 검증 방법이다(README의 데모 계정 참고).
 
+이 개발 환경(macOS)에는 시스템 JDK가 따로 설치되어 있지 않다(`java -version`이 "Unable to locate a Java Runtime"로 실패). 다만 VSCode의 `redhat.java` 확장이 언어 서버 구동용으로 완전한 JDK를 내장하고 있어, 그걸로 `./mvnw compile` 등 컴파일 확인이 가능하다:
+```
+JAVAC_PATH=$(find ~/.vscode/extensions -path "*redhat.java-*/jre/*/bin/javac" | head -1)
+export JAVA_HOME=$(dirname "$(dirname "$JAVAC_PATH")")
+export PATH="$JAVA_HOME/bin:$PATH"
+```
+(대입문에는 셸 glob이 확장되지 않으므로 `find`로 실제 경로를 구해서 대입해야 한다 — `.../jre/*`처럼 와일드카드를 바로 대입하면 문자 그대로 들어가 실패한다.)
+
+백엔드 코드를 고친 뒤에는 위처럼 `JAVA_HOME`을 잡고 최소 `./mvnw compile`로 컴파일 여부를 확인할 것. (`./mvnw test`/`spring-boot:run`은 Supabase 실제 DB에 붙으므로, 컨텍스트 로드나 DB 부수효과가 걱정되면 사용자에게 먼저 확인한다.) redhat.java 확장 버전이 올라가면 폴더명이 바뀌므로 위 `find` 방식을 그대로 쓰면 된다.
+
 **Frontend** (`frontend/`)
 ```
 npm run dev        # 개발 서버 (Vite, :5173)

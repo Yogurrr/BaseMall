@@ -97,6 +97,15 @@
 			<scope>runtime</scope>
 		</dependency>
 
+		<!-- 💡 spring-boot-starter-parent가 버전을 관리해주지 않는 서드파티 라이브러리라 직접 버전을 고정한다.
+		     3.0.3은 spring-boot-starter-parent 4.0.5를 타깃으로 빌드됐고(4.1대를 타는 3.1.0보다),
+		     이 프로젝트의 4.0.7과 같은 4.0.x 라인이라 더 안전한 선택이다. -->
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>3.0.3</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>

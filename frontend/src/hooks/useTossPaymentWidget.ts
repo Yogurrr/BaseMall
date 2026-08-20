@@ -35,6 +35,7 @@ export const useTossPaymentWidget = ({ enabled, customerKey, initialAmount }: Us
     if (!enabled) {
       widgetRef.current = null;
       methodsWidgetRef.current = null;
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- 토스 결제위젯(외부 SDK)의 준비 상태를 껐다 켜는 동기화라 effect 밖에서 계산할 수 없다.
       setIsReady(false);
       return;
     }

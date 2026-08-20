@@ -75,6 +75,13 @@
   gap: 1rem;
 }
 
+.inquiryHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+
 .wishlistGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -142,6 +149,97 @@
 }
 
 .withdrawActions {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.profileForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  width: 100%;
+}
+
+.profileTable {
+  border: 0.05rem solid var(--border);
+  border-radius: 0.4rem;
+}
+
+.profileRow:first-child .profileLabel {
+  border-top-left-radius: 0.4rem;
+}
+
+.profileRow:last-child .profileLabel {
+  border-bottom-left-radius: 0.4rem;
+}
+
+.profileRow {
+  display: grid;
+  grid-template-columns: 6.5rem 1fr;
+  border-bottom: 0.05rem solid var(--border);
+}
+
+.profileRow:last-child {
+  border-bottom: none;
+}
+
+.profileLabel {
+  background: var(--code-bg);
+  padding: 0.7rem 0.8rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-h);
+  display: flex;
+  align-items: center;
+}
+
+.profileValue {
+  padding: 0.7rem 0.8rem;
+  display: flex;
+  align-items: center;
+}
+
+.profileValue input {
+  width: 100%;
+  box-sizing: border-box;
+  font: inherit;
+  font-size: 0.8rem;
+  padding: 0.5rem 0.6rem;
+  border-radius: 0.3rem;
+  border: 0.05rem solid var(--border);
+  background: var(--bg);
+  color: var(--text-h);
+}
+
+.profileStatic {
+  font-size: 0.8rem;
+  color: var(--text);
+}
+
+.profileSectionTitle {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-h);
+  margin: 0;
+}
+
+.profileHint {
+  font-size: 0.72rem;
+  color: var(--text);
+  margin: -0.6rem 0 0;
+}
+
+.profileError {
+  font-size: 0.75rem;
+  color: #dc2626;
+}
+
+.profileSuccess {
+  font-size: 0.75rem;
+  color: #16a34a;
+}
+
+.profileActions {
   display: flex;
   gap: 0.4rem;
 }

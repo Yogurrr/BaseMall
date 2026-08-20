@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import styles from './SearchBar.module.css';
 
 interface SearchBarProps {
@@ -9,11 +9,14 @@ interface SearchBarProps {
 }
 
 export const SearchBar = ({ defaultValue = '', placeholder = '검색어를 입력하세요', size = 'sm', onSearch }: SearchBarProps) => {
+  // 💡 defaultValue(상위 검색어)가 바뀌면 입력값도 맞춰야 하는데, effect 대신 렌더링 중에
+  // 이전 값과 비교해 바뀐 경우에만 조정한다(React 문서의 "prop이 바뀔 때 state를 조정하기" 패턴).
+  const [prevDefaultValue, setPrevDefaultValue] = useState(defaultValue);
   const [value, setValue] = useState(defaultValue);
-
-  useEffect(() => {
+  if (defaultValue !== prevDefaultValue) {
+    setPrevDefaultValue(defaultValue);
     setValue(defaultValue);
-  }, [defaultValue]);
+  }
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();

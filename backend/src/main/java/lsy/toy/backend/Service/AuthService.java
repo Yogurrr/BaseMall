@@ -1,6 +1,8 @@
 package lsy.toy.backend.Service;
 
 import lsy.toy.backend.Dto.AuthResponse;
+import lsy.toy.backend.Dto.RegisterRequest;
+import lsy.toy.backend.Dto.UpdateProfileRequest;
 import lsy.toy.backend.Dto.UserInfoResponse;
 import lsy.toy.backend.Entity.Team;
 import lsy.toy.backend.Entity.User;
@@ -15,10 +17,25 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.regex.Pattern;
+
 @Service
 public class AuthService {
 
     private static final Logger log = LoggerFactory.getLogger(AuthService.class);
+
+    // 💡 8자 이상 + 영문/숫자/특수문자 중 2가지 이상 조합, 그 외 문자(한글/공백 등)는 아예 허용하지 않는다.
+    // (?=.{8,}) 로 길이를 먼저 확인하고, 뒤의 비-캡처 그룹에서 두 카테고리 조합 중 하나라도 만족하는지 본다.
+    private static final Pattern PASSWORD_PATTERN = Pattern.compile(
+        "^(?=.{8,})(?:(?=.*[A-Za-z])(?=.*\\d)|(?=.*[A-Za-z])(?=.*[!@#$%^&*()_+=-])|(?=.*\\d)(?=.*[!@#$%^&*()_+=-]))"
+            + "[A-Za-z\\d!@#$%^&*()_+=-]+$"
+    );
+    private static final String PASSWORD_RULE_MESSAGE =
+        "비밀번호는 8자 이상이며 영문/숫자/특수문자 중 2가지 이상을 조합해야 합니다.";
+
+    // 💡 휴대폰번호는 010-1234-5678처럼 하이픈으로 구분된 형식만 허용한다.
+    private static final Pattern PHONE_PATTERN = Pattern.compile("^01[016789]-\\d{3,4}-\\d{4}$");
+    private static final String PHONE_RULE_MESSAGE = "휴대폰번호는 010-1234-5678 형식으로 입력해주세요.";
 
     private final UserRepository userRepository;
     private final CartItemRepository cartItemRepository;
@@ -43,15 +60,23 @@ public class AuthService {
         this.userService = userService;
     }
 
-    public AuthResponse register(String name, String email, String rawPassword) {
+    public AuthResponse register(RegisterRequest request) {
+        String email = request.getEmail();
         // 💡 아직 로그인하지 않은 상태(RLS 세션에 본인 식별자가 없음)라 일반 findByEmail로는
         // users를 조회할 수 없다 — 이메일 중복 확인은 인증 우회용 조회 경로를 사용한다.
         if (userRepository.findAuthCredentialsByEmail(email).isPresent()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 가입된 이메일입니다: " + email);
         }
 
-        User user = new User(name, email);
+        String rawPassword = request.getPassword();
+        if (rawPassword == null || !PASSWORD_PATTERN.matcher(rawPassword).matches()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, PASSWORD_RULE_MESSAGE);
+        }
+
+        User user = new User(request.getName(), email);
         user.setPassword(passwordEncoder.encode(rawPassword));
+        user.setBirthDate(request.getBirthDate());
+        user.setPhoneNumber(normalizePhoneNumber(request.getPhoneNumber()));
         User saved = userRepository.save(user);
 
         String token = jwtService.generateToken(saved.getEmail());
@@ -105,11 +130,56 @@ public class AuthService {
         return toResponse(userRepository.save(user));
     }
 
+    // 💡 이름/생년월일/휴대폰번호/비밀번호를 각각 선택적으로 바꾼다. 이메일은 로그인 식별자(JWT subject)라
+    // 여기서 수정할 수 없게 막아둔다 — 바꾸려면 별도의 재인증 플로우가 필요해서 범위 밖.
+    public UserInfoResponse updateProfile(String email, UpdateProfileRequest request) {
+        User user = userRepository.findByEmail(email)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다: " + email));
+
+        String newName = request.getName();
+        if (newName == null || newName.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "이름을 입력해주세요.");
+        }
+        user.setName(newName.trim());
+
+        user.setBirthDate(request.getBirthDate());
+
+        user.setPhoneNumber(normalizePhoneNumber(request.getPhoneNumber()));
+
+        String newPassword = request.getNewPassword();
+        if (newPassword != null && !newPassword.isBlank()) {
+            if (!PASSWORD_PATTERN.matcher(newPassword).matches()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, PASSWORD_RULE_MESSAGE);
+            }
+            String currentPassword = request.getCurrentPassword();
+            if (currentPassword == null || user.getPassword() == null
+                || !passwordEncoder.matches(currentPassword, user.getPassword())) {
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "현재 비밀번호가 올바르지 않습니다.");
+            }
+            user.setPassword(passwordEncoder.encode(newPassword));
+        }
+
+        return toResponse(userRepository.save(user));
+    }
+
+    // 💡 register/updateProfile 둘 다 휴대폰번호를 선택 입력으로 받아 같은 규칙으로 검증하므로 공통 헬퍼로 뺐다.
+    private String normalizePhoneNumber(String rawPhoneNumber) {
+        if (rawPhoneNumber == null || rawPhoneNumber.isBlank()) {
+            return null;
+        }
+        String trimmed = rawPhoneNumber.trim();
+        if (!PHONE_PATTERN.matcher(trimmed).matches()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, PHONE_RULE_MESSAGE);
+        }
+        return trimmed;
+    }
+
     private UserInfoResponse toResponse(User user) {
         String favoriteTeamName = user.getFavoriteTeam() != null ? user.getFavoriteTeam().getName() : null;
         // 💡 ADMIN은 고객이 아니라 운영자라 구매 등급 개념이 없으므로 null로 둔다.
         String grade = "ADMIN".equals(user.getRole()) ? null : userService.getMemberGrade(user.getId());
-        return new UserInfoResponse(user.getId(), user.getName(), user.getEmail(), user.getRole(), favoriteTeamName, grade, user.getPoints());
+        return new UserInfoResponse(user.getId(), user.getName(), user.getEmail(), user.getBirthDate(), user.getPhoneNumber(),
+            user.getRole(), favoriteTeamName, grade, user.getPoints());
     }
 
     // 💡 회원 탈퇴. 비밀번호 재확인 후 장바구니를 먼저 비우고, 계정은 실제로 지우지 않고

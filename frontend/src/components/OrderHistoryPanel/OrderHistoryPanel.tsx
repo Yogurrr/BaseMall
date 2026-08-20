@@ -6,7 +6,8 @@ import { cancelOrder } from '../../api/orderApi';
 import { OrderDetailModal } from '../OrderDetailModal/OrderDetailModal';
 import { ProductThumb } from '../ProductThumb/ProductThumb';
 import { Button } from '../Button/Button';
-import { MonthRangeFilter, defaultMonthRange, type DateRange } from '../MonthRangeFilter/MonthRangeFilter';
+import { MonthRangeFilter } from '../MonthRangeFilter/MonthRangeFilter';
+import { defaultMonthRange, type DateRange } from '../../utils/dateRange';
 import styles from './OrderHistoryPanel.module.css';
 
 interface OrderHistoryPanelProps {

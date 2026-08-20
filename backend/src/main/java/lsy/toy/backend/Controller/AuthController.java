@@ -5,6 +5,7 @@ import lsy.toy.backend.Dto.DeleteAccountRequest;
 import lsy.toy.backend.Dto.LoginRequest;
 import lsy.toy.backend.Dto.RegisterRequest;
 import lsy.toy.backend.Dto.UpdateFavoriteTeamRequest;
+import lsy.toy.backend.Dto.UpdateProfileRequest;
 import lsy.toy.backend.Dto.UserInfoResponse;
 import lsy.toy.backend.Service.AuthService;
 import org.springframework.http.HttpStatus;
@@ -26,7 +27,7 @@ public class AuthController {
     // 1. 회원가입 (POST)
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest request) {
-        AuthResponse created = authService.register(request.getName(), request.getEmail(), request.getPassword());
+        AuthResponse created = authService.register(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
@@ -53,5 +54,11 @@ public class AuthController {
     @PatchMapping("/me/favorite-team")
     public UserInfoResponse updateFavoriteTeam(Authentication authentication, @RequestBody UpdateFavoriteTeamRequest request) {
         return authService.updateFavoriteTeam(authentication.getName(), request.getTeam());
+    }
+
+    // 6. 회원 정보 수정 (PATCH, JWT 필요, 이름/생년월일/휴대폰번호/비밀번호. 이메일은 수정 불가)
+    @PatchMapping("/me")
+    public UserInfoResponse updateProfile(Authentication authentication, @RequestBody UpdateProfileRequest request) {
+        return authService.updateProfile(authentication.getName(), request);
     }
 }
