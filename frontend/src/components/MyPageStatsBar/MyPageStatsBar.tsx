@@ -5,7 +5,10 @@ interface MyPageStatsBarProps {
   couponCount: number;
 }
 
-export const MyPageStatsBar = ({ wishlistCount, couponCount }: MyPageStatsBarProps) => (
+export const MyPageStatsBar = ({
+  wishlistCount,
+  couponCount,
+}: MyPageStatsBarProps) => (
   <section className={styles.bar}>
     <div className={styles.stat}>
       <span className={styles.label}>적립금</span>

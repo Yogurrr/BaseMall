@@ -1,5 +1,6 @@
 package lsy.toy.backend.Controller;
 
+import jakarta.validation.Valid;
 import lsy.toy.backend.Dto.AddressRequest;
 import lsy.toy.backend.Dto.AddressResponse;
 import lsy.toy.backend.Service.AddressService;
@@ -12,7 +13,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/addresses")
-@CrossOrigin(origins = "http://localhost:5173")
 public class AddressController {
 
     private final AddressService addressService;
@@ -29,14 +29,14 @@ public class AddressController {
 
     // 2. 배송지 저장 (주문/결제 화면의 "배송지 저장" 체크박스, POST)
     @PostMapping
-    public ResponseEntity<AddressResponse> createAddress(Authentication authentication, @RequestBody AddressRequest request) {
+    public ResponseEntity<AddressResponse> createAddress(Authentication authentication, @Valid @RequestBody AddressRequest request) {
         AddressResponse created = addressService.createAddress(authentication.getName(), request);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     // 3. 저장된 배송지 수정 (PUT)
     @PutMapping("/{id}")
-    public AddressResponse updateAddress(Authentication authentication, @PathVariable Long id, @RequestBody AddressRequest request) {
+    public AddressResponse updateAddress(Authentication authentication, @PathVariable Long id, @Valid @RequestBody AddressRequest request) {
         return addressService.updateAddress(authentication.getName(), id, request);
     }
 

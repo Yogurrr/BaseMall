@@ -1,5 +1,3 @@
-const TOKEN_KEY = 'auth_token';
-
 type Listener = () => void;
 const listeners = new Set<Listener>();
 
@@ -13,15 +11,21 @@ export const subscribeAuthChange = (listener: Listener): (() => void) => {
   return () => listeners.delete(listener);
 };
 
-export const getToken = (): string | null => localStorage.getItem(TOKEN_KEY);
+// 💡 액세스 토큰은 localStorage가 아니라 모듈 스코프 변수(=탭 메모리)에만 둔다 — XSS로 스크립트가
+// 실행돼도 localStorage처럼 영구 저장소를 뒤질 필요 없이 훔칠 수 있는 걸 막는다. 새로고침하면
+// 이 변수는 비워지고, 대신 axiosInstance.refreshAccessToken()이 httpOnly 리프레시 쿠키로
+// 조용히 재발급받아 채운다(App.tsx/RequireAuth.tsx 참고).
+let accessToken: string | null = null;
+
+export const getToken = (): string | null => accessToken;
 
 export const setToken = (token: string): void => {
-  localStorage.setItem(TOKEN_KEY, token);
+  accessToken = token;
   notifyAuthChange();
 };
 
 export const clearToken = (): void => {
-  localStorage.removeItem(TOKEN_KEY);
+  accessToken = null;
   notifyAuthChange();
 };
 

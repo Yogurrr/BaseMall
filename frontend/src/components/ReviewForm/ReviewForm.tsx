@@ -1,7 +1,16 @@
-import { useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { StarRating } from '../StarRating/StarRating';
 import { Button } from '../Button/Button';
 import styles from './ReviewForm.module.css';
+
+const reviewSchema = z.object({
+  rating: z.number().min(1).max(5),
+  content: z.string().trim().min(1, '리뷰 내용을 입력해주세요.'),
+});
+
+type ReviewFormValues = z.infer<typeof reviewSchema>;
 
 interface ReviewFormProps {
   initialRating?: number;
@@ -20,29 +29,37 @@ export const ReviewForm = ({
   onSubmit,
   onCancel,
 }: ReviewFormProps) => {
-  const [rating, setRating] = useState(initialRating);
-  const [content, setContent] = useState(initialContent);
+  const { control, register, handleSubmit } = useForm<ReviewFormValues>({
+    resolver: zodResolver(reviewSchema),
+    defaultValues: { rating: initialRating, content: initialContent },
+  });
 
-  const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
-    if (!content.trim()) return;
-    onSubmit(rating, content.trim());
+  const submit = (values: ReviewFormValues) => {
+    onSubmit(values.rating, values.content.trim());
   };
 
   return (
-    <form className={styles.form} onSubmit={handleSubmit}>
+    <form className={styles.form} onSubmit={handleSubmit(submit)} noValidate>
       <div className={styles.ratingRow}>
         <span>별점</span>
-        <StarRating value={rating} onChange={setRating} size="lg" />
+        <Controller
+          control={control}
+          name="rating"
+          render={({ field }) => (
+            <StarRating
+              value={field.value}
+              onChange={field.onChange}
+              size="lg"
+            />
+          )}
+        />
       </div>
       <textarea
         className={styles.textarea}
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
+        {...register('content')}
         placeholder="상품에 대한 솔직한 후기를 남겨주세요."
         maxLength={1000}
         rows={4}
-        required
       />
       <div className={styles.actions}>
         {onCancel && (

@@ -35,7 +35,12 @@
 .scrim {
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.25) 55%, rgba(0, 0, 0, 0.05));
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.6),
+    rgba(0, 0, 0, 0.25) 55%,
+    rgba(0, 0, 0, 0.05)
+  );
 }
 
 .slideContent {
@@ -154,7 +159,9 @@
   background: var(--border);
   cursor: pointer;
   padding: 0;
-  transition: background 0.2s, transform 0.2s;
+  transition:
+    background 0.2s,
+    transform 0.2s;
 }
 
 .dot:hover {

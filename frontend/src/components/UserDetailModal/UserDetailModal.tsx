@@ -7,6 +7,7 @@ import { fetchUserById } from '../../api/userApi';
 import { fetchOrdersByUserId } from '../../api/orderApi';
 import { formatPrice } from '../../api/productApi';
 import type { Order } from '../../types/order';
+import { formatDate, formatDateTime } from '../../utils/formatDate';
 import styles from './UserDetailModal.module.css';
 
 interface UserDetailModalProps {
@@ -20,12 +21,20 @@ const ROLE_LABEL: Record<string, string> = {
 };
 
 export const UserDetailModal = ({ userId, onClose }: UserDetailModalProps) => {
-  const { data: user, isLoading, isError } = useQuery({
+  const {
+    data: user,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ['user', userId],
     queryFn: () => fetchUserById(userId),
   });
 
-  const { data: orders, isLoading: ordersLoading, isError: ordersError } = useQuery({
+  const {
+    data: orders,
+    isLoading: ordersLoading,
+    isError: ordersError,
+  } = useQuery({
     queryKey: ['user-orders', userId],
     queryFn: () => fetchOrdersByUserId(userId),
   });
@@ -43,7 +52,12 @@ export const UserDetailModal = ({ userId, onClose }: UserDetailModalProps) => {
       >
         <div className={styles.header}>
           <h2 id="user-detail-title">회원 상세 정보</h2>
-          <button type="button" className={styles.closeButton} onClick={onClose} aria-label="닫기">
+          <button
+            type="button"
+            className={styles.closeButton}
+            onClick={onClose}
+            aria-label="닫기"
+          >
             ✕
           </button>
         </div>
@@ -69,24 +83,28 @@ export const UserDetailModal = ({ userId, onClose }: UserDetailModalProps) => {
             <dt>적립금</dt>
             <dd>{formatPrice(user.points)}</dd>
             <dt>가입일</dt>
-            <dd>{new Date(user.createdAt).toLocaleString('ko-KR')}</dd>
+            <dd>{formatDateTime(user.createdAt)}</dd>
             <dt>상태</dt>
             <dd>
-              <span className={`${styles.statusBadge} ${user.useAt === 'Y' ? styles.statusActive : styles.statusWithdrawn}`}>
+              <span
+                className={`${styles.statusBadge} ${user.useAt === 'Y' ? styles.statusActive : styles.statusWithdrawn}`}
+              >
                 {user.useAt === 'Y' ? '활동중' : '탈퇴'}
               </span>
             </dd>
             {user.useAt === 'N' && user.withdrawnAt && (
               <>
                 <dt>탈퇴일</dt>
-                <dd>{new Date(user.withdrawnAt).toLocaleString('ko-KR')}</dd>
+                <dd>{formatDateTime(user.withdrawnAt)}</dd>
               </>
             )}
           </dl>
         )}
 
         <div className={styles.ordersSection}>
-          <h3 className={styles.ordersTitle}>주문 내역{orders && ` (${orders.length}건)`}</h3>
+          <h3 className={styles.ordersTitle}>
+            주문 내역{orders && ` (${orders.length}건)`}
+          </h3>
           {ordersLoading ? (
             <Spinner size={20} />
           ) : ordersError ? (
@@ -108,11 +126,15 @@ export const UserDetailModal = ({ userId, onClose }: UserDetailModalProps) => {
                 {orders.map((order) => (
                   <tr key={order.id}>
                     <td>#{order.id}</td>
-                    <td>{new Date(order.createdAt).toLocaleDateString('ko-KR')}</td>
+                    <td>{formatDate(order.createdAt)}</td>
                     <td>{formatPrice(order.totalPrice)}</td>
                     <td>{order.status}</td>
                     <td>
-                      <Button size="sm" variant="outline" onClick={() => setSelectedOrder(order)}>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setSelectedOrder(order)}
+                      >
                         상세보기
                       </Button>
                     </td>
@@ -125,7 +147,11 @@ export const UserDetailModal = ({ userId, onClose }: UserDetailModalProps) => {
       </div>
 
       {selectedOrder && (
-        <OrderDetailModal order={selectedOrder} onClose={() => setSelectedOrder(null)} readOnly />
+        <OrderDetailModal
+          order={selectedOrder}
+          onClose={() => setSelectedOrder(null)}
+          readOnly
+        />
       )}
     </div>
   );

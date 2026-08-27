@@ -17,7 +17,9 @@
   border-radius: 0.7rem;
   background: var(--code-bg);
   border: 0.05rem solid var(--border);
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
 }
 
 .perks > div:hover {

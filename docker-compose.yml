@@ -1,0 +1,28 @@
+services:
+  backend:
+    image: eclipse-temurin:17-jdk
+    working_dir: /app
+    volumes:
+      - ./backend:/app
+      - maven-repo:/root/.m2 # 💡 컨테이너를 새로 만들 때마다 의존성을 다시 받지 않도록 캐시를 영속화
+    command: ./mvnw spring-boot:run
+    ports:
+      - "8080:8080"
+
+  frontend:
+    image: node:22-alpine
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules # 💡 호스트의 (없거나 다른 OS용) node_modules가 컨테이너를 덮어쓰지 않도록 분리
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    environment:
+      VITE_API_PROXY_TARGET: http://backend:8080 # 💡 컨테이너 네트워크 안에서는 서비스명으로 접근
+      HUSKY: 0 # 💡 컨테이너는 frontend/만 마운트해 .git이 없고 경로 구조도 달라 husky(git hook) 설치가 항상 실패함 — git hook은 호스트 전용 워크플로라 컨테이너에서는 건너뜀
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
+volumes:
+  maven-repo:

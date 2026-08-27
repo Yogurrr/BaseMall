@@ -6,7 +6,11 @@ export const fetchMyCoupons = async (): Promise<Coupon[]> => {
   return response.data;
 };
 
-export const issueCouponsByGrade = async (grade: string): Promise<{ issuedCount: number }> => {
-  const response = await api.post<{ issuedCount: number }>('/coupons', { grade });
+export const issueCouponsByGrade = async (
+  grade: string,
+): Promise<{ issuedCount: number }> => {
+  const response = await api.post<{ issuedCount: number }>('/coupons', {
+    grade,
+  });
   return response.data;
 };

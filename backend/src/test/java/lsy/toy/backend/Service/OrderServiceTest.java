@@ -46,6 +46,8 @@ class OrderServiceTest {
     private CouponRepository couponRepository;
     @Mock
     private PointService pointService;
+    @Mock
+    private KakaoNotificationService kakaoNotificationService;
 
     @InjectMocks
     private OrderService orderService;
@@ -173,5 +175,29 @@ class OrderServiceTest {
         assertThat(response.getStatus()).isEqualTo("주문취소");
         verify(pointService).record(eq(user), eq(1_000), eq("ORDER_CANCEL"), eq(order), eq(null), any());
         verify(pointService).record(eq(user), eq(-90), eq("ORDER_CANCEL"), eq(order), eq(null), any());
+    }
+
+    @Test
+    void updateStatus_성공하면_카카오알림을보낸다() {
+        User user = userWithPoints(0);
+        Order order = order(user, "결제완료", 0, 0);
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.save(any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        orderService.updateStatus(1L, "배송중");
+
+        verify(kakaoNotificationService).notifyOrderStatusChanged(order);
+    }
+
+    @Test
+    void updateTrackingNumber_등록하면_카카오알림을보낸다() {
+        User user = userWithPoints(0);
+        Order order = order(user, "배송준비중", 0, 0);
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.save(any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        orderService.updateTrackingNumber(1L, "123456789");
+
+        verify(kakaoNotificationService).notifyTrackingNumberRegistered(order);
     }
 }

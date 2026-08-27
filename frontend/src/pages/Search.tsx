@@ -6,7 +6,10 @@ import { SiteFooter } from '../components/SiteFooter/SiteFooter';
 import { ProductCard } from '../components/ProductCard/ProductCard';
 import { Pagination } from '../components/Pagination/Pagination';
 import { Spinner } from '../components/Spinner/Spinner';
-import { SortSelect, type SortOption } from '../components/SortSelect/SortSelect';
+import {
+  SortSelect,
+  type SortOption,
+} from '../components/SortSelect/SortSelect';
 import { AddToCartModal } from '../components/AddToCartModal/AddToCartModal';
 import { useCart } from '../hooks/useCart';
 import { useWishlist } from '../hooks/useWishlist';
@@ -34,7 +37,12 @@ export const Search = () => {
   const [sort, setSort] = useState('');
   const { addItem } = useCart();
   const { isLiked, toggleWishlist } = useWishlist();
-  const { isAddToCartModalOpen, openAddToCartModal, closeAddToCartModal, goToCheckout } = useAddToCartModal();
+  const {
+    isAddToCartModalOpen,
+    openAddToCartModal,
+    closeAddToCartModal,
+    goToCheckout,
+  } = useAddToCartModal();
 
   // 💡 검색어가 바뀌면 페이지도 처음부터 다시 봐야 하는데, effect 대신 렌더링 중에
   // 이전 검색어와 비교해 바뀐 경우에만 조정한다.
@@ -49,9 +57,14 @@ export const Search = () => {
     setPage(0);
   };
 
-  const { data: productPage, isLoading, isError } = useQuery({
+  const {
+    data: productPage,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ['products', 'search', query, page, sort],
-    queryFn: () => fetchProductsPage({ page, size: PAGE_SIZE, keyword: query, sort }),
+    queryFn: () =>
+      fetchProductsPage({ page, size: PAGE_SIZE, keyword: query, sort }),
     enabled: query.length > 0,
   });
 
@@ -73,8 +86,14 @@ export const Search = () => {
         ) : (
           <>
             <div className={styles.resultBar}>
-              {!isLoading && !isError && <p className={styles.resultLabel}>총 {totalElements}개</p>}
-              <SortSelect options={SORT_OPTIONS} value={sort} onChange={handleSortChange} />
+              {!isLoading && !isError && (
+                <p className={styles.resultLabel}>총 {totalElements}개</p>
+              )}
+              <SortSelect
+                options={SORT_OPTIONS}
+                value={sort}
+                onChange={handleSortChange}
+              />
             </div>
 
             {isLoading ? (
@@ -99,10 +118,18 @@ export const Search = () => {
                 ))}
               </div>
             ) : (
-              <p className={styles.empty}>'{query}'에 대한 검색 결과가 없습니다.</p>
+              <p className={styles.empty}>
+                '{query}'에 대한 검색 결과가 없습니다.
+              </p>
             )}
 
-            {!isLoading && !isError && <Pagination page={page} totalPages={totalPages} onChange={setPage} />}
+            {!isLoading && !isError && (
+              <Pagination
+                page={page}
+                totalPages={totalPages}
+                onChange={setPage}
+              />
+            )}
           </>
         )}
 
@@ -114,7 +141,10 @@ export const Search = () => {
       <SiteFooter />
 
       {isAddToCartModalOpen && (
-        <AddToCartModal onClose={closeAddToCartModal} onCheckout={goToCheckout} />
+        <AddToCartModal
+          onClose={closeAddToCartModal}
+          onCheckout={goToCheckout}
+        />
       )}
     </div>
   );

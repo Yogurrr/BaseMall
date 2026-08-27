@@ -9,7 +9,8 @@ interface KakaoPayNoticeProps {
 
 // 💡 카카오 결제창에서 취소하거나 결제가 실패하면 cancel_url/fail_url로 돌아온다. 주문은 생성되지 않는다.
 export const KakaoPayNotice = ({ status }: KakaoPayNoticeProps) => {
-  const message = status === 'cancel' ? '결제가 취소되었습니다.' : '결제에 실패했습니다.';
+  const message =
+    status === 'cancel' ? '결제가 취소되었습니다.' : '결제에 실패했습니다.';
 
   return (
     <div className={styles.page}>

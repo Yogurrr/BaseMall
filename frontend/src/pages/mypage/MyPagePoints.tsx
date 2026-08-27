@@ -8,11 +8,16 @@ import styles from './MyPage.module.css';
 
 export const MyPagePoints = () => {
   const currentUser = useOutletContext<UserInfo>();
-  const { data: transactions = [] } = useQuery({ queryKey: ['points', 'me'], queryFn: fetchMyPointTransactions });
+  const { data: transactions = [] } = useQuery({
+    queryKey: ['points', 'me'],
+    queryFn: fetchMyPointTransactions,
+  });
 
   return (
     <div className={styles.wishlistSection}>
-      <p className={styles.comingSoonTitle}>보유 적립금 {formatPrice(currentUser.points)}</p>
+      <p className={styles.comingSoonTitle}>
+        보유 적립금 {formatPrice(currentUser.points)}
+      </p>
 
       <PointHistoryPanel transactions={transactions} />
     </div>

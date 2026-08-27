@@ -9,7 +9,12 @@ import styles from './MyPage.module.css';
 export const MyPageWishlist = () => {
   const { addItem } = useCart();
   const { items: wishlistItems, isLoading, toggleWishlist } = useWishlist();
-  const { isAddToCartModalOpen, openAddToCartModal, closeAddToCartModal, goToCheckout } = useAddToCartModal();
+  const {
+    isAddToCartModalOpen,
+    openAddToCartModal,
+    closeAddToCartModal,
+    goToCheckout,
+  } = useAddToCartModal();
 
   return (
     <div className={styles.wishlistSection}>
@@ -39,7 +44,10 @@ export const MyPageWishlist = () => {
       )}
 
       {isAddToCartModalOpen && (
-        <AddToCartModal onClose={closeAddToCartModal} onCheckout={goToCheckout} />
+        <AddToCartModal
+          onClose={closeAddToCartModal}
+          onCheckout={goToCheckout}
+        />
       )}
     </div>
   );

@@ -50,7 +50,7 @@ public class QnaService {
 
     @Transactional
     public QnaResponse createQna(Long productId, String email, String question) {
-        String trimmedQuestion = validateNotBlank(question, "질문 내용을 입력해주세요.");
+        String trimmedQuestion = question.trim();
 
         Product product = findProduct(productId);
         User user = findUser(email);
@@ -71,8 +71,11 @@ public class QnaService {
 
     @Transactional
     public AdminQnaResponse answerQna(Long id, String answer) {
-        String trimmed = validateNotBlank(answer, "답변 내용을 입력해주세요.");
+        String trimmed = answer.trim();
         Qna qna = findQna(id);
+        if (!"답변대기".equals(qna.getStatus())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 답변이 등록된 질문입니다.");
+        }
         qna.answer(trimmed);
         return new AdminQnaResponse(qna);
     }
@@ -96,13 +99,6 @@ public class QnaService {
     private Qna findQna(Long id) {
         return qnaRepository.findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "질문을 찾을 수 없습니다: " + id));
-    }
-
-    private String validateNotBlank(String value, String message) {
-        if (value == null || value.isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, message);
-        }
-        return value.trim();
     }
 
     private Product findProduct(Long id) {

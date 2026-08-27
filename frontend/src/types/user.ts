@@ -16,6 +16,7 @@ export interface UserInfo {
   favoriteTeam?: string;
   grade?: string | null;
   points: number;
+  kakaoLinked: boolean;
 }
 
 export interface User {

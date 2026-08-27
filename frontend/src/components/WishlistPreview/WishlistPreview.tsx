@@ -11,7 +11,12 @@ interface WishlistPreviewProps {
 
 const PREVIEW_SIZE = 4;
 
-export const WishlistPreview = ({ products, onToggleLike, onAddToCart, onMore }: WishlistPreviewProps) => (
+export const WishlistPreview = ({
+  products,
+  onToggleLike,
+  onAddToCart,
+  onMore,
+}: WishlistPreviewProps) => (
   <section className={styles.section}>
     <div className={styles.header}>
       <p className={styles.title}>좋아요</p>

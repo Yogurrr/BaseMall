@@ -19,10 +19,21 @@ export const MyPageHome = () => {
   const navigate = useNavigate();
   const { addItem } = useCart();
   const { items: wishlistItems, toggleWishlist } = useWishlist();
-  const { isAddToCartModalOpen, openAddToCartModal, closeAddToCartModal, goToCheckout } = useAddToCartModal();
+  const {
+    isAddToCartModalOpen,
+    openAddToCartModal,
+    closeAddToCartModal,
+    goToCheckout,
+  } = useAddToCartModal();
 
-  const { data: myOrders = [] } = useQuery({ queryKey: ['orders', 'me'], queryFn: fetchMyOrders });
-  const { data: myCoupons = [] } = useQuery({ queryKey: ['coupons', 'me'], queryFn: fetchMyCoupons });
+  const { data: myOrders = [] } = useQuery({
+    queryKey: ['orders', 'me'],
+    queryFn: fetchMyOrders,
+  });
+  const { data: myCoupons = [] } = useQuery({
+    queryKey: ['coupons', 'me'],
+    queryFn: fetchMyCoupons,
+  });
   const unusedCouponCount = myCoupons.filter((coupon) => !coupon.usedAt).length;
 
   return (
@@ -36,9 +47,15 @@ export const MyPageHome = () => {
         onSelectProfile={() => navigate('/mypage/profile-edit')}
       />
 
-      <MyPageStatsBar wishlistCount={wishlistItems.length} couponCount={unusedCouponCount} />
+      <MyPageStatsBar
+        wishlistCount={wishlistItems.length}
+        couponCount={unusedCouponCount}
+      />
 
-      <OrderStatusOverview orders={myOrders} onMore={() => navigate('/mypage/orders')} />
+      <OrderStatusOverview
+        orders={myOrders}
+        onMore={() => navigate('/mypage/orders')}
+      />
 
       <WishlistPreview
         products={wishlistItems}
@@ -52,12 +69,20 @@ export const MyPageHome = () => {
 
       {currentUser.role === 'ADMIN' && (
         <div className={styles.linkGrid}>
-          <QuickLinkCard icon="🛠️" label="관리자 페이지" description="상품 · 회원 관리" to="/admin" />
+          <QuickLinkCard
+            icon="🛠️"
+            label="관리자 페이지"
+            description="상품 · 회원 관리"
+            to="/admin"
+          />
         </div>
       )}
 
       {isAddToCartModalOpen && (
-        <AddToCartModal onClose={closeAddToCartModal} onCheckout={goToCheckout} />
+        <AddToCartModal
+          onClose={closeAddToCartModal}
+          onCheckout={goToCheckout}
+        />
       )}
     </>
   );

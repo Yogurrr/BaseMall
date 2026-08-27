@@ -7,9 +7,18 @@ interface SelectFilterProps {
   sectionId?: string;
 }
 
-export const SelectFilter = ({ options, value, onChange, sectionId }: SelectFilterProps) => (
+export const SelectFilter = ({
+  options,
+  value,
+  onChange,
+  sectionId,
+}: SelectFilterProps) => (
   <section id={sectionId} className={styles.wrapper}>
-    <select className={styles.select} value={value} onChange={(event) => onChange(event.target.value)}>
+    <select
+      className={styles.select}
+      value={value}
+      onChange={(event) => onChange(event.target.value)}
+    >
       {options.map((option) => (
         <option key={option} value={option}>
           {option}

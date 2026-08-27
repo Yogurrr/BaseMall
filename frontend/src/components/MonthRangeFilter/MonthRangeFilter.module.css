@@ -69,6 +69,9 @@
 .searchButton {
   flex-shrink: 0;
   width: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font: inherit;
   font-size: 16px;
   font-weight: 700;
@@ -80,6 +83,26 @@
 
 .searchButton:hover {
   filter: brightness(0.95);
+}
+
+.searchButton:disabled {
+  cursor: not-allowed;
+  filter: brightness(0.95);
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #fff;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .notices {

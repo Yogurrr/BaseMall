@@ -5,7 +5,9 @@ import type { PaymentWidgetInstance } from '@tosspayments/payment-widget-sdk';
 export const TOSS_PAYMENT_METHODS_SELECTOR = '#toss-payment-methods';
 export const TOSS_AGREEMENT_SELECTOR = '#toss-agreement';
 
-type PaymentMethodsWidget = ReturnType<PaymentWidgetInstance['renderPaymentMethods']>;
+type PaymentMethodsWidget = ReturnType<
+  PaymentWidgetInstance['renderPaymentMethods']
+>;
 
 interface UseTossPaymentWidgetOptions {
   enabled: boolean;
@@ -26,7 +28,11 @@ interface RequestTossPaymentParams {
 // 💡 토스페이먼츠 결제위젯의 mount~unmount 라이프사이클을 캡슐화한다. enabled가 true일 때만
 // 위젯을 로드/렌더링하고, requestPayment 호출 시 authoritative 금액으로 updateAmount 후
 // 바로 결제를 요청해 호출부가 순서를 틀릴 수 없게 한다.
-export const useTossPaymentWidget = ({ enabled, customerKey, initialAmount }: UseTossPaymentWidgetOptions) => {
+export const useTossPaymentWidget = ({
+  enabled,
+  customerKey,
+  initialAmount,
+}: UseTossPaymentWidgetOptions) => {
   const [isReady, setIsReady] = useState(false);
   const widgetRef = useRef<PaymentWidgetInstance | null>(null);
   const methodsWidgetRef = useRef<PaymentMethodsWidget | null>(null);
@@ -46,7 +52,10 @@ export const useTossPaymentWidget = ({ enabled, customerKey, initialAmount }: Us
     loadPaymentWidget(clientKey, customerKey || ANONYMOUS).then((widget) => {
       if (cancelled) return;
       widgetRef.current = widget;
-      methodsWidgetRef.current = widget.renderPaymentMethods(TOSS_PAYMENT_METHODS_SELECTOR, initialAmount);
+      methodsWidgetRef.current = widget.renderPaymentMethods(
+        TOSS_PAYMENT_METHODS_SELECTOR,
+        initialAmount,
+      );
       widget.renderAgreement(TOSS_AGREEMENT_SELECTOR);
       setIsReady(true);
     });

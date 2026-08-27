@@ -31,12 +31,12 @@ public class BadgeService {
     }
 
     public Badge createBadge(String name, String colorFrom, String colorTo) {
-        String trimmedName = requireName(name);
+        String trimmedName = name.trim();
         if (badgeRepository.existsByName(trimmedName)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 존재하는 뱃지입니다: " + trimmedName);
         }
 
-        Badge badge = new Badge(trimmedName, requireColor(colorFrom), requireColor(colorTo));
+        Badge badge = new Badge(trimmedName, colorFrom.trim(), colorTo.trim());
         Badge saved = badgeRepository.save(badge);
         log.info("뱃지 등록: badgeId={}, name={}", saved.getId(), saved.getName());
         return saved;
@@ -45,7 +45,7 @@ public class BadgeService {
     @Transactional
     public Badge updateBadge(Long id, String name, String colorFrom, String colorTo) {
         Badge badge = findBadge(id);
-        String trimmedName = requireName(name);
+        String trimmedName = name.trim();
 
         if (!trimmedName.equals(badge.getName())) {
             if (badgeRepository.existsByName(trimmedName)) {
@@ -55,8 +55,8 @@ public class BadgeService {
             badge.setName(trimmedName);
         }
 
-        badge.setColorFrom(requireColor(colorFrom));
-        badge.setColorTo(requireColor(colorTo));
+        badge.setColorFrom(colorFrom.trim());
+        badge.setColorTo(colorTo.trim());
 
         Badge saved = badgeRepository.save(badge);
         log.info("뱃지 수정: badgeId={}, name={}", saved.getId(), saved.getName());
@@ -81,20 +81,6 @@ public class BadgeService {
         List<Product> affected = productRepository.findByBadge(oldName);
         affected.forEach(product -> product.setBadge(newName));
         productRepository.saveAll(affected);
-    }
-
-    private String requireName(String name) {
-        if (name == null || name.isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "뱃지 이름을 입력해주세요.");
-        }
-        return name.trim();
-    }
-
-    private String requireColor(String color) {
-        if (color == null || color.isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "뱃지 색상을 입력해주세요.");
-        }
-        return color.trim();
     }
 
     private Badge findBadge(Long id) {

@@ -1,4 +1,12 @@
-import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
 import { formatPrice } from '../../api/productApi';
 import type { RevenueByGroup } from '../../types/order';
 import styles from './RevenueBreakdownChart.module.css';
@@ -15,7 +23,10 @@ const formatCompact = (value: number) => {
   return formatPrice(value);
 };
 
-export const RevenueBreakdownChart = ({ title, data }: RevenueBreakdownChartProps) => {
+export const RevenueBreakdownChart = ({
+  title,
+  data,
+}: RevenueBreakdownChartProps) => {
   const chartHeight = Math.max(data.length * 36, 120);
 
   return (
@@ -26,7 +37,11 @@ export const RevenueBreakdownChart = ({ title, data }: RevenueBreakdownChartProp
       ) : (
         <div className={styles.chart} style={{ height: `${chartHeight}px` }}>
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data} layout="vertical" margin={{ top: 4, right: 24, left: 4, bottom: 4 }}>
+            <BarChart
+              data={data}
+              layout="vertical"
+              margin={{ top: 4, right: 24, left: 4, bottom: 4 }}
+            >
               <CartesianGrid stroke="var(--border)" horizontal={false} />
               <XAxis
                 type="number"
@@ -54,7 +69,11 @@ export const RevenueBreakdownChart = ({ title, data }: RevenueBreakdownChartProp
                 }}
                 labelStyle={{ color: 'var(--text-h)' }}
               />
-              <Bar dataKey="revenue" fill="var(--accent)" radius={[0, 4, 4, 0]} />
+              <Bar
+                dataKey="revenue"
+                fill="var(--accent)"
+                radius={[0, 4, 4, 0]}
+              />
             </BarChart>
           </ResponsiveContainer>
         </div>

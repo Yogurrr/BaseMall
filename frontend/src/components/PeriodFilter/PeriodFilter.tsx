@@ -108,7 +108,11 @@ export const PeriodFilter = ({ value, onApply }: PeriodFilterProps) => {
             setTo(e.target.value);
           }}
         />
-        <button type="button" className={styles.searchButton} onClick={handleSearch}>
+        <button
+          type="button"
+          className={styles.searchButton}
+          onClick={handleSearch}
+        >
           조회
         </button>
       </div>

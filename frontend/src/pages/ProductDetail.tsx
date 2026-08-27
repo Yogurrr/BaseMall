@@ -16,7 +16,11 @@ import { fetchProduct, formatPrice } from '../api/productApi';
 import { fetchBadges, getBadgeGradient } from '../api/badgeApi';
 import { recordRecentView } from '../api/recentViewApi';
 import { isLoggedIn } from '../api/authToken';
-import { UNIFORM_CATEGORY_NAME, UNIFORM_MARKING_NAMES, UNIFORM_SIZES } from '../constants/uniformOptions';
+import {
+  UNIFORM_CATEGORY_NAME,
+  UNIFORM_MARKING_NAMES,
+  UNIFORM_SIZES,
+} from '../constants/uniformOptions';
 import styles from './ProductDetail.module.css';
 
 export const ProductDetail = () => {
@@ -25,11 +29,18 @@ export const ProductDetail = () => {
   const navigate = useNavigate();
   const { addItem } = useCart();
   const { isLiked, toggleWishlist } = useWishlist();
-  const { isAddToCartModalOpen, openAddToCartModal, closeAddToCartModal, goToCheckout } = useAddToCartModal();
+  const {
+    isAddToCartModalOpen,
+    openAddToCartModal,
+    closeAddToCartModal,
+    goToCheckout,
+  } = useAddToCartModal();
 
   const [quantity, setQuantity] = useState(1);
   const [size, setSize] = useState<string>(UNIFORM_SIZES[0]);
-  const [markingName, setMarkingName] = useState<string>(UNIFORM_MARKING_NAMES[0]);
+  const [markingName, setMarkingName] = useState<string>(
+    UNIFORM_MARKING_NAMES[0],
+  );
 
   const {
     data: product,
@@ -41,7 +52,11 @@ export const ProductDetail = () => {
     enabled: Number.isFinite(productId),
   });
 
-  const { data: badges = [] } = useQuery({ queryKey: ['badges'], queryFn: fetchBadges, staleTime: 5 * 60 * 1000 });
+  const { data: badges = [] } = useQuery({
+    queryKey: ['badges'],
+    queryFn: fetchBadges,
+    staleTime: 5 * 60 * 1000,
+  });
 
   // 💡 로그인 사용자가 상품 상세를 실제로 조회했을 때만 "최근 본 상품" 이력을 남긴다(비로그인은 대상 없음).
   useEffect(() => {
@@ -83,11 +98,15 @@ export const ProductDetail = () => {
           <span>/</span>
           {product ? <span>{product.category}</span> : <span>상품</span>}
           <span>/</span>
-          <span className={styles.breadcrumbCurrent}>{product?.name ?? '상세정보'}</span>
+          <span className={styles.breadcrumbCurrent}>
+            {product?.name ?? '상세정보'}
+          </span>
         </nav>
 
         {isLoading ? (
-          <div className={styles.empty}><Spinner /></div>
+          <div className={styles.empty}>
+            <Spinner />
+          </div>
         ) : isError || !product ? (
           <div className={styles.empty}>
             <p>상품을 찾을 수 없습니다.</p>
@@ -98,9 +117,18 @@ export const ProductDetail = () => {
         ) : (
           <div className={styles.detail}>
             <div className={styles.thumb}>
-              <ProductThumb imageUrl={product.imageUrl} alt={product.name} size="lg" />
+              <ProductThumb
+                imageUrl={product.imageUrl}
+                alt={product.name}
+                size="lg"
+              />
               {product.badge && (
-                <span className={styles.badge} style={{ background: getBadgeGradient(badges, product.badge) }}>
+                <span
+                  className={styles.badge}
+                  style={{
+                    background: getBadgeGradient(badges, product.badge),
+                  }}
+                >
                   {product.badge}
                 </span>
               )}
@@ -109,18 +137,29 @@ export const ProductDetail = () => {
             <div className={styles.info}>
               <p className={styles.category}>
                 {product.category}
-                {product.team && <span className={styles.team}> · {product.team}</span>}
+                {product.team && (
+                  <span className={styles.team}> · {product.team}</span>
+                )}
               </p>
               <h1 className={styles.title}>{product.name}</h1>
               <p className={styles.rating}>
-                ⭐ {product.rating} <span className={styles.reviewCount}>({product.reviewCount}개 리뷰)</span>
+                ⭐ {product.rating}{' '}
+                <span className={styles.reviewCount}>
+                  ({product.reviewCount}개 리뷰)
+                </span>
               </p>
 
               <div className={styles.priceRow}>
-                {discountPercent > 0 && <span className={styles.discount}>{discountPercent}%</span>}
-                <span className={styles.price}>{formatPrice(product.price)}</span>
+                {discountPercent > 0 && (
+                  <span className={styles.discount}>{discountPercent}%</span>
+                )}
+                <span className={styles.price}>
+                  {formatPrice(product.price)}
+                </span>
                 {product.originalPrice && (
-                  <span className={styles.originalPrice}>{formatPrice(product.originalPrice)}</span>
+                  <span className={styles.originalPrice}>
+                    {formatPrice(product.originalPrice)}
+                  </span>
                 )}
               </div>
 
@@ -162,17 +201,27 @@ export const ProductDetail = () => {
               <div className={styles.quantityRow}>
                 <span>수량</span>
                 <div className={styles.stepper}>
-                  <button type="button" onClick={() => handleQuantityChange(-1)} aria-label="수량 감소">
+                  <button
+                    type="button"
+                    onClick={() => handleQuantityChange(-1)}
+                    aria-label="수량 감소"
+                  >
                     −
                   </button>
                   <span>{quantity}</span>
-                  <button type="button" onClick={() => handleQuantityChange(1)} aria-label="수량 증가">
+                  <button
+                    type="button"
+                    onClick={() => handleQuantityChange(1)}
+                    aria-label="수량 증가"
+                  >
                     +
                   </button>
                 </div>
               </div>
 
-              <p className={styles.totalPrice}>총 금액 {formatPrice(product.price * quantity)}</p>
+              <p className={styles.totalPrice}>
+                총 금액 {formatPrice(product.price * quantity)}
+              </p>
 
               <div className={styles.actions}>
                 <Button size="lg" onClick={handleBuyNow}>
@@ -198,24 +247,40 @@ export const ProductDetail = () => {
           </div>
         )}
 
-        {!isLoading && !isError && product && (product.description || product.detailImageUrl) && (
-          <section className={styles.description}>
-            <h2 className={styles.descriptionTitle}>상세 설명</h2>
-            {product.detailImageUrl && (
-              <img src={product.detailImageUrl} alt={`${product.name} 상세 이미지`} className={styles.descriptionImage} />
-            )}
-            {product.description && <p className={styles.descriptionText}>{product.description}</p>}
-          </section>
-        )}
+        {!isLoading &&
+          !isError &&
+          product &&
+          (product.description || product.detailImageUrl) && (
+            <section className={styles.description}>
+              <h2 className={styles.descriptionTitle}>상세 설명</h2>
+              {product.detailImageUrl && (
+                <img
+                  src={product.detailImageUrl}
+                  alt={`${product.name} 상세 이미지`}
+                  className={styles.descriptionImage}
+                />
+              )}
+              {product.description && (
+                <p className={styles.descriptionText}>{product.description}</p>
+              )}
+            </section>
+          )}
 
-        {!isLoading && !isError && product && <ProductReviews productId={product.id} />}
-        {!isLoading && !isError && product && <ProductQna productId={product.id} />}
+        {!isLoading && !isError && product && (
+          <ProductReviews productId={product.id} />
+        )}
+        {!isLoading && !isError && product && (
+          <ProductQna productId={product.id} />
+        )}
       </div>
 
       <SiteFooter />
 
       {isAddToCartModalOpen && (
-        <AddToCartModal onClose={closeAddToCartModal} onCheckout={goToCheckout} />
+        <AddToCartModal
+          onClose={closeAddToCartModal}
+          onCheckout={goToCheckout}
+        />
       )}
     </div>
   );

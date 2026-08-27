@@ -6,7 +6,10 @@ interface PaymentMethodFormProps {
   onPaymentMethodChange: (value: string) => void;
 }
 
-export const PaymentMethodForm = ({ paymentMethod, onPaymentMethodChange }: PaymentMethodFormProps) => {
+export const PaymentMethodForm = ({
+  paymentMethod,
+  onPaymentMethodChange,
+}: PaymentMethodFormProps) => {
   return (
     <section className={styles.section}>
       <h2 className={styles.sectionTitle}>결제수단 선택</h2>

@@ -13,7 +13,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/coupons")
-@CrossOrigin(origins = "http://localhost:5173") // 💡 React(Vite) 포트 허용
 public class CouponController {
 
     private final CouponService couponService;

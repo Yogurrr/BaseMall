@@ -1,6 +1,7 @@
 import type { DaumPostcodeResult } from '../types/daumPostcode';
 
-const DAUM_POSTCODE_SRC = '//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
+const DAUM_POSTCODE_SRC =
+  '//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
 
 let loadingPromise: Promise<void> | null = null;
 
@@ -23,7 +24,9 @@ const loadDaumPostcodeScript = (): Promise<void> => {
   return loadingPromise;
 };
 
-export const openDaumPostcode = async (onComplete: (data: DaumPostcodeResult) => void) => {
+export const openDaumPostcode = async (
+  onComplete: (data: DaumPostcodeResult) => void,
+) => {
   await loadDaumPostcodeScript();
   new window.daum!.Postcode({
     oncomplete: onComplete,

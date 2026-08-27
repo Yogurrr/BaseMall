@@ -17,7 +17,9 @@ export const AdminSidebar = ({ onLogout }: AdminSidebarProps) => (
         <NavLink
           key={item.key}
           to={`/admin/${item.key}`}
-          className={({ isActive }) => `${styles.tab} ${isActive ? styles.tabActive : ''}`}
+          className={({ isActive }) =>
+            `${styles.tab} ${isActive ? styles.tabActive : ''}`
+          }
         >
           {item.label}
         </NavLink>

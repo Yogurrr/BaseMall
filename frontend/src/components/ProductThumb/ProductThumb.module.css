@@ -32,7 +32,11 @@
   width: 1.4rem;
   height: 1.4rem;
   border-radius: 0.3rem;
-  background: radial-gradient(circle at 30% 20%, var(--accent-bg), var(--code-bg));
+  background: radial-gradient(
+    circle at 30% 20%,
+    var(--accent-bg),
+    var(--code-bg)
+  );
   font-size: 0.9rem;
   vertical-align: middle;
 }

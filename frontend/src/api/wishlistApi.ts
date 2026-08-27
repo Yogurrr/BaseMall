@@ -6,12 +6,20 @@ export const fetchWishlist = async (): Promise<WishlistItem[]> => {
   return response.data;
 };
 
-export const addWishlistItem = async (productId: number): Promise<WishlistItem[]> => {
-  const response = await api.post<WishlistItem[]>('/wishlist/items', { productId });
+export const addWishlistItem = async (
+  productId: number,
+): Promise<WishlistItem[]> => {
+  const response = await api.post<WishlistItem[]>('/wishlist/items', {
+    productId,
+  });
   return response.data;
 };
 
-export const removeWishlistItem = async (productId: number): Promise<WishlistItem[]> => {
-  const response = await api.delete<WishlistItem[]>(`/wishlist/items/${productId}`);
+export const removeWishlistItem = async (
+  productId: number,
+): Promise<WishlistItem[]> => {
+  const response = await api.delete<WishlistItem[]>(
+    `/wishlist/items/${productId}`,
+  );
   return response.data;
 };

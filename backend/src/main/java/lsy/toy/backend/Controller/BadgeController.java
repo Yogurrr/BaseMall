@@ -1,5 +1,6 @@
 package lsy.toy.backend.Controller;
 
+import jakarta.validation.Valid;
 import lsy.toy.backend.Dto.BadgeRequest;
 import lsy.toy.backend.Entity.Badge;
 import lsy.toy.backend.Service.BadgeService;
@@ -11,7 +12,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/badges")
-@CrossOrigin(origins = "http://localhost:5173") // 💡 React(Vite) 포트 허용
 public class BadgeController {
 
     private final BadgeService badgeService;
@@ -28,14 +28,14 @@ public class BadgeController {
 
     // 2. 뱃지 등록 (POST, 관리자 전용)
     @PostMapping
-    public ResponseEntity<Badge> createBadge(@RequestBody BadgeRequest request) {
+    public ResponseEntity<Badge> createBadge(@Valid @RequestBody BadgeRequest request) {
         Badge created = badgeService.createBadge(request.getName(), request.getColorFrom(), request.getColorTo());
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     // 3. 뱃지 수정 (PUT, 관리자 전용)
     @PutMapping("/{id}")
-    public Badge updateBadge(@PathVariable Long id, @RequestBody BadgeRequest request) {
+    public Badge updateBadge(@PathVariable Long id, @Valid @RequestBody BadgeRequest request) {
         return badgeService.updateBadge(id, request.getName(), request.getColorFrom(), request.getColorTo());
     }
 

@@ -12,9 +12,10 @@ public class UserInfoResponse {
     private String favoriteTeam;
     private String grade;
     private Integer points;
+    private boolean kakaoLinked;
 
     public UserInfoResponse(Long id, String name, String email, LocalDate birthDate, String phoneNumber,
-                             String role, String favoriteTeam, String grade, Integer points) {
+                             String role, String favoriteTeam, String grade, Integer points, boolean kakaoLinked) {
         this.id = id;
         this.name = name;
         this.email = email;
@@ -24,6 +25,7 @@ public class UserInfoResponse {
         this.favoriteTeam = favoriteTeam;
         this.grade = grade;
         this.points = points;
+        this.kakaoLinked = kakaoLinked;
     }
 
     public Long getId() { return id; }
@@ -35,4 +37,5 @@ public class UserInfoResponse {
     public String getFavoriteTeam() { return favoriteTeam; }
     public String getGrade() { return grade; }
     public Integer getPoints() { return points; }
+    public boolean isKakaoLinked() { return kakaoLinked; }
 }

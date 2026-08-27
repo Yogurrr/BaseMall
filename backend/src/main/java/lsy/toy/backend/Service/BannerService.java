@@ -65,9 +65,6 @@ public class BannerService {
     }
 
     public Banner updateActive(Long id, Boolean active) {
-        if (active == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "active 값이 필요합니다.");
-        }
         Banner banner = findBanner(id);
         banner.setActive(active);
         return bannerRepository.save(banner);

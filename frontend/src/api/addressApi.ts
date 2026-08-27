@@ -16,12 +16,17 @@ export const fetchMyAddresses = async (): Promise<Address[]> => {
   return response.data;
 };
 
-export const saveAddress = async (params: SaveAddressParams): Promise<Address> => {
+export const saveAddress = async (
+  params: SaveAddressParams,
+): Promise<Address> => {
   const response = await api.post<Address>('/addresses', params);
   return response.data;
 };
 
-export const updateAddress = async (id: number, params: SaveAddressParams): Promise<Address> => {
+export const updateAddress = async (
+  id: number,
+  params: SaveAddressParams,
+): Promise<Address> => {
   const response = await api.put<Address>(`/addresses/${id}`, params);
   return response.data;
 };

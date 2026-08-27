@@ -28,14 +28,27 @@ export const QnaListPanel = ({ qnas, emptyMessage }: QnaListPanelProps) => {
       {qnas.map((qna) => (
         <li key={qna.id} className={styles.card}>
           <Link to={`/products/${qna.productId}`} className={styles.thumb}>
-            <ProductThumb imageUrl={qna.productImageUrl} alt={qna.productName} size="lg" />
+            <ProductThumb
+              imageUrl={qna.productImageUrl}
+              alt={qna.productName}
+              size="lg"
+            />
           </Link>
           <div className={styles.info}>
             <div className={styles.metaRow}>
-              <Link to={`/products/${qna.productId}`} className={styles.productName}>
+              <Link
+                to={`/products/${qna.productId}`}
+                className={styles.productName}
+              >
                 {qna.productName}
               </Link>
-              <span className={qna.status === '답변완료' ? styles.statusDone : styles.statusPending}>
+              <span
+                className={
+                  qna.status === '답변완료'
+                    ? styles.statusDone
+                    : styles.statusPending
+                }
+              >
                 {qna.status}
               </span>
             </div>

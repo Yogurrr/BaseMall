@@ -6,9 +6,14 @@ import { SelectFilter } from '../../components/SelectFilter/SelectFilter';
 import { Pagination } from '../../components/Pagination/Pagination';
 import { OrderDetailModal } from '../../components/OrderDetailModal/OrderDetailModal';
 import { ProductThumb } from '../../components/ProductThumb/ProductThumb';
-import { ORDER_STATUSES, fetchOrders, updateOrderStatus } from '../../api/orderApi';
+import {
+  ORDER_STATUSES,
+  fetchOrders,
+  updateOrderStatus,
+} from '../../api/orderApi';
 import { formatPrice } from '../../api/productApi';
 import type { Order } from '../../types/order';
+import { formatDateTime } from '../../utils/formatDate';
 import styles from './Admin.module.css';
 
 const ORDER_STATUS_FILTERS = ['전체', ...ORDER_STATUSES];
@@ -16,7 +21,11 @@ const ORDERS_PAGE_SIZE = 10;
 
 export const AdminOrders = () => {
   const queryClient = useQueryClient();
-  const { data: orders = [], isLoading, isError } = useQuery({
+  const {
+    data: orders = [],
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ['orders'],
     queryFn: fetchOrders,
   });
@@ -26,7 +35,8 @@ export const AdminOrders = () => {
   const [page, setPage] = useState(0);
 
   const statusMutation = useMutation({
-    mutationFn: ({ id, status }: { id: number; status: string }) => updateOrderStatus(id, status),
+    mutationFn: ({ id, status }: { id: number; status: string }) =>
+      updateOrderStatus(id, status),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
     },
@@ -52,7 +62,10 @@ export const AdminOrders = () => {
     });
 
   const totalPages = Math.ceil(filteredOrders.length / ORDERS_PAGE_SIZE);
-  const pagedOrders = filteredOrders.slice(page * ORDERS_PAGE_SIZE, page * ORDERS_PAGE_SIZE + ORDERS_PAGE_SIZE);
+  const pagedOrders = filteredOrders.slice(
+    page * ORDERS_PAGE_SIZE,
+    page * ORDERS_PAGE_SIZE + ORDERS_PAGE_SIZE,
+  );
 
   // 💡 상태/검색어 필터가 바뀌면 페이지도 처음부터 다시 봐야 하는데, effect 대신 렌더링 중에
   // 이전 필터 조합과 비교해 바뀐 경우에만 조정한다.
@@ -81,7 +94,11 @@ export const AdminOrders = () => {
       </section>
 
       <div className={styles.filterBar}>
-        <SelectFilter options={ORDER_STATUS_FILTERS} value={statusFilter} onChange={setStatusFilter} />
+        <SelectFilter
+          options={ORDER_STATUS_FILTERS}
+          value={statusFilter}
+          onChange={setStatusFilter}
+        />
         <input
           type="search"
           className={styles.searchInput}
@@ -94,14 +111,20 @@ export const AdminOrders = () => {
 
       <div className={styles.tableWrap}>
         {isLoading ? (
-          <div className={styles.empty}><Spinner /></div>
+          <div className={styles.empty}>
+            <Spinner />
+          </div>
         ) : isError ? (
-          <p className={`${styles.empty} ${styles.error}`}>주문 목록을 불러오지 못했습니다.</p>
+          <p className={`${styles.empty} ${styles.error}`}>
+            주문 목록을 불러오지 못했습니다.
+          </p>
         ) : orders.length === 0 ? (
           <p className={styles.empty}>주문 내역이 없습니다.</p>
         ) : filteredOrders.length === 0 ? (
           <p className={styles.empty}>
-            {trimmedKeyword ? `'${keyword}'에 대한 검색 결과가 없습니다.` : `'${statusFilter}' 상태의 주문이 없습니다.`}
+            {trimmedKeyword
+              ? `'${keyword}'에 대한 검색 결과가 없습니다.`
+              : `'${statusFilter}' 상태의 주문이 없습니다.`}
           </p>
         ) : (
           <table>
@@ -122,30 +145,50 @@ export const AdminOrders = () => {
                   <td>#{order.id}</td>
                   <td>
                     {order.buyerName}
-                    <div className={styles.orderBuyerEmail}>{order.buyerEmail}</div>
+                    <div className={styles.orderBuyerEmail}>
+                      {order.buyerEmail}
+                    </div>
                   </td>
                   <td>
                     {order.items.map((item, index) => (
                       <div key={index}>
-                        <ProductThumb imageUrl={item.imageUrl} alt={item.name} size="sm" /> {item.name} × {item.quantity}
+                        <ProductThumb
+                          imageUrl={item.imageUrl}
+                          alt={item.name}
+                          size="sm"
+                        />{' '}
+                        {item.name} × {item.quantity}
                         {(item.size || item.markingName) && (
                           <span className={styles.orderBuyerEmail}>
                             {' '}
-                            ({[item.size && `사이즈 ${item.size}`, item.markingName && `마킹 ${item.markingName}`]
+                            (
+                            {[
+                              item.size && `사이즈 ${item.size}`,
+                              item.markingName && `마킹 ${item.markingName}`,
+                            ]
                               .filter(Boolean)
-                              .join(' · ')})
+                              .join(' · ')}
+                            )
                           </span>
                         )}
                       </div>
                     ))}
                   </td>
                   <td>{formatPrice(order.totalPrice)}</td>
-                  <td>{new Date(order.createdAt).toLocaleString('ko-KR')}</td>
+                  <td>{formatDateTime(order.createdAt)}</td>
                   <td>
                     <select
                       value={order.status}
-                      disabled={statusMutation.isPending && statusMutation.variables?.id === order.id}
-                      onChange={(e) => statusMutation.mutate({ id: order.id, status: e.target.value })}
+                      disabled={
+                        statusMutation.isPending &&
+                        statusMutation.variables?.id === order.id
+                      }
+                      onChange={(e) =>
+                        statusMutation.mutate({
+                          id: order.id,
+                          status: e.target.value,
+                        })
+                      }
                     >
                       {ORDER_STATUSES.map((status) => (
                         <option key={status} value={status}>
@@ -155,7 +198,11 @@ export const AdminOrders = () => {
                     </select>
                   </td>
                   <td>
-                    <Button size="sm" variant="outline" onClick={() => setSelectedOrder(order)}>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setSelectedOrder(order)}
+                    >
                       상세보기
                     </Button>
                   </td>
@@ -171,7 +218,10 @@ export const AdminOrders = () => {
       )}
 
       {selectedOrder && (
-        <OrderDetailModal order={selectedOrder} onClose={() => setSelectedOrder(null)} />
+        <OrderDetailModal
+          order={selectedOrder}
+          onClose={() => setSelectedOrder(null)}
+        />
       )}
     </>
   );

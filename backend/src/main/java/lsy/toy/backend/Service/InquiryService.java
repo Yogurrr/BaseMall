@@ -36,8 +36,8 @@ public class InquiryService {
     public InquiryResponse createInquiry(String email, InquiryRequest request) {
         User user = findUser(email);
         String category = validateCategory(request.getCategory());
-        String title = validateNotBlank(request.getTitle(), "제목을 입력해주세요.");
-        String content = validateNotBlank(request.getContent(), "내용을 입력해주세요.");
+        String title = request.getTitle().trim();
+        String content = request.getContent().trim();
         Order order = resolveOwnedOrder(request.getOrderId(), user);
 
         Inquiry saved = inquiryRepository.save(new Inquiry(user, order, category, title, content, request.getImageUrl()));
@@ -73,8 +73,11 @@ public class InquiryService {
 
     @Transactional
     public AdminInquiryResponse answerInquiry(Long id, String answer) {
-        String trimmed = validateNotBlank(answer, "답변 내용을 입력해주세요.");
+        String trimmed = answer.trim();
         Inquiry inquiry = findInquiry(id);
+        if (!"답변대기".equals(inquiry.getStatus())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 답변이 등록된 문의입니다.");
+        }
         inquiry.answer(trimmed);
         return new AdminInquiryResponse(inquiry);
     }
@@ -109,13 +112,6 @@ public class InquiryService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "올바른 카테고리를 선택해주세요.");
         }
         return category;
-    }
-
-    private String validateNotBlank(String value, String message) {
-        if (value == null || value.isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, message);
-        }
-        return value.trim();
     }
 
     private User findUser(String email) {

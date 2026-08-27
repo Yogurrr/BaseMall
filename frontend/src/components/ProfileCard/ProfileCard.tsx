@@ -13,7 +13,9 @@ export const ProfileCard = ({ name, email, role }: ProfileCardProps) => {
       <div className={styles.info}>
         <div className={styles.nameRow}>
           <h1 className={styles.name}>{name}</h1>
-          <span className={`${styles.badge} ${role === 'ADMIN' ? styles.badgeAdmin : ''}`}>
+          <span
+            className={`${styles.badge} ${role === 'ADMIN' ? styles.badgeAdmin : ''}`}
+          >
             {role === 'ADMIN' ? '관리자' : '일반회원'}
           </span>
         </div>

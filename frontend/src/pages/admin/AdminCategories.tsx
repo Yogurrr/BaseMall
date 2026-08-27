@@ -1,50 +1,109 @@
-import { useState, type FormEvent } from 'react';
+import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useForm, type FieldErrors } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import axios from 'axios';
+import { toast } from 'sonner';
 import { Button } from '../../components/Button/Button';
 import { Spinner } from '../../components/Spinner/Spinner';
-import { InfoModal } from '../../components/InfoModal/InfoModal';
-import { createCategory, deleteCategory, fetchCategoryList, updateCategory } from '../../api/categoryApi';
-import { createBadge, deleteBadge, fetchBadges, getBadgeGradient, updateBadge } from '../../api/badgeApi';
+import {
+  createCategory,
+  deleteCategory,
+  fetchCategoryList,
+  updateCategory,
+} from '../../api/categoryApi';
+import {
+  createBadge,
+  deleteBadge,
+  fetchBadges,
+  getBadgeGradient,
+  updateBadge,
+} from '../../api/badgeApi';
 import type { Category } from '../../types/category';
 import type { Badge, BadgeInput } from '../../types/badge';
 import styles from './Admin.module.css';
 
 const extractErrorMessage = (error: unknown, fallback: string) =>
-  axios.isAxiosError(error) && error.response?.data?.message ? error.response.data.message : fallback;
+  axios.isAxiosError(error) && error.response?.data?.message
+    ? error.response.data.message
+    : fallback;
 
-const DEFAULT_BADGE_FORM: BadgeInput = { name: '', colorFrom: '#2563eb', colorTo: '#38bdf8' };
+const categoryFormSchema = z.object({
+  name: z.string().trim().min(1, '이름을 입력해주세요.'),
+});
+
+type CategoryFormValues = z.infer<typeof categoryFormSchema>;
+
+const badgeFormSchema = z.object({
+  name: z.string().trim().min(1, '이름을 입력해주세요.'),
+  colorFrom: z.string(),
+  colorTo: z.string(),
+});
+
+type BadgeFormValues = z.infer<typeof badgeFormSchema>;
+
+const DEFAULT_BADGE_FORM: BadgeFormValues = {
+  name: '',
+  colorFrom: '#2563eb',
+  colorTo: '#38bdf8',
+};
+
+const onInvalid = (
+  formErrors: FieldErrors<CategoryFormValues | BadgeFormValues>,
+) => {
+  const firstMessage = Object.values(formErrors)[0]?.message;
+  toast.error(
+    typeof firstMessage === 'string' ? firstMessage : '입력값을 확인해주세요.',
+  );
+};
 
 export const AdminCategories = () => {
   const queryClient = useQueryClient();
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // ================= 카테고리 =================
   const {
     data: categories = [],
     isLoading: isCategoriesLoading,
     isError: isCategoriesError,
-  } = useQuery({ queryKey: ['categories', 'admin'], queryFn: fetchCategoryList });
+  } = useQuery({
+    queryKey: ['categories', 'admin'],
+    queryFn: fetchCategoryList,
+  });
 
-  const [categoryName, setCategoryName] = useState('');
-  const [editingCategoryId, setEditingCategoryId] = useState<number | null>(null);
-  const [categoryError, setCategoryError] = useState<string | null>(null);
+  const {
+    register: registerCategory,
+    handleSubmit: handleCategoryFormSubmit,
+    reset: resetCategoryFormValues,
+  } = useForm<CategoryFormValues>({
+    resolver: zodResolver(categoryFormSchema),
+    defaultValues: { name: '' },
+  });
+  const [editingCategoryId, setEditingCategoryId] = useState<number | null>(
+    null,
+  );
 
   const resetCategoryForm = () => {
-    setCategoryName('');
+    resetCategoryFormValues({ name: '' });
     setEditingCategoryId(null);
-    setCategoryError(null);
   };
 
   const categoryMutation = useMutation({
     mutationFn: (name: string) =>
-      editingCategoryId !== null ? updateCategory(editingCategoryId, name) : createCategory(name),
+      editingCategoryId !== null
+        ? updateCategory(editingCategoryId, name)
+        : createCategory(name),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories'] });
-      setSuccessMessage(editingCategoryId !== null ? '카테고리가 수정되었습니다.' : '카테고리가 추가되었습니다.');
+      toast.success(
+        editingCategoryId !== null
+          ? '카테고리가 수정되었습니다.'
+          : '카테고리가 추가되었습니다.',
+      );
       resetCategoryForm();
     },
-    onError: (error) => setCategoryError(extractErrorMessage(error, '저장에 실패했습니다.')),
+    onError: (error) =>
+      toast.error(extractErrorMessage(error, '저장에 실패했습니다.')),
   });
 
   const deleteCategoryMutation = useMutation({
@@ -53,21 +112,17 @@ export const AdminCategories = () => {
       queryClient.invalidateQueries({ queryKey: ['categories'] });
       if (editingCategoryId === id) resetCategoryForm();
     },
-    onError: (error) => setCategoryError(extractErrorMessage(error, '삭제에 실패했습니다.')),
+    onError: (error) =>
+      toast.error(extractErrorMessage(error, '삭제에 실패했습니다.')),
   });
 
-  const handleCategorySubmit = (event: FormEvent) => {
-    event.preventDefault();
-    const trimmed = categoryName.trim();
-    if (!trimmed) return;
-    setCategoryError(null);
-    categoryMutation.mutate(trimmed);
+  const onCategorySubmit = (values: CategoryFormValues) => {
+    categoryMutation.mutate(values.name);
   };
 
   const handleCategoryEdit = (category: Category) => {
     setEditingCategoryId(category.id);
-    setCategoryName(category.name);
-    setCategoryError(null);
+    resetCategoryFormValues({ name: category.name });
   };
 
   // ================= 뱃지 =================
@@ -77,25 +132,41 @@ export const AdminCategories = () => {
     isError: isBadgesError,
   } = useQuery({ queryKey: ['badges'], queryFn: fetchBadges });
 
-  const [badgeForm, setBadgeForm] = useState<BadgeInput>(DEFAULT_BADGE_FORM);
+  const {
+    register: registerBadge,
+    handleSubmit: handleBadgeFormSubmit,
+    watch: watchBadge,
+    reset: resetBadgeFormValues,
+  } = useForm<BadgeFormValues>({
+    resolver: zodResolver(badgeFormSchema),
+    defaultValues: DEFAULT_BADGE_FORM,
+  });
+  const badgeName = watchBadge('name');
+  const badgeColorFrom = watchBadge('colorFrom');
+  const badgeColorTo = watchBadge('colorTo');
   const [editingBadgeId, setEditingBadgeId] = useState<number | null>(null);
-  const [badgeError, setBadgeError] = useState<string | null>(null);
 
   const resetBadgeForm = () => {
-    setBadgeForm(DEFAULT_BADGE_FORM);
+    resetBadgeFormValues(DEFAULT_BADGE_FORM);
     setEditingBadgeId(null);
-    setBadgeError(null);
   };
 
   const badgeMutation = useMutation({
     mutationFn: (payload: BadgeInput) =>
-      editingBadgeId !== null ? updateBadge(editingBadgeId, payload) : createBadge(payload),
+      editingBadgeId !== null
+        ? updateBadge(editingBadgeId, payload)
+        : createBadge(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['badges'] });
-      setSuccessMessage(editingBadgeId !== null ? '뱃지가 수정되었습니다.' : '뱃지가 추가되었습니다.');
+      toast.success(
+        editingBadgeId !== null
+          ? '뱃지가 수정되었습니다.'
+          : '뱃지가 추가되었습니다.',
+      );
       resetBadgeForm();
     },
-    onError: (error) => setBadgeError(extractErrorMessage(error, '저장에 실패했습니다.')),
+    onError: (error) =>
+      toast.error(extractErrorMessage(error, '저장에 실패했습니다.')),
   });
 
   const deleteBadgeMutation = useMutation({
@@ -105,21 +176,21 @@ export const AdminCategories = () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
       if (editingBadgeId === id) resetBadgeForm();
     },
-    onError: (error) => setBadgeError(extractErrorMessage(error, '삭제에 실패했습니다.')),
+    onError: (error) =>
+      toast.error(extractErrorMessage(error, '삭제에 실패했습니다.')),
   });
 
-  const handleBadgeSubmit = (event: FormEvent) => {
-    event.preventDefault();
-    const trimmed = badgeForm.name.trim();
-    if (!trimmed) return;
-    setBadgeError(null);
-    badgeMutation.mutate({ ...badgeForm, name: trimmed });
+  const onBadgeSubmit = (values: BadgeFormValues) => {
+    badgeMutation.mutate({ ...values, name: values.name });
   };
 
   const handleBadgeEdit = (badge: Badge) => {
     setEditingBadgeId(badge.id);
-    setBadgeForm({ name: badge.name, colorFrom: badge.colorFrom, colorTo: badge.colorTo });
-    setBadgeError(null);
+    resetBadgeFormValues({
+      name: badge.name,
+      colorFrom: badge.colorFrom,
+      colorTo: badge.colorTo,
+    });
   };
 
   return (
@@ -131,34 +202,40 @@ export const AdminCategories = () => {
       <div className={styles.statsSection}>
         <h2 className={styles.sectionTitle}>카테고리</h2>
 
-        <form className={styles.form} onSubmit={handleCategorySubmit}>
+        <form
+          className={styles.form}
+          onSubmit={handleCategoryFormSubmit(onCategorySubmit, onInvalid)}
+          noValidate
+        >
           <label className={`${styles.field} ${styles.fieldWide}`}>
             이름
-            <input
-              value={categoryName}
-              onChange={(e) => setCategoryName(e.target.value)}
-              placeholder="예: 유니폼"
-              required
-            />
+            <input {...registerCategory('name')} placeholder="예: 유니폼" />
           </label>
           <div className={styles.formActions}>
             <Button type="submit" isLoading={categoryMutation.isPending}>
               {editingCategoryId !== null ? '수정 저장' : '카테고리 추가'}
             </Button>
             {editingCategoryId !== null && (
-              <Button type="button" variant="secondary" onClick={resetCategoryForm}>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={resetCategoryForm}
+              >
                 취소
               </Button>
             )}
           </div>
-          {categoryError && <p className={styles.error}>{categoryError}</p>}
         </form>
 
         <div className={styles.tableWrap}>
           {isCategoriesLoading ? (
-            <div className={styles.empty}><Spinner /></div>
+            <div className={styles.empty}>
+              <Spinner />
+            </div>
           ) : isCategoriesError ? (
-            <p className={`${styles.empty} ${styles.error}`}>카테고리 목록을 불러오지 못했습니다.</p>
+            <p className={`${styles.empty} ${styles.error}`}>
+              카테고리 목록을 불러오지 못했습니다.
+            </p>
           ) : (
             <table>
               <thead>
@@ -173,14 +250,23 @@ export const AdminCategories = () => {
                     <td>{category.name}</td>
                     <td>
                       <div className={styles.rowActions}>
-                        <Button size="sm" variant="outline" onClick={() => handleCategoryEdit(category)}>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleCategoryEdit(category)}
+                        >
                           수정
                         </Button>
                         <Button
                           size="sm"
                           variant="danger"
-                          isLoading={deleteCategoryMutation.isPending && deleteCategoryMutation.variables === category.id}
-                          onClick={() => deleteCategoryMutation.mutate(category.id)}
+                          isLoading={
+                            deleteCategoryMutation.isPending &&
+                            deleteCategoryMutation.variables === category.id
+                          }
+                          onClick={() =>
+                            deleteCategoryMutation.mutate(category.id)
+                          }
                         >
                           삭제
                         </Button>
@@ -191,48 +277,43 @@ export const AdminCategories = () => {
               </tbody>
             </table>
           )}
-          {!isCategoriesLoading && !isCategoriesError && categories.length === 0 && (
-            <p className={styles.empty}>등록된 카테고리가 없습니다.</p>
-          )}
+          {!isCategoriesLoading &&
+            !isCategoriesError &&
+            categories.length === 0 && (
+              <p className={styles.empty}>등록된 카테고리가 없습니다.</p>
+            )}
         </div>
       </div>
 
       <div className={styles.statsSection}>
         <h2 className={styles.sectionTitle}>뱃지</h2>
 
-        <form className={styles.form} onSubmit={handleBadgeSubmit}>
+        <form
+          className={styles.form}
+          onSubmit={handleBadgeFormSubmit(onBadgeSubmit, onInvalid)}
+          noValidate
+        >
           <label className={styles.field}>
             이름
-            <input
-              value={badgeForm.name}
-              onChange={(e) => setBadgeForm((f) => ({ ...f, name: e.target.value }))}
-              placeholder="예: NEW"
-              required
-            />
+            <input {...registerBadge('name')} placeholder="예: NEW" />
           </label>
           <label className={styles.field}>
             시작 색상
-            <input
-              type="color"
-              value={badgeForm.colorFrom}
-              onChange={(e) => setBadgeForm((f) => ({ ...f, colorFrom: e.target.value }))}
-            />
+            <input type="color" {...registerBadge('colorFrom')} />
           </label>
           <label className={styles.field}>
             끝 색상
-            <input
-              type="color"
-              value={badgeForm.colorTo}
-              onChange={(e) => setBadgeForm((f) => ({ ...f, colorTo: e.target.value }))}
-            />
+            <input type="color" {...registerBadge('colorTo')} />
           </label>
           <div className={styles.field}>
             미리보기
             <span
               className={styles.badge}
-              style={{ background: `linear-gradient(120deg, ${badgeForm.colorFrom}, ${badgeForm.colorTo})` }}
+              style={{
+                background: `linear-gradient(120deg, ${badgeColorFrom}, ${badgeColorTo})`,
+              }}
             >
-              {badgeForm.name || '뱃지'}
+              {badgeName || '뱃지'}
             </span>
           </div>
           <div className={styles.formActions}>
@@ -240,19 +321,26 @@ export const AdminCategories = () => {
               {editingBadgeId !== null ? '수정 저장' : '뱃지 추가'}
             </Button>
             {editingBadgeId !== null && (
-              <Button type="button" variant="secondary" onClick={resetBadgeForm}>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={resetBadgeForm}
+              >
                 취소
               </Button>
             )}
           </div>
-          {badgeError && <p className={styles.error}>{badgeError}</p>}
         </form>
 
         <div className={styles.tableWrap}>
           {isBadgesLoading ? (
-            <div className={styles.empty}><Spinner /></div>
+            <div className={styles.empty}>
+              <Spinner />
+            </div>
           ) : isBadgesError ? (
-            <p className={`${styles.empty} ${styles.error}`}>뱃지 목록을 불러오지 못했습니다.</p>
+            <p className={`${styles.empty} ${styles.error}`}>
+              뱃지 목록을 불러오지 못했습니다.
+            </p>
           ) : (
             <table>
               <thead>
@@ -266,20 +354,32 @@ export const AdminCategories = () => {
                 {badges.map((badge) => (
                   <tr key={badge.id}>
                     <td>
-                      <span className={styles.badge} style={{ background: getBadgeGradient(badges, badge.name) }}>
+                      <span
+                        className={styles.badge}
+                        style={{
+                          background: getBadgeGradient(badges, badge.name),
+                        }}
+                      >
                         {badge.name}
                       </span>
                     </td>
                     <td>{badge.name}</td>
                     <td>
                       <div className={styles.rowActions}>
-                        <Button size="sm" variant="outline" onClick={() => handleBadgeEdit(badge)}>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleBadgeEdit(badge)}
+                        >
                           수정
                         </Button>
                         <Button
                           size="sm"
                           variant="danger"
-                          isLoading={deleteBadgeMutation.isPending && deleteBadgeMutation.variables === badge.id}
+                          isLoading={
+                            deleteBadgeMutation.isPending &&
+                            deleteBadgeMutation.variables === badge.id
+                          }
                           onClick={() => deleteBadgeMutation.mutate(badge.id)}
                         >
                           삭제
@@ -296,10 +396,6 @@ export const AdminCategories = () => {
           )}
         </div>
       </div>
-
-      {successMessage && (
-        <InfoModal message={successMessage} onClose={() => setSuccessMessage(null)} />
-      )}
     </>
   );
 };

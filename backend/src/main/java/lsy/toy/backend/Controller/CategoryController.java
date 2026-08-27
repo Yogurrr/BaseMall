@@ -1,5 +1,6 @@
 package lsy.toy.backend.Controller;
 
+import jakarta.validation.Valid;
 import lsy.toy.backend.Dto.CategoryRequest;
 import lsy.toy.backend.Entity.Category;
 import lsy.toy.backend.Service.CategoryService;
@@ -11,7 +12,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/categories")
-@CrossOrigin(origins = "http://localhost:5173") // 💡 React(Vite) 포트 허용
 public class CategoryController {
 
     private final CategoryService categoryService;
@@ -36,14 +36,14 @@ public class CategoryController {
 
     // 3. 카테고리 등록 (POST, 관리자 전용)
     @PostMapping
-    public ResponseEntity<Category> createCategory(@RequestBody CategoryRequest request) {
+    public ResponseEntity<Category> createCategory(@Valid @RequestBody CategoryRequest request) {
         Category created = categoryService.createCategory(request.getName());
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     // 4. 카테고리 수정 (PUT, 관리자 전용)
     @PutMapping("/{id}")
-    public Category updateCategory(@PathVariable Long id, @RequestBody CategoryRequest request) {
+    public Category updateCategory(@PathVariable Long id, @Valid @RequestBody CategoryRequest request) {
         return categoryService.updateCategory(id, request.getName());
     }
 

@@ -1,6 +1,10 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useForm, type FieldErrors } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { toast } from 'sonner';
 import { Button } from '../../components/Button/Button';
 import { Spinner } from '../../components/Spinner/Spinner';
 import { ProductImageUploader } from '../../components/ProductImageUploader/ProductImageUploader';
@@ -19,36 +23,43 @@ import type { Product, ProductInput } from '../../types/product';
 import adminStyles from './Admin.module.css';
 import styles from './AdminProductNew.module.css';
 
-const EMPTY_FORM = {
-  name: '',
-  category: '',
-  team: '',
-  price: '',
-  originalPrice: '',
-  badge: '',
-  stock: '0',
-  description: '',
-  imageUrl: '',
-  detailImageUrl: '',
-};
+const productSchema = z
+  .object({
+    name: z.string(),
+    category: z.string(),
+    team: z.string(),
+    price: z.string(),
+    originalPrice: z.string(),
+    badge: z.string(),
+    stock: z.string(),
+    description: z.string(),
+  })
+  .superRefine((values, ctx) => {
+    if (!values.name.trim()) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['name'],
+        message: '상품명을 입력해주세요.',
+      });
+    }
+    if (!values.category) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['category'],
+        message: '카테고리를 선택해주세요.',
+      });
+    }
+    const priceValue = Number(values.price);
+    if (!priceValue || priceValue <= 0) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['price'],
+        message: '가격을 입력해주세요.',
+      });
+    }
+  });
 
-type FormState = typeof EMPTY_FORM;
-
-const toFormState = (product?: Product): FormState => {
-  if (!product) return EMPTY_FORM;
-  return {
-    name: product.name,
-    category: product.category,
-    team: product.team ?? '',
-    price: String(product.price),
-    originalPrice: product.originalPrice ? String(product.originalPrice) : '',
-    badge: product.badge ?? '',
-    stock: String(product.stock),
-    description: product.description ?? '',
-    imageUrl: product.imageUrl ?? '',
-    detailImageUrl: product.detailImageUrl ?? '',
-  };
-};
+type ProductFormValues = z.infer<typeof productSchema>;
 
 export const AdminProductNew = () => {
   const navigate = useNavigate();
@@ -56,9 +67,18 @@ export const AdminProductNew = () => {
   const productId = id ? Number(id) : null;
   const isEditMode = productId !== null;
 
-  const { data: categoryNames = [] } = useQuery({ queryKey: ['categories'], queryFn: fetchCategories });
-  const { data: teamNames = [] } = useQuery({ queryKey: ['teams'], queryFn: fetchTeams });
-  const { data: badges = [] } = useQuery({ queryKey: ['badges'], queryFn: fetchBadges });
+  const { data: categoryNames = [] } = useQuery({
+    queryKey: ['categories'],
+    queryFn: fetchCategories,
+  });
+  const { data: teamNames = [] } = useQuery({
+    queryKey: ['teams'],
+    queryFn: fetchTeams,
+  });
+  const { data: badges = [] } = useQuery({
+    queryKey: ['badges'],
+    queryFn: fetchBadges,
+  });
   const { data: product, isLoading: isProductLoading } = useQuery({
     queryKey: ['product', productId],
     queryFn: () => fetchProduct(productId as number),
@@ -69,7 +89,12 @@ export const AdminProductNew = () => {
     <div className={styles.page}>
       <div className={adminStyles.panelHeader}>
         <h1>{isEditMode ? '상품 수정' : '상품 등록'}</h1>
-        <Button type="button" variant="outline" size="sm" onClick={() => navigate('/admin/products')}>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => navigate('/admin/products')}
+        >
           목록으로
         </Button>
       </div>
@@ -82,8 +107,15 @@ export const AdminProductNew = () => {
         // 💡 productId가 바뀌면(다른 상품 수정으로 이동) 폼 상태를 처음부터 다시 초기화해야 하므로 key로 리마운트시킨다.
         // 이 지점에 도달했을 때는(스피너를 벗어난 시점) edit 모드면 이미 product가 로드된 뒤라, effect 없이
         // 최초 렌더링에서 바로 product 데이터로 상태를 초기화할 수 있다.
-        <ProductForm key={productId ?? 'new'} product={product} isEditMode={isEditMode} productId={productId}
-          categoryNames={categoryNames} teamNames={teamNames} badges={badges} />
+        <ProductForm
+          key={productId ?? 'new'}
+          product={product}
+          isEditMode={isEditMode}
+          productId={productId}
+          categoryNames={categoryNames}
+          teamNames={teamNames}
+          badges={badges}
+        />
       )}
     </div>
   );
@@ -98,56 +130,93 @@ interface ProductFormProps {
   badges: Badge[];
 }
 
-const ProductForm = ({ product, isEditMode, productId, categoryNames, teamNames, badges }: ProductFormProps) => {
+const ProductForm = ({
+  product,
+  isEditMode,
+  productId,
+  categoryNames,
+  teamNames,
+  badges,
+}: ProductFormProps) => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const [form, setForm] = useState<FormState>(() => toFormState(product));
+  const imageUrl = product?.imageUrl ?? '';
+  const detailImageUrl = product?.detailImageUrl ?? '';
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [detailImageFile, setDetailImageFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
-  const [uploadError, setUploadError] = useState<string | null>(null);
 
-  const imagePreview = useObjectUrlPreview(imageFile, form.imageUrl || null);
-  const detailImagePreview = useObjectUrlPreview(detailImageFile, form.detailImageUrl || null);
+  const imagePreview = useObjectUrlPreview(imageFile, imageUrl || null);
+  const detailImagePreview = useObjectUrlPreview(
+    detailImageFile,
+    detailImageUrl || null,
+  );
 
-  // 💡 신규 등록일 때 목록이 로드되기 전에는 아직 고를 후보가 없어 form.category/team이 비어 있을 수 있다.
-  // 렌더링 중에 계산 가능한 값이라 별도 effect로 state에 동기화해 넣을 필요가 없다.
-  const effectiveCategory = form.category || categoryNames[0] || '';
-  const effectiveTeam = form.team || teamNames[0] || '';
+  const { register, handleSubmit, setValue, getValues } =
+    useForm<ProductFormValues>({
+      resolver: zodResolver(productSchema),
+      defaultValues: {
+        name: product?.name ?? '',
+        category: product?.category ?? '',
+        team: product?.team ?? '',
+        price: product ? String(product.price) : '',
+        originalPrice: product?.originalPrice
+          ? String(product.originalPrice)
+          : '',
+        badge: product?.badge ?? '',
+        stock: product ? String(product.stock) : '0',
+        description: product?.description ?? '',
+      },
+    });
+
+  // 💡 신규 등록 시 카테고리/구단 목록이 폼 마운트 이후 비동기로 도착할 수 있어, 도착 시점에 첫 값을 기본 선택으로 채워준다.
+  useEffect(() => {
+    if (!getValues('category') && categoryNames.length > 0) {
+      setValue('category', categoryNames[0]);
+    }
+  }, [categoryNames, getValues, setValue]);
+
+  useEffect(() => {
+    if (!getValues('team') && teamNames.length > 0) {
+      setValue('team', teamNames[0]);
+    }
+  }, [teamNames, getValues, setValue]);
 
   const saveMutation = useMutation({
     mutationFn: (payload: ProductInput) =>
-      isEditMode ? updateProduct(productId as number, payload) : createProduct(payload),
+      isEditMode
+        ? updateProduct(productId as number, payload)
+        : createProduct(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
       if (isEditMode) {
         queryClient.invalidateQueries({ queryKey: ['product', productId] });
       }
+      toast.success(
+        isEditMode ? '상품이 수정되었습니다.' : '상품이 등록되었습니다.',
+      );
       navigate('/admin/products');
     },
+    onError: () =>
+      toast.error(isEditMode ? '수정에 실패했습니다.' : '등록에 실패했습니다.'),
   });
 
-  const handleSubmit = async (event: FormEvent) => {
-    event.preventDefault();
-    const trimmedName = form.name.trim();
-    const priceValue = Number(form.price);
-    if (!trimmedName || !priceValue || !effectiveCategory) return;
-
-    let imageUrl = form.imageUrl || undefined;
-    let detailImageUrl = form.detailImageUrl || undefined;
+  const onSubmit = async (values: ProductFormValues) => {
+    let nextImageUrl = imageUrl || undefined;
+    let nextDetailImageUrl = detailImageUrl || undefined;
     if (imageFile || detailImageFile) {
-      setUploadError(null);
       setIsUploading(true);
       try {
         if (imageFile) {
-          imageUrl = (await uploadProductImage(imageFile)).imageUrl;
+          nextImageUrl = (await uploadProductImage(imageFile)).imageUrl;
         }
         if (detailImageFile) {
-          detailImageUrl = (await uploadProductImage(detailImageFile)).imageUrl;
+          nextDetailImageUrl = (await uploadProductImage(detailImageFile))
+            .imageUrl;
         }
       } catch {
-        setUploadError('이미지 업로드에 실패했습니다.');
+        toast.error('이미지 업로드에 실패했습니다.');
         setIsUploading(false);
         return;
       }
@@ -155,35 +224,45 @@ const ProductForm = ({ product, isEditMode, productId, categoryNames, teamNames,
     }
 
     saveMutation.mutate({
-      name: trimmedName,
-      category: effectiveCategory,
-      team: effectiveTeam || undefined,
-      price: priceValue,
-      originalPrice: form.originalPrice ? Number(form.originalPrice) : undefined,
-      imageUrl,
-      badge: form.badge || undefined,
-      stock: Math.max(0, Math.floor(Number(form.stock) || 0)),
-      description: form.description.trim() || undefined,
-      detailImageUrl,
+      name: values.name.trim(),
+      category: values.category,
+      team: values.team || undefined,
+      price: Number(values.price),
+      originalPrice: values.originalPrice
+        ? Number(values.originalPrice)
+        : undefined,
+      imageUrl: nextImageUrl,
+      badge: values.badge || undefined,
+      stock: Math.max(0, Math.floor(Number(values.stock) || 0)),
+      description: values.description.trim() || undefined,
+      detailImageUrl: nextDetailImageUrl,
     });
   };
 
+  const onInvalid = (formErrors: FieldErrors<ProductFormValues>) => {
+    const firstMessage = Object.values(formErrors)[0]?.message;
+    toast.error(
+      typeof firstMessage === 'string'
+        ? firstMessage
+        : '입력값을 확인해주세요.',
+    );
+  };
+
   return (
-    <form className={styles.card} onSubmit={handleSubmit}>
+    <form
+      className={styles.card}
+      onSubmit={handleSubmit(onSubmit, onInvalid)}
+      noValidate
+    >
       <label className={styles.titleField}>
-        <input
-          value={form.name}
-          onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-          placeholder="상품명을 입력하세요"
-          required
-        />
+        <input {...register('name')} placeholder="상품명을 입력하세요" />
       </label>
 
       <div className={styles.header}>
         <div className={styles.row}>
           <label className={styles.metaField}>
             <span>카테고리</span>
-            <select value={effectiveCategory} onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}>
+            <select {...register('category')}>
               {categoryNames.map((category) => (
                 <option key={category} value={category}>
                   {category}
@@ -193,7 +272,7 @@ const ProductForm = ({ product, isEditMode, productId, categoryNames, teamNames,
           </label>
           <label className={styles.metaField}>
             <span>구단</span>
-            <select value={effectiveTeam} onChange={(e) => setForm((f) => ({ ...f, team: e.target.value }))}>
+            <select {...register('team')}>
               {teamNames.map((team) => (
                 <option key={team} value={team}>
                   {team}
@@ -209,10 +288,8 @@ const ProductForm = ({ product, isEditMode, productId, categoryNames, teamNames,
             <input
               type="number"
               min="0"
-              value={form.price}
-              onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
+              {...register('price')}
               placeholder="39000"
-              required
             />
           </label>
           <label className={styles.metaField}>
@@ -220,8 +297,7 @@ const ProductForm = ({ product, isEditMode, productId, categoryNames, teamNames,
             <input
               type="number"
               min="0"
-              value={form.originalPrice}
-              onChange={(e) => setForm((f) => ({ ...f, originalPrice: e.target.value }))}
+              {...register('originalPrice')}
               placeholder="52000"
             />
           </label>
@@ -233,17 +309,13 @@ const ProductForm = ({ product, isEditMode, productId, categoryNames, teamNames,
             <input
               type="number"
               min="0"
-              value={form.stock}
-              onChange={(e) => setForm((f) => ({ ...f, stock: e.target.value }))}
+              {...register('stock')}
               placeholder="50"
             />
           </label>
           <label className={styles.metaField}>
             <span>뱃지</span>
-            <select
-              value={form.badge}
-              onChange={(e) => setForm((f) => ({ ...f, badge: e.target.value }))}
-            >
+            <select {...register('badge')}>
               <option value="">없음</option>
               {badges.map((badge) => (
                 <option key={badge.id} value={badge.name}>
@@ -257,29 +329,33 @@ const ProductForm = ({ product, isEditMode, productId, categoryNames, teamNames,
 
       <label className={styles.contentField}>
         <textarea
-          value={form.description}
-          onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+          {...register('description')}
           placeholder="상품의 소재, 사이즈, 세탁 방법 등 자세한 설명을 작성해주세요."
         />
       </label>
 
       <div className={styles.attachRow}>
         <span>상세 이미지</span>
-        <ProductImageUploader imagePreview={detailImagePreview} onFileChange={setDetailImageFile} />
+        <ProductImageUploader
+          imagePreview={detailImagePreview}
+          onFileChange={setDetailImageFile}
+        />
       </div>
 
       <div className={styles.attachRow}>
         <span>썸네일 이미지</span>
-        <ProductImageUploader imagePreview={imagePreview} onFileChange={setImageFile} />
+        <ProductImageUploader
+          imagePreview={imagePreview}
+          onFileChange={setImageFile}
+        />
       </div>
 
-      {uploadError && <p className={adminStyles.error}>{uploadError}</p>}
-      {saveMutation.isError && (
-        <p className={adminStyles.error}>{isEditMode ? '수정에 실패했습니다.' : '등록에 실패했습니다.'}</p>
-      )}
-
       <div className={styles.footer}>
-        <Button type="button" variant="secondary" onClick={() => navigate('/admin/products')}>
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={() => navigate('/admin/products')}
+        >
           취소
         </Button>
         <Button type="submit" isLoading={isUploading || saveMutation.isPending}>

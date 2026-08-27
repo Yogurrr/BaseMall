@@ -17,12 +17,21 @@ const GRADE_ICONS: Record<string, string> = {
   MVP: '🏆',
 };
 
-export const MyPageBanner = ({ name, role, team, grade, onSelectWishlist, onSelectProfile }: MyPageBannerProps) => (
+export const MyPageBanner = ({
+  name,
+  role,
+  team,
+  grade,
+  onSelectWishlist,
+  onSelectProfile,
+}: MyPageBannerProps) => (
   <section className={styles.banner}>
     <div className={styles.greeting}>
       <span className={styles.name}>{name}님, 반갑습니다</span>
       <span className={styles.badge}>
-        {role === 'ADMIN' ? '관리자' : `${GRADE_ICONS[grade ?? ''] ?? '🌱'} ${grade ?? 'Rookie'}`}
+        {role === 'ADMIN'
+          ? '관리자'
+          : `${GRADE_ICONS[grade ?? ''] ?? '🌱'} ${grade ?? 'Rookie'}`}
       </span>
       {team && <span className={styles.badge}>⚾ {team}</span>}
     </div>

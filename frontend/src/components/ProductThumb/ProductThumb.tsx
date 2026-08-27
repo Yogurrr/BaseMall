@@ -6,13 +6,27 @@ interface ProductThumbProps {
   size?: 'lg' | 'sm';
 }
 
-export const ProductThumb = ({ imageUrl, alt, size = 'lg' }: ProductThumbProps) => {
+export const ProductThumb = ({
+  imageUrl,
+  alt,
+  size = 'lg',
+}: ProductThumbProps) => {
   if (imageUrl) {
-    return <img src={imageUrl} alt={alt} className={`${styles.image} ${styles[size]}`} />;
+    return (
+      <img
+        src={imageUrl}
+        alt={alt}
+        className={`${styles.image} ${styles[size]}`}
+      />
+    );
   }
 
   return (
-    <span className={`${styles.placeholder} ${styles[size]}`} role="img" aria-label={alt}>
+    <span
+      className={`${styles.placeholder} ${styles[size]}`}
+      role="img"
+      aria-label={alt}
+    >
       📦
     </span>
   );

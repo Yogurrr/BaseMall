@@ -7,13 +7,20 @@ import { AdBanner, type AdSlide } from '../components/AdBanner/AdBanner';
 import { CategoryTabs } from '../components/CategoryTabs/CategoryTabs';
 import { ProductCard } from '../components/ProductCard/ProductCard';
 import { Pagination } from '../components/Pagination/Pagination';
-import { SortSelect, type SortOption } from '../components/SortSelect/SortSelect';
+import {
+  SortSelect,
+  type SortOption,
+} from '../components/SortSelect/SortSelect';
 import { SiteFooter } from '../components/SiteFooter/SiteFooter';
 import { Spinner } from '../components/Spinner/Spinner';
 import { RecommendedProducts } from '../components/RecommendedProducts/RecommendedProducts';
 import { useWishlist } from '../hooks/useWishlist';
 import { useCurrentUser } from '../hooks/useCurrentUser';
-import { fetchCategories, fetchProductsPage, fetchTeams } from '../api/productApi';
+import {
+  fetchCategories,
+  fetchProductsPage,
+  fetchTeams,
+} from '../api/productApi';
 import { fetchActiveBanners } from '../api/bannerApi';
 import styles from './Home.module.css';
 
@@ -28,14 +35,22 @@ const SORT_OPTIONS: SortOption[] = [
 
 export const Home = () => {
   const [searchParams] = useSearchParams();
-  const [activeCategory, setActiveCategory] = useState(() => searchParams.get('category') || '전체');
-  const [activeTeam, setActiveTeam] = useState(() => searchParams.get('team') || '전체');
+  const [activeCategory, setActiveCategory] = useState(
+    () => searchParams.get('category') || '전체',
+  );
+  const [activeTeam, setActiveTeam] = useState(
+    () => searchParams.get('team') || '전체',
+  );
   const [page, setPage] = useState(0);
   const [sort, setSort] = useState('');
   const { isLiked, toggleWishlist } = useWishlist();
   const { data: currentUser } = useCurrentUser();
 
-  const { data: productPage, isLoading, isError } = useQuery({
+  const {
+    data: productPage,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ['products', 'page', page, activeCategory, activeTeam, sort],
     queryFn: () =>
       fetchProductsPage({
@@ -57,6 +72,7 @@ export const Home = () => {
   const adSlides: AdSlide[] = useMemo(
     () =>
       banners.map((banner) => ({
+        id: banner.id,
         eyebrow: banner.eyebrow,
         title: banner.title,
         description: banner.description,
@@ -71,7 +87,10 @@ export const Home = () => {
     queryKey: ['categories'],
     queryFn: fetchCategories,
   });
-  const categoryTabs = useMemo(() => ['전체', ...categoryNames], [categoryNames]);
+  const categoryTabs = useMemo(
+    () => ['전체', ...categoryNames],
+    [categoryNames],
+  );
 
   const { data: teamNames = [] } = useQuery({
     queryKey: ['teams'],
@@ -111,10 +130,12 @@ export const Home = () => {
       <SiteHeader />
 
       <AdBanner slides={adSlides} />
-       
+
       {/* <PerksBar perks={PERKS} /> */}
 
-      {currentUser?.favoriteTeam && <RecommendedProducts team={currentUser.favoriteTeam} />}
+      {currentUser?.favoriteTeam && (
+        <RecommendedProducts team={currentUser.favoriteTeam} />
+      )}
 
       <p className={styles.filterLabel}>상품 종류</p>
       <CategoryTabs
@@ -125,15 +146,25 @@ export const Home = () => {
       />
 
       <p className={styles.filterLabel}>구단별</p>
-      <CategoryTabs categories={teamTabs} active={activeTeam} onSelect={handleSelectTeam} />
+      <CategoryTabs
+        categories={teamTabs}
+        active={activeTeam}
+        onSelect={handleSelectTeam}
+      />
 
       <section id="best" className={styles.products}>
         <div className={styles.sectionHeader}>
           <h2>베스트 굿즈</h2>
-          <SortSelect options={SORT_OPTIONS} value={sort} onChange={handleSortChange} />
+          <SortSelect
+            options={SORT_OPTIONS}
+            value={sort}
+            onChange={handleSortChange}
+          />
         </div>
         {isLoading ? (
-          <div className={styles.empty}><Spinner /></div>
+          <div className={styles.empty}>
+            <Spinner />
+          </div>
         ) : isError ? (
           <p className={styles.empty}>상품을 불러오지 못했습니다.</p>
         ) : products.length > 0 ? (
@@ -151,7 +182,9 @@ export const Home = () => {
           <p className={styles.empty}>해당 카테고리의 상품이 없습니다.</p>
         )}
 
-        {!isLoading && !isError && <Pagination page={page} totalPages={totalPages} onChange={setPage} />}
+        {!isLoading && !isError && (
+          <Pagination page={page} totalPages={totalPages} onChange={setPage} />
+        )}
       </section>
 
       <SiteFooter />

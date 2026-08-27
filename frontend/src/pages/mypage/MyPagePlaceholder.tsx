@@ -5,7 +5,10 @@ import styles from './MyPage.module.css';
 
 export const MyPagePlaceholder = () => {
   const { section } = useParams<{ section: string }>();
-  const label = MYPAGE_MENU.flatMap((group) => group.items).find((item) => item.key === section)?.label ?? '';
+  const label =
+    MYPAGE_MENU.flatMap((group) => group.items).find(
+      (item) => item.key === section,
+    )?.label ?? '';
 
   return (
     <div className={styles.comingSoon}>

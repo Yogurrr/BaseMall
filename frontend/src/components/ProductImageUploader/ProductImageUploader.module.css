@@ -20,7 +20,11 @@
   height: 9rem;
   border-radius: 0.6rem;
   overflow: hidden;
-  background: radial-gradient(circle at 30% 20%, var(--accent-bg), var(--code-bg));
+  background: radial-gradient(
+    circle at 30% 20%,
+    var(--accent-bg),
+    var(--code-bg)
+  );
   font-size: 3rem;
 }
 

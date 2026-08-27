@@ -10,7 +10,10 @@ const CANCEL_CODES = new Set(['USER_CANCEL', 'PAY_PROCESS_CANCELED']);
 export const TossPayNotice = () => {
   const [searchParams] = useSearchParams();
   const code = searchParams.get('code');
-  const message = code && CANCEL_CODES.has(code) ? '결제가 취소되었습니다.' : '결제에 실패했습니다.';
+  const message =
+    code && CANCEL_CODES.has(code)
+      ? '결제가 취소되었습니다.'
+      : '결제에 실패했습니다.';
 
   return (
     <div className={styles.page}>

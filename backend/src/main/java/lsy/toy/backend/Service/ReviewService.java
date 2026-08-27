@@ -77,8 +77,7 @@ public class ReviewService {
 
     @Transactional
     public ReviewResponse createReview(Long productId, String email, int rating, String content) {
-        validateRating(rating);
-        String trimmedContent = validateContent(content);
+        String trimmedContent = content.trim();
 
         Product product = findProduct(productId);
         User user = findUser(email);
@@ -100,8 +99,7 @@ public class ReviewService {
 
     @Transactional
     public ReviewResponse updateReview(Long productId, Long reviewId, String email, int rating, String content) {
-        validateRating(rating);
-        String trimmedContent = validateContent(content);
+        String trimmedContent = content.trim();
 
         Review review = findOwnedReview(productId, reviewId, email);
         review.setRating(rating);
@@ -151,19 +149,6 @@ public class ReviewService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "리뷰를 찾을 수 없습니다: " + reviewId);
         }
         return review;
-    }
-
-    private void validateRating(int rating) {
-        if (rating < 1 || rating > 5) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "별점은 1~5 사이여야 합니다.");
-        }
-    }
-
-    private String validateContent(String content) {
-        if (content == null || content.isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "리뷰 내용을 입력해주세요.");
-        }
-        return content.trim();
     }
 
     private Product findProduct(Long id) {

@@ -21,9 +21,16 @@ export const ReviewableItemPanel = ({ items }: ReviewableItemPanelProps) => {
         {items.map((item) => (
           <li key={item.productId} className={styles.card}>
             <Link to={`/products/${item.productId}`} className={styles.thumb}>
-              <ProductThumb imageUrl={item.productImageUrl} alt={item.productName} size="lg" />
+              <ProductThumb
+                imageUrl={item.productImageUrl}
+                alt={item.productName}
+                size="lg"
+              />
             </Link>
-            <Link to={`/products/${item.productId}`} className={styles.productName}>
+            <Link
+              to={`/products/${item.productId}`}
+              className={styles.productName}
+            >
               {item.productName}
             </Link>
             <Link

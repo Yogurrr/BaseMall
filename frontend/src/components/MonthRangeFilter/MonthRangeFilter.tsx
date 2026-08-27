@@ -28,9 +28,15 @@ const toParts = (date: Date): DateParts => ({
 const partsToDate = (p: DateParts) => new Date(p.y, p.m - 1, p.d);
 
 const today = new Date();
-const YEAR_OPTIONS = Array.from({ length: 5 }, (_, i) => today.getFullYear() - 4 + i);
+const YEAR_OPTIONS = Array.from(
+  { length: 5 },
+  (_, i) => today.getFullYear() - 4 + i,
+);
 const MONTH_OPTIONS = Array.from({ length: 12 }, (_, i) => i + 1);
 const DAY_OPTIONS = Array.from({ length: 31 }, (_, i) => i + 1);
+
+// 💡 조회 버튼 스피너를 최소 이 시간만큼 보여줘서 즉시 끝나는 조회도 클릭 반응이 느껴지게 한다.
+const SEARCH_SPINNER_MIN_DURATION_MS = 400;
 
 interface MonthRangeFilterProps {
   label: string;
@@ -40,10 +46,17 @@ interface MonthRangeFilterProps {
 
 // 💡 주문/배송 조회 페이지의 기간 필터(1/3/6/12개월 프리셋 + 연월일 직접 선택)를
 // 다른 내역 패널(적립금 등)에서도 그대로 재사용하기 위해 분리한 컴포넌트.
-export const MonthRangeFilter = ({ label, notice, onApply }: MonthRangeFilterProps) => {
+export const MonthRangeFilter = ({
+  label,
+  notice,
+  onApply,
+}: MonthRangeFilterProps) => {
   const [activePreset, setActivePreset] = useState<Preset | null>('1');
-  const [fromDate, setFromDate] = useState<DateParts>(() => toParts(monthsAgo(new Date(), 1)));
+  const [fromDate, setFromDate] = useState<DateParts>(() =>
+    toParts(monthsAgo(new Date(), 1)),
+  );
   const [toDate, setToDate] = useState<DateParts>(() => toParts(new Date()));
+  const [isSearching, setIsSearching] = useState(false);
 
   const handlePreset = (preset: Preset, months: number) => {
     setActivePreset(preset);
@@ -60,7 +73,12 @@ export const MonthRangeFilter = ({ label, notice, onApply }: MonthRangeFilterPro
     const from = partsToDate(fromDate);
     const to = partsToDate(toDate);
     to.setHours(23, 59, 59, 999);
+    setIsSearching(true);
     onApply({ from, to });
+    window.setTimeout(
+      () => setIsSearching(false),
+      SEARCH_SPINNER_MIN_DURATION_MS,
+    );
   };
 
   return (
@@ -103,8 +121,13 @@ export const MonthRangeFilter = ({ label, notice, onApply }: MonthRangeFilterPro
           </div>
         </div>
 
-        <button type="button" className={styles.searchButton} onClick={handleSearch}>
-          조회
+        <button
+          type="button"
+          className={styles.searchButton}
+          onClick={handleSearch}
+          disabled={isSearching}
+        >
+          {isSearching ? <span className={styles.spinner} /> : '조회'}
         </button>
       </div>
 
@@ -122,21 +145,30 @@ interface DateSelectProps {
 
 const DateSelect = ({ parts, onChange }: DateSelectProps) => (
   <>
-    <select value={parts.y} onChange={(e) => onChange({ ...parts, y: Number(e.target.value) })}>
+    <select
+      value={parts.y}
+      onChange={(e) => onChange({ ...parts, y: Number(e.target.value) })}
+    >
       {YEAR_OPTIONS.map((y) => (
         <option key={y} value={y}>
           {y}년
         </option>
       ))}
     </select>
-    <select value={parts.m} onChange={(e) => onChange({ ...parts, m: Number(e.target.value) })}>
+    <select
+      value={parts.m}
+      onChange={(e) => onChange({ ...parts, m: Number(e.target.value) })}
+    >
       {MONTH_OPTIONS.map((m) => (
         <option key={m} value={m}>
           {m}월
         </option>
       ))}
     </select>
-    <select value={parts.d} onChange={(e) => onChange({ ...parts, d: Number(e.target.value) })}>
+    <select
+      value={parts.d}
+      onChange={(e) => onChange({ ...parts, d: Number(e.target.value) })}
+    >
       {DAY_OPTIONS.map((d) => (
         <option key={d} value={d}>
           {d}일

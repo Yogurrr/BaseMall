@@ -19,7 +19,7 @@
   display: block;
   margin: 0;
   font: inherit;
-  font-size: 2.0rem;
+  font-size: 2rem;
   font-weight: 900;
   color: inherit;
   background: none;
@@ -133,7 +133,13 @@
   line-height: 1.5;
 }
 
+.withdrawForm label {
+  display: block;
+}
+
 .withdrawForm input {
+  width: 100%;
+  box-sizing: border-box;
   font: inherit;
   font-size: 0.8rem;
   padding: 0.5rem 0.6rem;
@@ -146,6 +152,18 @@
 .withdrawError {
   font-size: 0.75rem;
   color: #dc2626;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .withdrawActions {

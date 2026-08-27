@@ -8,27 +8,41 @@ import { InquiryDetailModal } from '../../components/InquiryDetailModal/InquiryD
 import { fetchAllInquiries } from '../../api/inquiryApi';
 import { INQUIRY_STATUSES } from '../../types/inquiry';
 import type { AdminInquiry } from '../../types/inquiry';
+import { formatDateTime } from '../../utils/formatDate';
 import styles from './Admin.module.css';
 
 const STATUS_FILTERS = ['전체', ...INQUIRY_STATUSES];
 const INQUIRIES_PAGE_SIZE = 10;
 
 export const AdminInquiries = () => {
-  const { data: inquiries = [], isLoading, isError } = useQuery({
+  const {
+    data: inquiries = [],
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ['inquiries', 'admin'],
     queryFn: fetchAllInquiries,
   });
   const [statusFilter, setStatusFilter] = useState('전체');
   const [keyword, setKeyword] = useState('');
-  const [selectedInquiry, setSelectedInquiry] = useState<AdminInquiry | null>(null);
+  const [selectedInquiry, setSelectedInquiry] = useState<AdminInquiry | null>(
+    null,
+  );
   const [page, setPage] = useState(0);
 
   const trimmedKeyword = keyword.trim().toLowerCase();
   const filteredInquiries = inquiries
-    .filter((inquiry) => statusFilter === '전체' || inquiry.status === statusFilter)
+    .filter(
+      (inquiry) => statusFilter === '전체' || inquiry.status === statusFilter,
+    )
     .filter((inquiry) => {
       if (!trimmedKeyword) return true;
-      const haystack = [`#${inquiry.id}`, inquiry.title, inquiry.authorName, inquiry.authorEmail]
+      const haystack = [
+        `#${inquiry.id}`,
+        inquiry.title,
+        inquiry.authorName,
+        inquiry.authorEmail,
+      ]
         .join(' ')
         .toLowerCase();
       return haystack.includes(trimmedKeyword);
@@ -47,7 +61,9 @@ export const AdminInquiries = () => {
     setPage(0);
   }
 
-  const pendingCount = inquiries.filter((inquiry) => inquiry.status === '답변대기').length;
+  const pendingCount = inquiries.filter(
+    (inquiry) => inquiry.status === '답변대기',
+  ).length;
 
   return (
     <>
@@ -67,7 +83,11 @@ export const AdminInquiries = () => {
       </section>
 
       <div className={styles.filterBar}>
-        <SelectFilter options={STATUS_FILTERS} value={statusFilter} onChange={setStatusFilter} />
+        <SelectFilter
+          options={STATUS_FILTERS}
+          value={statusFilter}
+          onChange={setStatusFilter}
+        />
         <input
           type="search"
           className={styles.searchInput}
@@ -80,14 +100,20 @@ export const AdminInquiries = () => {
 
       <div className={styles.tableWrap}>
         {isLoading ? (
-          <div className={styles.empty}><Spinner /></div>
+          <div className={styles.empty}>
+            <Spinner />
+          </div>
         ) : isError ? (
-          <p className={`${styles.empty} ${styles.error}`}>문의 목록을 불러오지 못했습니다.</p>
+          <p className={`${styles.empty} ${styles.error}`}>
+            문의 목록을 불러오지 못했습니다.
+          </p>
         ) : inquiries.length === 0 ? (
           <p className={styles.empty}>문의 내역이 없습니다.</p>
         ) : filteredInquiries.length === 0 ? (
           <p className={styles.empty}>
-            {trimmedKeyword ? `'${keyword}'에 대한 검색 결과가 없습니다.` : `'${statusFilter}' 상태의 문의가 없습니다.`}
+            {trimmedKeyword
+              ? `'${keyword}'에 대한 검색 결과가 없습니다.`
+              : `'${statusFilter}' 상태의 문의가 없습니다.`}
           </p>
         ) : (
           <table>
@@ -108,14 +134,20 @@ export const AdminInquiries = () => {
                   <td>#{inquiry.id}</td>
                   <td>
                     {inquiry.authorName}
-                    <div className={styles.orderBuyerEmail}>{inquiry.authorEmail}</div>
+                    <div className={styles.orderBuyerEmail}>
+                      {inquiry.authorEmail}
+                    </div>
                   </td>
                   <td>{inquiry.category}</td>
                   <td>{inquiry.title}</td>
-                  <td>{new Date(inquiry.createdAt).toLocaleString('ko-KR')}</td>
+                  <td>{formatDateTime(inquiry.createdAt)}</td>
                   <td>{inquiry.status}</td>
                   <td>
-                    <Button size="sm" variant="outline" onClick={() => setSelectedInquiry(inquiry)}>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setSelectedInquiry(inquiry)}
+                    >
                       상세보기
                     </Button>
                   </td>
@@ -131,7 +163,11 @@ export const AdminInquiries = () => {
       )}
 
       {selectedInquiry && (
-        <InquiryDetailModal inquiry={selectedInquiry} mode="admin" onClose={() => setSelectedInquiry(null)} />
+        <InquiryDetailModal
+          inquiry={selectedInquiry}
+          mode="admin"
+          onClose={() => setSelectedInquiry(null)}
+        />
       )}
     </>
   );

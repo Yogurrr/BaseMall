@@ -13,21 +13,22 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 export const Button = ({
   children,
   variant = 'primary', // 기본값: primary
-  size = 'md',        // 기본값: md
+  size = 'md', // 기본값: md
   isLoading = false,
-  className = '',     // 외부에서 추가 스타일을 줄 경우
+  className = '', // 외부에서 추가 스타일을 줄 경우
   disabled,
-  ...props            // 나머지 모든 기본 버튼 속성 (onClick 등)
+  ...props // 나머지 모든 기본 버튼 속성 (onClick 등)
 }: ButtonProps) => {
-  
   // 2. 조건에 따라 적용할 클래스 이름 조합
   const buttonClassNames = [
-    styles.button,                  // 공통 스타일
-    styles[variant],               // variant 스타일 (e.g., styles.primary)
-    styles[size],                  // size 스타일 (e.g., styles.md)
+    styles.button, // 공통 스타일
+    styles[variant], // variant 스타일 (e.g., styles.primary)
+    styles[size], // size 스타일 (e.g., styles.md)
     isLoading ? styles.loading : '', // 로딩 중일 때 스타일
-    className                      // 외부 스타일 합치기
-  ].join(' ').trim();               // 빈칸으로 구분된 하나의 문자열로 합침
+    className, // 외부 스타일 합치기
+  ]
+    .join(' ')
+    .trim(); // 빈칸으로 구분된 하나의 문자열로 합침
 
   return (
     <button

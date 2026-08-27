@@ -8,7 +8,12 @@ interface QuickLinkCardProps {
   to: string;
 }
 
-export const QuickLinkCard = ({ icon, label, description, to }: QuickLinkCardProps) => {
+export const QuickLinkCard = ({
+  icon,
+  label,
+  description,
+  to,
+}: QuickLinkCardProps) => {
   return (
     <Link to={to} className={styles.card}>
       <span className={styles.icon}>{icon}</span>

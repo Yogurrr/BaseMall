@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import styles from './AdBanner.module.css';
 
 export interface AdSlide {
+  id: number;
   eyebrow: string;
   title: string;
   description: string;
@@ -38,9 +39,12 @@ export const AdBanner = ({ slides, intervalMs = 8000 }: AdBannerProps) => {
       <div className={styles.viewport}>
         {slides.map((slide, index) => (
           <div
-            key={slide.title}
+            key={slide.id}
             className={styles.slide}
-            style={{ background: slide.gradient, opacity: index === activeIndex ? 1 : 0 }}
+            style={{
+              background: slide.gradient,
+              opacity: index === activeIndex ? 1 : 0,
+            }}
             aria-hidden={index !== activeIndex}
           >
             {slide.image && !brokenImages.has(index) && (
@@ -50,7 +54,9 @@ export const AdBanner = ({ slides, intervalMs = 8000 }: AdBannerProps) => {
                   alt=""
                   className={styles.slideImage}
                   loading={index === 0 ? 'eager' : 'lazy'}
-                  onError={() => setBrokenImages((prev) => new Set(prev).add(index))}
+                  onError={() =>
+                    setBrokenImages((prev) => new Set(prev).add(index))
+                  }
                 />
                 <div className={styles.scrim} />
               </>
@@ -66,10 +72,20 @@ export const AdBanner = ({ slides, intervalMs = 8000 }: AdBannerProps) => {
           </div>
         ))}
 
-        <button type="button" className={`${styles.arrow} ${styles.arrowLeft}`} aria-label="이전 배너" onClick={() => goTo(activeIndex - 1)}>
+        <button
+          type="button"
+          className={`${styles.arrow} ${styles.arrowLeft}`}
+          aria-label="이전 배너"
+          onClick={() => goTo(activeIndex - 1)}
+        >
           ‹
         </button>
-        <button type="button" className={`${styles.arrow} ${styles.arrowRight}`} aria-label="다음 배너" onClick={() => goTo(activeIndex + 1)}>
+        <button
+          type="button"
+          className={`${styles.arrow} ${styles.arrowRight}`}
+          aria-label="다음 배너"
+          onClick={() => goTo(activeIndex + 1)}
+        >
           ›
         </button>
       </div>
@@ -77,7 +93,7 @@ export const AdBanner = ({ slides, intervalMs = 8000 }: AdBannerProps) => {
       <div className={styles.dots}>
         {slides.map((slide, index) => (
           <button
-            key={slide.title}
+            key={slide.id}
             type="button"
             className={`${styles.dot} ${index === activeIndex ? styles.dotActive : ''}`}
             aria-label={`${index + 1}번째 배너로 이동`}

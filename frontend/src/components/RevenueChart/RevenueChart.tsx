@@ -26,14 +26,20 @@ const formatCompact = (value: number) => {
 };
 
 export const RevenueChart = ({ data, currentMonth }: RevenueChartProps) => {
-  const chartData = data.map((point) => ({ ...point, label: `${point.month}월` }));
+  const chartData = data.map((point) => ({
+    ...point,
+    label: `${point.month}월`,
+  }));
 
   return (
     <section className={styles.chartCard}>
       <h2>월별 매출 추이</h2>
       <div className={styles.chart}>
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={chartData} margin={{ top: 24, right: 8, left: 0, bottom: 0 }}>
+          <BarChart
+            data={chartData}
+            margin={{ top: 24, right: 8, left: 0, bottom: 0 }}
+          >
             <CartesianGrid stroke="var(--border)" vertical={false} />
             <XAxis
               dataKey="label"
@@ -63,7 +69,11 @@ export const RevenueChart = ({ data, currentMonth }: RevenueChartProps) => {
               {chartData.map((point) => (
                 <Cell
                   key={point.month}
-                  fill={point.month === currentMonth ? 'var(--accent)' : 'var(--accent-bg)'}
+                  fill={
+                    point.month === currentMonth
+                      ? 'var(--accent)'
+                      : 'var(--accent-bg)'
+                  }
                   stroke="var(--accent-border)"
                   strokeWidth={1}
                 />

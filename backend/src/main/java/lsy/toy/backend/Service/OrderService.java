@@ -59,6 +59,9 @@ public class OrderService {
     // 💡 결제 완료 시 실제 결제 금액(적립금 사용분 차감 후)의 1%를 적립한다.
     private static final int POINT_EARN_RATE_PERCENT = 1;
 
+    // 💡 할인율/적립율(퍼센트)을 실제 금액으로 환산할 때 공통으로 쓰는 나눗셈 기준값.
+    private static final int PERCENT_DIVISOR = 100;
+
     // 💡 매출은 주문이 실제로 발생한 한국 시각 기준 날짜로 집계한다(DB의 createdAt은 UTC Instant).
     private static final ZoneId SALES_ZONE = ZoneId.of("Asia/Seoul");
 
@@ -68,6 +71,7 @@ public class OrderService {
     private final UserRepository userRepository;
     private final CouponRepository couponRepository;
     private final PointService pointService;
+    private final KakaoNotificationService kakaoNotificationService;
 
     public OrderService(
         OrderRepository orderRepository,
@@ -75,7 +79,8 @@ public class OrderService {
         CartItemRepository cartItemRepository,
         UserRepository userRepository,
         CouponRepository couponRepository,
-        PointService pointService
+        PointService pointService,
+        KakaoNotificationService kakaoNotificationService
     ) {
         this.orderRepository = orderRepository;
         this.orderItemRepository = orderItemRepository;
@@ -83,6 +88,7 @@ public class OrderService {
         this.userRepository = userRepository;
         this.couponRepository = couponRepository;
         this.pointService = pointService;
+        this.kakaoNotificationService = kakaoNotificationService;
     }
 
     @Transactional
@@ -208,7 +214,7 @@ public class OrderService {
             if (coupon.getUsedAt() != null) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "이미 사용된 쿠폰입니다.");
             }
-            discountAmount = totalPrice * coupon.getDiscountPercent() / 100;
+            discountAmount = totalPrice * coupon.getDiscountPercent() / PERCENT_DIVISOR;
             totalPrice -= discountAmount;
         }
 
@@ -225,7 +231,7 @@ public class OrderService {
         }
         totalPrice -= usedPoints;
 
-        int earnedPoints = totalPrice * POINT_EARN_RATE_PERCENT / 100;
+        int earnedPoints = totalPrice * POINT_EARN_RATE_PERCENT / PERCENT_DIVISOR;
         return new PricingResult(totalPrice, discountAmount, usedPoints, earnedPoints, coupon);
     }
 
@@ -265,13 +271,14 @@ public class OrderService {
         if (newlyCancelled) {
             refundPoints(order);
         }
-        OrderResponse response = new OrderResponse(orderRepository.save(order));
+        Order saved = orderRepository.save(order);
+        kakaoNotificationService.notifyOrderStatusChanged(saved);
 
         if (newlyCancelled) {
             log.info("주문 취소: orderId={}, userId={}", orderId, order.getUser().getId());
         }
 
-        return response;
+        return new OrderResponse(saved);
     }
 
     // 💡 고객 본인 취소: 관리자용 updateStatus와 달리 소유권 검증과 '결제완료' 상태 제약이 들어간다.
@@ -313,7 +320,9 @@ public class OrderService {
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "주문을 찾을 수 없습니다: " + orderId));
 
         order.setTrackingNumber(trackingNumber == null || trackingNumber.isBlank() ? null : trackingNumber.trim());
-        return new OrderResponse(orderRepository.save(order));
+        Order saved = orderRepository.save(order);
+        kakaoNotificationService.notifyTrackingNumberRegistered(saved);
+        return new OrderResponse(saved);
     }
 
     public SalesResponse getSalesSummary() {

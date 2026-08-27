@@ -12,5 +12,10 @@ export const useAddToCartModal = () => {
     navigate('/cart');
   };
 
-  return { isAddToCartModalOpen, openAddToCartModal, closeAddToCartModal, goToCheckout };
+  return {
+    isAddToCartModalOpen,
+    openAddToCartModal,
+    closeAddToCartModal,
+    goToCheckout,
+  };
 };

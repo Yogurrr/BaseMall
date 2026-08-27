@@ -1,5 +1,6 @@
 package lsy.toy.backend.Controller;
 
+import jakarta.validation.Valid;
 import lsy.toy.backend.Dto.BannerRequest;
 import lsy.toy.backend.Dto.ImageUploadResponse;
 import lsy.toy.backend.Dto.UpdateBannerActiveRequest;
@@ -15,7 +16,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/banners")
-@CrossOrigin(origins = "http://localhost:5173")
 public class BannerController {
 
     // 💡 상품 이미지(product-images)와 분리된 전용 버킷. 프론트 Home.tsx가 예전부터 쓰던 이름과 맞춘다.
@@ -64,7 +64,7 @@ public class BannerController {
 
     // 5. 노출 여부만 빠르게 토글 (PATCH)
     @PatchMapping("/{id}/active")
-    public Banner updateActive(@PathVariable Long id, @RequestBody UpdateBannerActiveRequest request) {
+    public Banner updateActive(@PathVariable Long id, @Valid @RequestBody UpdateBannerActiveRequest request) {
         return bannerService.updateActive(id, request.getActive());
     }
 

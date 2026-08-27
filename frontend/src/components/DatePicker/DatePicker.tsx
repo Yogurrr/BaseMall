@@ -8,13 +8,15 @@ interface DatePickerProps {
   max?: string;
   min?: string;
   placeholder?: string;
+  id?: string;
 }
 
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
 
 const pad = (n: number) => String(n).padStart(2, '0');
 
-const toIso = (y: number, mIdx: number, d: number) => `${y}-${pad(mIdx + 1)}-${pad(d)}`;
+const toIso = (y: number, mIdx: number, d: number) =>
+  `${y}-${pad(mIdx + 1)}-${pad(d)}`;
 
 const parseIso = (iso: string | undefined | null) => {
   if (!iso) return null;
@@ -42,7 +44,12 @@ const buildGrid = (viewYear: number, viewMonthIdx: number): Cell[] => {
   for (let i = firstWeekday - 1; i >= 0; i--) {
     const prevMonthIdx = viewMonthIdx === 0 ? 11 : viewMonthIdx - 1;
     const prevYear = viewMonthIdx === 0 ? viewYear - 1 : viewYear;
-    cells.push({ y: prevYear, mIdx: prevMonthIdx, d: daysInPrevMonth - i, inCurrentMonth: false });
+    cells.push({
+      y: prevYear,
+      mIdx: prevMonthIdx,
+      d: daysInPrevMonth - i,
+      inCurrentMonth: false,
+    });
   }
 
   for (let d = 1; d <= daysInMonth; d++) {
@@ -53,7 +60,12 @@ const buildGrid = (viewYear: number, viewMonthIdx: number): Cell[] => {
   const nextYear = viewMonthIdx === 11 ? viewYear + 1 : viewYear;
   let nextDay = 1;
   while (cells.length % 7 !== 0 || cells.length < 42) {
-    cells.push({ y: nextYear, mIdx: nextMonthIdx, d: nextDay, inCurrentMonth: false });
+    cells.push({
+      y: nextYear,
+      mIdx: nextMonthIdx,
+      d: nextDay,
+      inCurrentMonth: false,
+    });
     nextDay++;
   }
 
@@ -66,16 +78,30 @@ const formatDisplay = (iso: string) => {
   return `${parsed.y}년 ${parsed.mIdx + 1}월 ${parsed.d}일`;
 };
 
-export const DatePicker = ({ value, onChange, max, min, placeholder = '날짜 선택' }: DatePickerProps) => {
+export const DatePicker = ({
+  value,
+  onChange,
+  max,
+  min,
+  placeholder = '날짜 선택',
+  id,
+}: DatePickerProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [viewYear, setViewYear] = useState(() => parseIso(value)?.y ?? today.getFullYear());
-  const [viewMonthIdx, setViewMonthIdx] = useState(() => parseIso(value)?.mIdx ?? today.getMonth());
+  const [viewYear, setViewYear] = useState(
+    () => parseIso(value)?.y ?? today.getFullYear(),
+  );
+  const [viewMonthIdx, setViewMonthIdx] = useState(
+    () => parseIso(value)?.mIdx ?? today.getMonth(),
+  );
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!isOpen) return;
     const handleClickOutside = (event: MouseEvent) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
+      if (
+        wrapperRef.current &&
+        !wrapperRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
       }
     };
@@ -118,7 +144,10 @@ export const DatePicker = ({ value, onChange, max, min, placeholder = '날짜 �
 
   const maxYear = parseIso(max)?.y ?? today.getFullYear();
   const minYear = parseIso(min)?.y ?? today.getFullYear() - 100;
-  const yearOptions = Array.from({ length: maxYear - minYear + 1 }, (_, i) => maxYear - i);
+  const yearOptions = Array.from(
+    { length: maxYear - minYear + 1 },
+    (_, i) => maxYear - i,
+  );
   const monthOptions = Array.from({ length: 12 }, (_, i) => i);
 
   const cells = buildGrid(viewYear, viewMonthIdx);
@@ -127,29 +156,43 @@ export const DatePicker = ({ value, onChange, max, min, placeholder = '날짜 �
   return (
     <div className={styles.wrapper} ref={wrapperRef}>
       <button
+        id={id}
         type="button"
         className={`${styles.trigger} ${isOpen ? styles.triggerOpen : ''}`}
         onClick={() => (isOpen ? setIsOpen(false) : openPicker())}
       >
-        <span className={display ? undefined : styles.placeholder}>{display ?? placeholder}</span>
+        <span className={display ? undefined : styles.placeholder}>
+          {display ?? placeholder}
+        </span>
         <span className={styles.icon}>📅</span>
       </button>
 
       {isOpen && (
         <div className={styles.panel}>
           <div className={styles.header}>
-            <button type="button" className={styles.navButton} onClick={() => changeMonth(-1)} aria-label="이전 달">
+            <button
+              type="button"
+              className={styles.navButton}
+              onClick={() => changeMonth(-1)}
+              aria-label="이전 달"
+            >
               ‹
             </button>
             <div className={styles.selects}>
-              <select value={viewYear} onChange={(e) => setViewYear(Number(e.target.value))}>
+              <select
+                value={viewYear}
+                onChange={(e) => setViewYear(Number(e.target.value))}
+              >
                 {yearOptions.map((y) => (
                   <option key={y} value={y}>
                     {y}년
                   </option>
                 ))}
               </select>
-              <select value={viewMonthIdx} onChange={(e) => setViewMonthIdx(Number(e.target.value))}>
+              <select
+                value={viewMonthIdx}
+                onChange={(e) => setViewMonthIdx(Number(e.target.value))}
+              >
                 {monthOptions.map((m) => (
                   <option key={m} value={m}>
                     {m + 1}월
@@ -157,14 +200,28 @@ export const DatePicker = ({ value, onChange, max, min, placeholder = '날짜 �
                 ))}
               </select>
             </div>
-            <button type="button" className={styles.navButton} onClick={() => changeMonth(1)} aria-label="다음 달">
+            <button
+              type="button"
+              className={styles.navButton}
+              onClick={() => changeMonth(1)}
+              aria-label="다음 달"
+            >
               ›
             </button>
           </div>
 
           <div className={styles.weekdays}>
             {WEEKDAYS.map((w, i) => (
-              <span key={w} className={i === 0 ? styles.weekdaySun : i === 6 ? styles.weekdaySat : undefined}>
+              <span
+                key={w}
+                className={
+                  i === 0
+                    ? styles.weekdaySun
+                    : i === 6
+                      ? styles.weekdaySat
+                      : undefined
+                }
+              >
                 {w}
               </span>
             ))}
@@ -200,7 +257,11 @@ export const DatePicker = ({ value, onChange, max, min, placeholder = '날짜 �
           </div>
 
           <div className={styles.footer}>
-            <button type="button" className={styles.footerButton} onClick={() => onChange('')}>
+            <button
+              type="button"
+              className={styles.footerButton}
+              onClick={() => onChange('')}
+            >
               지우기
             </button>
             <button

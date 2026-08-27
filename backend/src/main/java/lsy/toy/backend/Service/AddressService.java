@@ -31,7 +31,6 @@ public class AddressService {
 
     @Transactional
     public AddressResponse createAddress(String email, AddressRequest request) {
-        validateAddressRequest(request);
         User user = findUser(email);
 
         List<Address> existing = addressRepository.findByUser_IdOrderByIsDefaultDescCreatedAtDesc(user.getId());
@@ -57,7 +56,6 @@ public class AddressService {
 
     @Transactional
     public AddressResponse updateAddress(String email, Long id, AddressRequest request) {
-        validateAddressRequest(request);
         User user = findUser(email);
         Address address = findOwnedAddress(id, user.getId());
 
@@ -119,18 +117,6 @@ public class AddressService {
     private Address findOwnedAddress(Long id, Long userId) {
         return addressRepository.findByIdAndUser_Id(id, userId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "배송지를 찾을 수 없습니다: " + id));
-    }
-
-    private void validateAddressRequest(AddressRequest request) {
-        if (isBlank(request.getRecipientName())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "받는 분을 입력해주세요.");
-        }
-        if (isBlank(request.getRecipientPhone())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "연락처를 입력해주세요.");
-        }
-        if (isBlank(request.getZipCode()) || isBlank(request.getAddress())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "배송지 주소를 입력해주세요.");
-        }
     }
 
     private User findUser(String email) {

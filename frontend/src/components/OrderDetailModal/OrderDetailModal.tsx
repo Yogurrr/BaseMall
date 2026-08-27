@@ -1,11 +1,21 @@
-import { useState, type FormEvent } from 'react';
+import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { Button } from '../Button/Button';
 import { ProductThumb } from '../ProductThumb/ProductThumb';
 import { updateTrackingNumber } from '../../api/orderApi';
 import type { Order } from '../../types/order';
 import { formatPrice } from '../../api/productApi';
+import { formatDateTime } from '../../utils/formatDate';
 import styles from './OrderDetailModal.module.css';
+
+const trackingSchema = z.object({
+  trackingNumber: z.string(),
+});
+
+type TrackingFormValues = z.infer<typeof trackingSchema>;
 
 interface OrderDetailModalProps {
   order: Order;
@@ -13,29 +23,45 @@ interface OrderDetailModalProps {
   readOnly?: boolean;
 }
 
-export const OrderDetailModal = ({ order, onClose, readOnly = false }: OrderDetailModalProps) => {
+export const OrderDetailModal = ({
+  order,
+  onClose,
+  readOnly = false,
+}: OrderDetailModalProps) => {
   const queryClient = useQueryClient();
+
+  const { register, handleSubmit, watch, reset } = useForm<TrackingFormValues>({
+    resolver: zodResolver(trackingSchema),
+    defaultValues: { trackingNumber: order.trackingNumber ?? '' },
+  });
+
   // 💡 order.trackingNumber는 저장 성공 후 캐시 무효화로 뒤늦게 갱신될 수 있다.
   // effect 대신 렌더링 중에 이전 값과 비교해 바뀐 경우에만 입력값을 다시 맞춘다
   // (React 문서의 "prop이 바뀔 때 state를 조정하기" 패턴).
-  const [prevTrackingNumber, setPrevTrackingNumber] = useState(order.trackingNumber);
-  const [trackingInput, setTrackingInput] = useState(order.trackingNumber ?? '');
+  const [prevTrackingNumber, setPrevTrackingNumber] = useState(
+    order.trackingNumber,
+  );
   if (order.trackingNumber !== prevTrackingNumber) {
     setPrevTrackingNumber(order.trackingNumber);
-    setTrackingInput(order.trackingNumber ?? '');
+    reset({ trackingNumber: order.trackingNumber ?? '' });
   }
 
+  const trackingInput = watch('trackingNumber');
+  const isTrackingUnchanged =
+    trackingInput.trim() === (order.trackingNumber ?? '');
+
   const trackingMutation = useMutation({
-    mutationFn: (trackingNumber: string) => updateTrackingNumber(order.id, trackingNumber),
+    mutationFn: (trackingNumber: string) =>
+      updateTrackingNumber(order.id, trackingNumber),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
     },
   });
 
-  const handleTrackingSubmit = (event: FormEvent) => {
-    event.preventDefault();
-    if (trackingInput.trim() === (order.trackingNumber ?? '')) return;
-    trackingMutation.mutate(trackingInput.trim());
+  const onTrackingSubmit = (values: TrackingFormValues) => {
+    const trimmed = values.trackingNumber.trim();
+    if (trimmed === (order.trackingNumber ?? '')) return;
+    trackingMutation.mutate(trimmed);
   };
 
   return (
@@ -49,7 +75,12 @@ export const OrderDetailModal = ({ order, onClose, readOnly = false }: OrderDeta
       >
         <div className={styles.header}>
           <h2 id="order-detail-title">주문 #{order.id}</h2>
-          <button type="button" className={styles.closeButton} onClick={onClose} aria-label="닫기">
+          <button
+            type="button"
+            className={styles.closeButton}
+            onClick={onClose}
+            aria-label="닫기"
+          >
             ✕
           </button>
         </div>
@@ -58,13 +89,16 @@ export const OrderDetailModal = ({ order, onClose, readOnly = false }: OrderDeta
           <dt>주문 상태</dt>
           <dd>{order.status}</dd>
           <dt>주문일시</dt>
-          <dd>{new Date(order.createdAt).toLocaleString('ko-KR')}</dd>
+          <dd>{formatDateTime(order.createdAt)}</dd>
           <dt>주문자</dt>
           <dd>{order.buyerName}</dd>
           <dt>이메일</dt>
           <dd>{order.buyerEmail}</dd>
           <dt>받는분</dt>
-          <dd>{order.recipientName ?? '-'} {order.recipientPhone && `(${order.recipientPhone})`}</dd>
+          <dd>
+            {order.recipientName ?? '-'}{' '}
+            {order.recipientPhone && `(${order.recipientPhone})`}
+          </dd>
           <dt>배송지</dt>
           <dd>
             {order.zipCode && `(${order.zipCode}) `}
@@ -93,13 +127,16 @@ export const OrderDetailModal = ({ order, onClose, readOnly = false }: OrderDeta
             <dd>{order.trackingNumber ?? '아직 등록되지 않았습니다'}</dd>
           </dl>
         ) : (
-          <form className={styles.trackingField} onSubmit={handleTrackingSubmit}>
+          <form
+            className={styles.trackingField}
+            onSubmit={handleSubmit(onTrackingSubmit)}
+            noValidate
+          >
             <label htmlFor="tracking-number">운송장 번호</label>
             <div className={styles.trackingInputRow}>
               <input
                 id="tracking-number"
-                value={trackingInput}
-                onChange={(e) => setTrackingInput(e.target.value)}
+                {...register('trackingNumber')}
                 placeholder="운송장 번호를 입력하세요"
               />
               <Button
@@ -107,12 +144,16 @@ export const OrderDetailModal = ({ order, onClose, readOnly = false }: OrderDeta
                 size="sm"
                 variant="outline"
                 isLoading={trackingMutation.isPending}
-                disabled={trackingInput.trim() === (order.trackingNumber ?? '')}
+                disabled={isTrackingUnchanged}
               >
                 저장
               </Button>
             </div>
-            {trackingMutation.isError && <p className={styles.trackingError}>운송장 번호 저장에 실패했습니다.</p>}
+            {trackingMutation.isError && (
+              <p className={styles.trackingError}>
+                운송장 번호 저장에 실패했습니다.
+              </p>
+            )}
           </form>
         )}
 
@@ -129,11 +170,21 @@ export const OrderDetailModal = ({ order, onClose, readOnly = false }: OrderDeta
             {order.items.map((item, index) => (
               <tr key={index}>
                 <td>
-                  <ProductThumb imageUrl={item.imageUrl} alt={item.name} size="sm" /> {item.name}
-                  {item.category && <span className={styles.itemCategory}>{item.category}</span>}
+                  <ProductThumb
+                    imageUrl={item.imageUrl}
+                    alt={item.name}
+                    size="sm"
+                  />{' '}
+                  {item.name}
+                  {item.category && (
+                    <span className={styles.itemCategory}>{item.category}</span>
+                  )}
                   {(item.size || item.markingName) && (
                     <span className={styles.itemCategory}>
-                      {[item.size && `사이즈 ${item.size}`, item.markingName && `마킹 ${item.markingName}`]
+                      {[
+                        item.size && `사이즈 ${item.size}`,
+                        item.markingName && `마킹 ${item.markingName}`,
+                      ]
                         .filter(Boolean)
                         .join(' · ')}
                     </span>

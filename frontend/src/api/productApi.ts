@@ -1,9 +1,16 @@
 import { api } from './axiosInstance';
-import type { Product, ProductInput, ProductPage, ProductStats, ProductStatus } from '../types/product';
+import type {
+  Product,
+  ProductInput,
+  ProductPage,
+  ProductStats,
+  ProductStatus,
+} from '../types/product';
 
 export const PRODUCT_STATUSES: ProductStatus[] = ['판매중', '판매중지', '품절'];
 
-export const formatPrice = (price: number) => `${price.toLocaleString('ko-KR')}원`;
+export const formatPrice = (price: number) =>
+  `${price.toLocaleString('ko-KR')}원`;
 
 export const fetchCategories = async (): Promise<string[]> => {
   const response = await api.get<string[]>('/categories');
@@ -51,12 +58,17 @@ export const fetchDeletedProducts = async (): Promise<Product[]> => {
   return response.data;
 };
 
-export const createProduct = async (payload: ProductInput): Promise<Product> => {
+export const createProduct = async (
+  payload: ProductInput,
+): Promise<Product> => {
   const response = await api.post<Product>('/products', payload);
   return response.data;
 };
 
-export const updateProduct = async (id: number, payload: ProductInput): Promise<Product> => {
+export const updateProduct = async (
+  id: number,
+  payload: ProductInput,
+): Promise<Product> => {
   const response = await api.put<Product>(`/products/${id}`, payload);
   return response.data;
 };
@@ -70,13 +82,21 @@ export const restoreProduct = async (id: number): Promise<Product> => {
   return response.data;
 };
 
-export const updateProductStock = async (id: number, stock: number): Promise<Product> => {
+export const updateProductStock = async (
+  id: number,
+  stock: number,
+): Promise<Product> => {
   const response = await api.patch<Product>(`/products/${id}/stock`, { stock });
   return response.data;
 };
 
-export const updateProductStatus = async (id: number, status: ProductStatus): Promise<Product> => {
-  const response = await api.patch<Product>(`/products/${id}/status`, { status });
+export const updateProductStatus = async (
+  id: number,
+  status: ProductStatus,
+): Promise<Product> => {
+  const response = await api.patch<Product>(`/products/${id}/status`, {
+    status,
+  });
   return response.data;
 };
 
@@ -85,13 +105,19 @@ export const fetchProductStats = async (): Promise<ProductStats> => {
   return response.data;
 };
 
-export const uploadProductImage = async (file: File): Promise<{ imageUrl: string }> => {
+export const uploadProductImage = async (
+  file: File,
+): Promise<{ imageUrl: string }> => {
   const formData = new FormData();
   formData.append('file', file);
   // 💡 axiosInstance가 기본 Content-Type을 application/json으로 고정해두므로,
   // multipart 경계(boundary)를 브라우저가 직접 채우도록 여기서만 헤더를 비워준다.
-  const response = await api.post<{ imageUrl: string }>('/products/images', formData, {
-    headers: { 'Content-Type': undefined },
-  });
+  const response = await api.post<{ imageUrl: string }>(
+    '/products/images',
+    formData,
+    {
+      headers: { 'Content-Type': undefined },
+    },
+  );
   return response.data;
 };

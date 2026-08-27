@@ -7,6 +7,7 @@ import lsy.toy.backend.Entity.User;
 import lsy.toy.backend.Repository.ProductRepository;
 import lsy.toy.backend.Repository.RecentViewItemRepository;
 import lsy.toy.backend.Repository.UserRepository;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,7 +35,7 @@ public class RecentViewService {
 
     public List<RecentViewItemResponse> getRecentViews(String email) {
         User user = findUser(email);
-        return recentViewItemRepository.findTop30ByUser_IdOrderByViewedAtDesc(user.getId()).stream()
+        return recentViewItemRepository.findRecentByUserId(user.getId(), PageRequest.of(0, 30)).stream()
             .map(item -> new RecentViewItemResponse(item.getProduct(), item.getViewedAt()))
             .toList();
     }

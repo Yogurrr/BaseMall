@@ -11,7 +11,10 @@ export const createCategory = async (name: string): Promise<Category> => {
   return response.data;
 };
 
-export const updateCategory = async (id: number, name: string): Promise<Category> => {
+export const updateCategory = async (
+  id: number,
+  name: string,
+): Promise<Category> => {
   const response = await api.put<Category>(`/categories/${id}`, { name });
   return response.data;
 };

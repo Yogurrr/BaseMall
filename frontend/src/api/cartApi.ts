@@ -12,16 +12,28 @@ export const addCartItem = async (
   size?: string,
   markingName?: string,
 ): Promise<CartItem[]> => {
-  const response = await api.post<CartItem[]>('/cart/items', { productId, quantity, size, markingName });
+  const response = await api.post<CartItem[]>('/cart/items', {
+    productId,
+    quantity,
+    size,
+    markingName,
+  });
   return response.data;
 };
 
-export const updateCartItem = async (cartItemId: number, quantity: number): Promise<CartItem[]> => {
-  const response = await api.put<CartItem[]>(`/cart/items/${cartItemId}`, { quantity });
+export const updateCartItem = async (
+  cartItemId: number,
+  quantity: number,
+): Promise<CartItem[]> => {
+  const response = await api.put<CartItem[]>(`/cart/items/${cartItemId}`, {
+    quantity,
+  });
   return response.data;
 };
 
-export const removeCartItem = async (cartItemId: number): Promise<CartItem[]> => {
+export const removeCartItem = async (
+  cartItemId: number,
+): Promise<CartItem[]> => {
   const response = await api.delete<CartItem[]>(`/cart/items/${cartItemId}`);
   return response.data;
 };

@@ -20,7 +20,8 @@ const formatOrderDate = (iso: string) => {
 };
 
 export const OrderHistoryPanel = ({ orders }: OrderHistoryPanelProps) => {
-  const [appliedRange, setAppliedRange] = useState<DateRange>(defaultMonthRange);
+  const [appliedRange, setAppliedRange] =
+    useState<DateRange>(defaultMonthRange);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const queryClient = useQueryClient();
   const cancelMutation = useMutation({
@@ -42,7 +43,10 @@ export const OrderHistoryPanel = ({ orders }: OrderHistoryPanelProps) => {
         const createdAt = new Date(order.createdAt);
         return createdAt >= appliedRange.from && createdAt <= appliedRange.to;
       })
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      );
   }, [orders, appliedRange]);
 
   return (
@@ -71,20 +75,43 @@ export const OrderHistoryPanel = ({ orders }: OrderHistoryPanelProps) => {
           </thead>
           <tbody>
             {filteredOrders.map((order) => {
-              const totalQuantity = order.items.reduce((sum, item) => sum + item.quantity, 0);
+              const totalQuantity = order.items.reduce(
+                (sum, item) => sum + item.quantity,
+                0,
+              );
               const [firstItem, ...rest] = order.items;
               return (
-                <tr key={order.id} onClick={() => setSelectedOrder(order)}>
-                  <td>{formatOrderDate(order.createdAt)}</td>
+                <tr key={order.id}>
+                  <td>
+                    <button
+                      type="button"
+                      className={styles.rowButton}
+                      onClick={() => setSelectedOrder(order)}
+                    >
+                      <span className={styles.srOnly}>
+                        {`${formatOrderDate(order.createdAt)} 주문 상세보기`}
+                      </span>
+                    </button>
+                    {formatOrderDate(order.createdAt)}
+                  </td>
                   <td>
                     {firstItem ? (
                       <>
-                        <ProductThumb imageUrl={firstItem.imageUrl} alt={firstItem.name} size="sm" /> {firstItem.name}
+                        <ProductThumb
+                          imageUrl={firstItem.imageUrl}
+                          alt={firstItem.name}
+                          size="sm"
+                        />{' '}
+                        {firstItem.name}
                       </>
                     ) : (
                       '-'
                     )}
-                    {rest.length > 0 && <span className={styles.itemCategory}>외 {rest.length}건</span>}
+                    {rest.length > 0 && (
+                      <span className={styles.itemCategory}>
+                        외 {rest.length}건
+                      </span>
+                    )}
                   </td>
                   <td>{totalQuantity}</td>
                   <td>{formatPrice(order.totalPrice)}</td>
@@ -96,7 +123,10 @@ export const OrderHistoryPanel = ({ orders }: OrderHistoryPanelProps) => {
                         size="sm"
                         variant="outline"
                         className={styles.cancelButton}
-                        isLoading={cancelMutation.isPending && cancelMutation.variables === order.id}
+                        isLoading={
+                          cancelMutation.isPending &&
+                          cancelMutation.variables === order.id
+                        }
                         onClick={(e) => {
                           e.stopPropagation();
                           handleCancel(order);
@@ -114,7 +144,11 @@ export const OrderHistoryPanel = ({ orders }: OrderHistoryPanelProps) => {
       )}
 
       {selectedOrder && (
-        <OrderDetailModal order={selectedOrder} onClose={() => setSelectedOrder(null)} readOnly />
+        <OrderDetailModal
+          order={selectedOrder}
+          onClose={() => setSelectedOrder(null)}
+          readOnly
+        />
       )}
     </div>
   );

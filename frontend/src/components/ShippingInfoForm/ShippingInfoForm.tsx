@@ -105,7 +105,9 @@ export const ShippingInfoForm = ({
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => onDeleteSavedAddress?.(selectedSavedAddressId!)}
+                  onClick={() =>
+                    onDeleteSavedAddress?.(selectedSavedAddressId!)
+                  }
                 >
                   삭제
                 </Button>
@@ -143,7 +145,11 @@ export const ShippingInfoForm = ({
             <input
               className={styles.phonePart}
               value={phoneMiddle}
-              onChange={(e) => onPhoneMiddleChange(e.target.value.replace(/\D/g, '').slice(0, 4))}
+              onChange={(e) =>
+                onPhoneMiddleChange(
+                  e.target.value.replace(/\D/g, '').slice(0, 4),
+                )
+              }
               inputMode="numeric"
               maxLength={4}
               placeholder="1234"
@@ -152,7 +158,9 @@ export const ShippingInfoForm = ({
             <input
               className={styles.phonePart}
               value={phoneLast}
-              onChange={(e) => onPhoneLastChange(e.target.value.replace(/\D/g, '').slice(0, 4))}
+              onChange={(e) =>
+                onPhoneLastChange(e.target.value.replace(/\D/g, '').slice(0, 4))
+              }
               inputMode="numeric"
               maxLength={4}
               placeholder="5678"
@@ -170,7 +178,12 @@ export const ShippingInfoForm = ({
                 readOnly
                 placeholder="우편번호"
               />
-              <Button type="button" variant="outline" size="sm" onClick={handleSearchAddress}>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleSearchAddress}
+              >
                 주소 검색
               </Button>
             </div>

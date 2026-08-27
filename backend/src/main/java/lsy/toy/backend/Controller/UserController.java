@@ -12,7 +12,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin(origins = "http://localhost:5173") // 💡 React(Vite) 포트 허용
 public class UserController {
 
     private final UserService userService;

@@ -1,7 +1,5 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import axios from 'axios';
 import { Button } from '../../components/Button/Button';
 import { Spinner } from '../../components/Spinner/Spinner';
 import { CheckboxFilterGroup } from '../../components/CheckboxFilterGroup/CheckboxFilterGroup';
@@ -9,23 +7,13 @@ import { StockEditor } from '../../components/StockEditor/StockEditor';
 import { SortableTh } from '../../components/SortableTh/SortableTh';
 import { ProductStatusSelect } from '../../components/ProductStatusSelect/ProductStatusSelect';
 import { ProductThumb } from '../../components/ProductThumb/ProductThumb';
-import {
-  deleteProduct,
-  fetchCategories,
-  fetchDeletedProducts,
-  fetchProducts,
-  fetchTeams,
-  formatPrice,
-  restoreProduct,
-  updateProductStock,
-  updateProductStatus,
-  PRODUCT_STATUSES,
-} from '../../api/productApi';
-import { fetchBadges, getBadgeGradient } from '../../api/badgeApi';
-import type { ProductStatus } from '../../types/product';
+import { formatPrice, PRODUCT_STATUSES } from '../../api/productApi';
+import { getBadgeGradient } from '../../api/badgeApi';
+import { useAdminProducts } from '../../hooks/useAdminProducts';
 import styles from './Admin.module.css';
 
-type ProductSortKey = 'name' | 'category' | 'team' | 'price' | 'stock' | 'rating';
+type ProductSortKey =
+  'name' | 'category' | 'team' | 'price' | 'stock' | 'rating';
 type SortDirection = 'asc' | 'desc';
 
 const toggleInSet = (set: Set<string>, value: string) => {
@@ -40,7 +28,6 @@ const toggleInSet = (set: Set<string>, value: string) => {
 
 export const AdminProducts = () => {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const [showDeleted, setShowDeleted] = useState(false);
   const [sortKey, setSortKey] = useState<ProductSortKey | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
@@ -50,7 +37,10 @@ export const AdminProducts = () => {
   const [badgeFilter, setBadgeFilter] = useState<Set<string>>(new Set());
   const [statusFilter, setStatusFilter] = useState<Set<string>>(new Set());
   const hasActiveFilter =
-    categoryFilter.size > 0 || teamFilter.size > 0 || badgeFilter.size > 0 || statusFilter.size > 0;
+    categoryFilter.size > 0 ||
+    teamFilter.size > 0 ||
+    badgeFilter.size > 0 ||
+    statusFilter.size > 0;
 
   const resetFilters = () => {
     setCategoryFilter(new Set());
@@ -68,39 +58,39 @@ export const AdminProducts = () => {
     }
   };
 
-  const { data: products = [], isLoading, isError } = useQuery({
-    queryKey: ['products'],
-    queryFn: fetchProducts,
-  });
   const {
-    data: deletedProducts = [],
-    isLoading: isDeletedLoading,
-    isError: isDeletedError,
-  } = useQuery({
-    queryKey: ['products', 'deleted'],
-    queryFn: fetchDeletedProducts,
-    enabled: showDeleted,
-  });
-  const { data: categoryNames = [] } = useQuery({
-    queryKey: ['categories'],
-    queryFn: fetchCategories,
-  });
-  const { data: teamNames = [] } = useQuery({
-    queryKey: ['teams'],
-    queryFn: fetchTeams,
-  });
-  const { data: badges = [] } = useQuery({
-    queryKey: ['badges'],
-    queryFn: fetchBadges,
-  });
+    products,
+    isLoading,
+    isError,
+    deletedProducts,
+    isDeletedLoading,
+    isDeletedError,
+    categoryNames,
+    teamNames,
+    badges,
+    deleteMutation,
+    restoreMutation,
+    stockMutation,
+    statusMutation,
+  } = useAdminProducts(showDeleted);
   const badgeNames = useMemo(() => badges.map((badge) => badge.name), [badges]);
 
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
-      if (categoryFilter.size > 0 && !categoryFilter.has(product.category)) return false;
-      if (teamFilter.size > 0 && !(product.team && teamFilter.has(product.team))) return false;
-      if (badgeFilter.size > 0 && !(product.badge && badgeFilter.has(product.badge))) return false;
-      if (statusFilter.size > 0 && !statusFilter.has(product.status)) return false;
+      if (categoryFilter.size > 0 && !categoryFilter.has(product.category))
+        return false;
+      if (
+        teamFilter.size > 0 &&
+        !(product.team && teamFilter.has(product.team))
+      )
+        return false;
+      if (
+        badgeFilter.size > 0 &&
+        !(product.badge && badgeFilter.has(product.badge))
+      )
+        return false;
+      if (statusFilter.size > 0 && !statusFilter.has(product.status))
+        return false;
       return true;
     });
   }, [products, categoryFilter, teamFilter, badgeFilter, statusFilter]);
@@ -114,46 +104,12 @@ export const AdminProducts = () => {
       if (typeof aValue === 'number' && typeof bValue === 'number') {
         return (aValue - bValue) * direction;
       }
-      return String(aValue ?? '').localeCompare(String(bValue ?? ''), 'ko') * direction;
+      return (
+        String(aValue ?? '').localeCompare(String(bValue ?? ''), 'ko') *
+        direction
+      );
     });
   }, [filteredProducts, sortKey, sortDirection]);
-
-  const deleteMutation = useMutation({
-    mutationFn: deleteProduct,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['products'] });
-    },
-  });
-
-  const restoreMutation = useMutation({
-    mutationFn: restoreProduct,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['products'] });
-    },
-  });
-
-  const stockMutation = useMutation({
-    mutationFn: ({ id, stock }: { id: number; stock: number }) => updateProductStock(id, stock),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['products'] });
-    },
-  });
-
-  const [statusError, setStatusError] = useState<string | null>(null);
-  const statusMutation = useMutation({
-    mutationFn: ({ id, status }: { id: number; status: ProductStatus }) => updateProductStatus(id, status),
-    onSuccess: () => {
-      setStatusError(null);
-      queryClient.invalidateQueries({ queryKey: ['products'] });
-    },
-    onError: (error) => {
-      setStatusError(
-        axios.isAxiosError(error) && error.response?.data?.message
-          ? error.response.data.message
-          : '상태 변경에 실패했습니다.',
-      );
-    },
-  });
 
   const handleDelete = (id: number) => {
     deleteMutation.mutate(id);
@@ -164,10 +120,19 @@ export const AdminProducts = () => {
       <div className={styles.panelHeader}>
         <h1>상품 관리</h1>
         <div className={styles.rowActions}>
-          <Button type="button" size="sm" onClick={() => navigate('/admin/products/new')}>
+          <Button
+            type="button"
+            size="sm"
+            onClick={() => navigate('/admin/products/new')}
+          >
             상품 등록
           </Button>
-          <Button type="button" variant="outline" size="sm" onClick={() => setShowDeleted((v) => !v)}>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setShowDeleted((v) => !v)}
+          >
             {showDeleted ? '활성 상품 보기' : '삭제된 상품 보기'}
           </Button>
         </div>
@@ -176,9 +141,13 @@ export const AdminProducts = () => {
       {showDeleted ? (
         <div className={styles.tableWrap}>
           {isDeletedLoading ? (
-            <div className={styles.empty}><Spinner /></div>
+            <div className={styles.empty}>
+              <Spinner />
+            </div>
           ) : isDeletedError ? (
-            <p className={`${styles.empty} ${styles.error}`}>삭제된 상품 목록을 불러오지 못했습니다.</p>
+            <p className={`${styles.empty} ${styles.error}`}>
+              삭제된 상품 목록을 불러오지 못했습니다.
+            </p>
           ) : (
             <table>
               <thead>
@@ -193,7 +162,12 @@ export const AdminProducts = () => {
                 {deletedProducts.map((product) => (
                   <tr key={product.id}>
                     <td>
-                      <ProductThumb imageUrl={product.imageUrl} alt={product.name} size="sm" /> {product.name}
+                      <ProductThumb
+                        imageUrl={product.imageUrl}
+                        alt={product.name}
+                        size="sm"
+                      />{' '}
+                      {product.name}
                     </td>
                     <td>{product.category}</td>
                     <td>{formatPrice(product.price)}</td>
@@ -201,7 +175,10 @@ export const AdminProducts = () => {
                       <Button
                         size="sm"
                         variant="outline"
-                        isLoading={restoreMutation.isPending && restoreMutation.variables === product.id}
+                        isLoading={
+                          restoreMutation.isPending &&
+                          restoreMutation.variables === product.id
+                        }
                         onClick={() => restoreMutation.mutate(product.id)}
                       >
                         복구
@@ -212,181 +189,235 @@ export const AdminProducts = () => {
               </tbody>
             </table>
           )}
-          {!isDeletedLoading && !isDeletedError && deletedProducts.length === 0 && (
-            <p className={styles.empty}>삭제된 상품이 없습니다.</p>
-          )}
+          {!isDeletedLoading &&
+            !isDeletedError &&
+            deletedProducts.length === 0 && (
+              <p className={styles.empty}>삭제된 상품이 없습니다.</p>
+            )}
         </div>
       ) : (
         <>
-      <section className={styles.stats}>
-        <div className={styles.statCard}>
-          <span>전체 상품</span>
-          <strong>{products.length}개</strong>
-        </div>
-        <div className={styles.statCard}>
-          <span>세일 상품</span>
-          <strong>{products.filter((p) => p.badge === 'SALE').length}개</strong>
-        </div>
-        <div className={styles.statCard}>
-          <span>평균 평점</span>
-          <strong>
-            {products.length
-              ? (products.reduce((sum, p) => sum + p.rating, 0) / products.length).toFixed(1)
-              : '0.0'}
-          </strong>
-        </div>
-      </section>
+          <section className={styles.stats}>
+            <div className={styles.statCard}>
+              <span>전체 상품</span>
+              <strong>{products.length}개</strong>
+            </div>
+            <div className={styles.statCard}>
+              <span>세일 상품</span>
+              <strong>
+                {products.filter((p) => p.badge === 'SALE').length}개
+              </strong>
+            </div>
+            <div className={styles.statCard}>
+              <span>평균 평점</span>
+              <strong>
+                {products.length
+                  ? (
+                      products.reduce((sum, p) => sum + p.rating, 0) /
+                      products.length
+                    ).toFixed(1)
+                  : '0.0'}
+              </strong>
+            </div>
+          </section>
 
-      {statusError && <p className={styles.error}>{statusError}</p>}
+          <div className={styles.checkboxFilterBar}>
+            <div className={styles.checkboxFilterGroups}>
+              <CheckboxFilterGroup
+                label="카테고리"
+                options={categoryNames}
+                selected={categoryFilter}
+                onToggle={(value) =>
+                  setCategoryFilter((prev) => toggleInSet(prev, value))
+                }
+              />
+              <CheckboxFilterGroup
+                label="구단"
+                options={teamNames}
+                selected={teamFilter}
+                onToggle={(value) =>
+                  setTeamFilter((prev) => toggleInSet(prev, value))
+                }
+              />
+              <CheckboxFilterGroup
+                label="뱃지"
+                options={badgeNames}
+                selected={badgeFilter}
+                onToggle={(value) =>
+                  setBadgeFilter((prev) => toggleInSet(prev, value))
+                }
+              />
+              <CheckboxFilterGroup
+                label="판매 상태"
+                options={PRODUCT_STATUSES}
+                selected={statusFilter}
+                onToggle={(value) =>
+                  setStatusFilter((prev) => toggleInSet(prev, value))
+                }
+              />
+            </div>
+            {hasActiveFilter && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className={styles.checkboxFilterReset}
+                onClick={resetFilters}
+              >
+                필터 초기화
+              </Button>
+            )}
+          </div>
 
-      <div className={styles.checkboxFilterBar}>
-        <div className={styles.checkboxFilterGroups}>
-          <CheckboxFilterGroup
-            label="카테고리"
-            options={categoryNames}
-            selected={categoryFilter}
-            onToggle={(value) => setCategoryFilter((prev) => toggleInSet(prev, value))}
-          />
-          <CheckboxFilterGroup
-            label="구단"
-            options={teamNames}
-            selected={teamFilter}
-            onToggle={(value) => setTeamFilter((prev) => toggleInSet(prev, value))}
-          />
-          <CheckboxFilterGroup
-            label="뱃지"
-            options={badgeNames}
-            selected={badgeFilter}
-            onToggle={(value) => setBadgeFilter((prev) => toggleInSet(prev, value))}
-          />
-          <CheckboxFilterGroup
-            label="판매 상태"
-            options={PRODUCT_STATUSES}
-            selected={statusFilter}
-            onToggle={(value) => setStatusFilter((prev) => toggleInSet(prev, value))}
-          />
-        </div>
-        {hasActiveFilter && (
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className={styles.checkboxFilterReset}
-            onClick={resetFilters}
-          >
-            필터 초기화
-          </Button>
-        )}
-      </div>
-
-      <div className={styles.tableWrap}>
-        {isLoading ? (
-          <div className={styles.empty}><Spinner /></div>
-        ) : isError ? (
-          <p className={`${styles.empty} ${styles.error}`}>상품 목록을 불러오지 못했습니다.</p>
-        ) : (
-          <table>
-            <thead>
-              <tr>
-                <SortableTh
-                  label="상품"
-                  active={sortKey === 'name'}
-                  direction={sortDirection}
-                  onClick={() => handleSort('name')}
-                />
-                <SortableTh
-                  label="카테고리"
-                  active={sortKey === 'category'}
-                  direction={sortDirection}
-                  onClick={() => handleSort('category')}
-                />
-                <SortableTh
-                  label="구단"
-                  active={sortKey === 'team'}
-                  direction={sortDirection}
-                  onClick={() => handleSort('team')}
-                />
-                <SortableTh
-                  label="가격"
-                  active={sortKey === 'price'}
-                  direction={sortDirection}
-                  onClick={() => handleSort('price')}
-                />
-                <SortableTh
-                  label="재고"
-                  active={sortKey === 'stock'}
-                  direction={sortDirection}
-                  onClick={() => handleSort('stock')}
-                />
-                <th>상태</th>
-                <SortableTh
-                  label="평점"
-                  active={sortKey === 'rating'}
-                  direction={sortDirection}
-                  onClick={() => handleSort('rating')}
-                />
-                <th>뱃지</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {sortedProducts.map((product) => (
-                <tr key={product.id}>
-                  <td>
-                    <ProductThumb imageUrl={product.imageUrl} alt={product.name} size="sm" /> {product.name}
-                  </td>
-                  <td>{product.category}</td>
-                  <td>{product.team ?? '-'}</td>
-                  <td>{formatPrice(product.price)}</td>
-                  <td>
-                    <StockEditor
-                      value={product.stock}
-                      isSaving={stockMutation.isPending && stockMutation.variables?.id === product.id}
-                      onSave={(stock) => stockMutation.mutate({ id: product.id, stock })}
+          <div className={styles.tableWrap}>
+            {isLoading ? (
+              <div className={styles.empty}>
+                <Spinner />
+              </div>
+            ) : isError ? (
+              <p className={`${styles.empty} ${styles.error}`}>
+                상품 목록을 불러오지 못했습니다.
+              </p>
+            ) : (
+              <table>
+                <thead>
+                  <tr>
+                    <SortableTh
+                      label="상품"
+                      active={sortKey === 'name'}
+                      direction={sortDirection}
+                      onClick={() => handleSort('name')}
                     />
-                  </td>
-                  <td>
-                    <ProductStatusSelect
-                      value={product.status}
-                      isSaving={statusMutation.isPending && statusMutation.variables?.id === product.id}
-                      onSave={(status) => statusMutation.mutate({ id: product.id, status })}
+                    <SortableTh
+                      label="카테고리"
+                      active={sortKey === 'category'}
+                      direction={sortDirection}
+                      onClick={() => handleSort('category')}
                     />
-                  </td>
-                  <td>⭐ {product.rating}</td>
-                  <td>
-                    {product.badge && (
-                      <span className={styles.badge} style={{ background: getBadgeGradient(badges, product.badge) }}>
-                        {product.badge}
-                      </span>
-                    )}
-                  </td>
-                  <td>
-                    <div className={styles.rowActions}>
-                      <Button size="sm" variant="outline" onClick={() => navigate(`/admin/products/${product.id}/edit`)}>
-                        수정
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="danger"
-                        isLoading={deleteMutation.isPending && deleteMutation.variables === product.id}
-                        onClick={() => handleDelete(product.id)}
-                      >
-                        삭제
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-        {!isLoading && !isError && products.length === 0 && (
-          <p className={styles.empty}>등록된 상품이 없습니다.</p>
-        )}
-        {!isLoading && !isError && products.length > 0 && sortedProducts.length === 0 && (
-          <p className={styles.empty}>필터 조건에 맞는 상품이 없습니다.</p>
-        )}
-      </div>
+                    <SortableTh
+                      label="구단"
+                      active={sortKey === 'team'}
+                      direction={sortDirection}
+                      onClick={() => handleSort('team')}
+                    />
+                    <SortableTh
+                      label="가격"
+                      active={sortKey === 'price'}
+                      direction={sortDirection}
+                      onClick={() => handleSort('price')}
+                    />
+                    <SortableTh
+                      label="재고"
+                      active={sortKey === 'stock'}
+                      direction={sortDirection}
+                      onClick={() => handleSort('stock')}
+                    />
+                    <th>상태</th>
+                    <SortableTh
+                      label="평점"
+                      active={sortKey === 'rating'}
+                      direction={sortDirection}
+                      onClick={() => handleSort('rating')}
+                    />
+                    <th>뱃지</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sortedProducts.map((product) => (
+                    <tr key={product.id}>
+                      <td>
+                        <ProductThumb
+                          imageUrl={product.imageUrl}
+                          alt={product.name}
+                          size="sm"
+                        />{' '}
+                        {product.name}
+                      </td>
+                      <td>{product.category}</td>
+                      <td>{product.team ?? '-'}</td>
+                      <td>{formatPrice(product.price)}</td>
+                      <td>
+                        <StockEditor
+                          value={product.stock}
+                          isSaving={
+                            stockMutation.isPending &&
+                            stockMutation.variables?.id === product.id
+                          }
+                          onSave={(stock) =>
+                            stockMutation.mutate({ id: product.id, stock })
+                          }
+                        />
+                      </td>
+                      <td>
+                        <ProductStatusSelect
+                          value={product.status}
+                          isSaving={
+                            statusMutation.isPending &&
+                            statusMutation.variables?.id === product.id
+                          }
+                          onSave={(status) =>
+                            statusMutation.mutate({ id: product.id, status })
+                          }
+                        />
+                      </td>
+                      <td>⭐ {product.rating}</td>
+                      <td>
+                        {product.badge && (
+                          <span
+                            className={styles.badge}
+                            style={{
+                              background: getBadgeGradient(
+                                badges,
+                                product.badge,
+                              ),
+                            }}
+                          >
+                            {product.badge}
+                          </span>
+                        )}
+                      </td>
+                      <td>
+                        <div className={styles.rowActions}>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() =>
+                              navigate(`/admin/products/${product.id}/edit`)
+                            }
+                          >
+                            수정
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="danger"
+                            isLoading={
+                              deleteMutation.isPending &&
+                              deleteMutation.variables === product.id
+                            }
+                            onClick={() => handleDelete(product.id)}
+                          >
+                            삭제
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+            {!isLoading && !isError && products.length === 0 && (
+              <p className={styles.empty}>등록된 상품이 없습니다.</p>
+            )}
+            {!isLoading &&
+              !isError &&
+              products.length > 0 &&
+              sortedProducts.length === 0 && (
+                <p className={styles.empty}>
+                  필터 조건에 맞는 상품이 없습니다.
+                </p>
+              )}
+          </div>
         </>
       )}
     </>

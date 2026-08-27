@@ -7,6 +7,7 @@ import { Spinner } from '../../components/Spinner/Spinner';
 import { StatusMessage } from '../../components/StatusMessage/StatusMessage';
 import { useCurrentUser } from '../../hooks/useCurrentUser';
 import { clearToken } from '../../api/authToken';
+import { logout } from '../../api/authApi';
 import styles from './MyPage.module.css';
 
 export const MyPageLayout = () => {
@@ -15,10 +16,14 @@ export const MyPageLayout = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    clearToken();
-    queryClient.removeQueries({ queryKey: ['me'] });
-    queryClient.removeQueries({ queryKey: ['cart'] });
-    navigate('/');
+    // 💡 서버쪽 리프레시 토큰도 폐기해야 새로고침 시 조용히 재로그인되는 걸 막을 수 있다.
+    logout().finally(() => {
+      clearToken();
+      queryClient.removeQueries({ queryKey: ['me'] });
+      queryClient.removeQueries({ queryKey: ['cart'] });
+      queryClient.removeQueries({ queryKey: ['wishlist'] });
+      navigate('/');
+    });
   };
 
   return (
@@ -36,7 +41,9 @@ export const MyPageLayout = () => {
           </div>
         ) : isError || !currentUser ? (
           <div className={styles.empty}>
-            <StatusMessage icon="⚠️">회원 정보를 불러오지 못했습니다.</StatusMessage>
+            <StatusMessage icon="⚠️">
+              회원 정보를 불러오지 못했습니다.
+            </StatusMessage>
           </div>
         ) : (
           <div className={styles.layout}>

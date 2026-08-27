@@ -8,7 +8,8 @@ import { useCart } from '../hooks/useCart';
 import styles from './Cart.module.css';
 
 export const Cart = () => {
-  const { items, totalPrice, isLoading, updateQuantity, removeItem } = useCart();
+  const { items, totalPrice, isLoading, updateQuantity, removeItem } =
+    useCart();
 
   return (
     <div className={styles.page}>
@@ -18,7 +19,9 @@ export const Cart = () => {
         <h1>장바구니</h1>
 
         {isLoading ? (
-          <div className={styles.empty}><Spinner /></div>
+          <div className={styles.empty}>
+            <Spinner />
+          </div>
         ) : items.length === 0 ? (
           <div className={styles.empty}>
             <p>장바구니가 비어 있습니다.</p>

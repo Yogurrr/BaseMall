@@ -1,8 +1,12 @@
 package lsy.toy.backend.Dto;
 
+import jakarta.validation.constraints.NotBlank;
+
 public class InquiryRequest {
     private String category;
+    @NotBlank(message = "제목을 입력해주세요.")
     private String title;
+    @NotBlank(message = "내용을 입력해주세요.")
     private String content;
     private String imageUrl;
     private Long orderId;

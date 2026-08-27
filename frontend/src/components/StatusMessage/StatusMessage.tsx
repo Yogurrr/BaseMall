@@ -7,7 +7,11 @@ interface StatusMessageProps {
   children: ReactNode;
 }
 
-export const StatusMessage = ({ icon, title, children }: StatusMessageProps) => (
+export const StatusMessage = ({
+  icon,
+  title,
+  children,
+}: StatusMessageProps) => (
   <div className={styles.wrap}>
     <span className={styles.icon}>{icon}</span>
     {title && <p className={styles.title}>{title}</p>}

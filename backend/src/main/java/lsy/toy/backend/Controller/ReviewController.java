@@ -1,7 +1,9 @@
 package lsy.toy.backend.Controller;
 
+import jakarta.validation.Valid;
 import lsy.toy.backend.Dto.ReviewRequest;
 import lsy.toy.backend.Dto.ReviewResponse;
+import lsy.toy.backend.Security.SecurityUtils;
 import lsy.toy.backend.Service.ReviewService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +14,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/products/{productId}/reviews")
-@CrossOrigin(origins = "http://localhost:5173") // 💡 React(Vite) 포트 허용
 public class ReviewController {
 
     private final ReviewService reviewService;
@@ -32,7 +33,7 @@ public class ReviewController {
     public ResponseEntity<ReviewResponse> createReview(
         @PathVariable Long productId,
         Authentication authentication,
-        @RequestBody ReviewRequest request
+        @Valid @RequestBody ReviewRequest request
     ) {
         ReviewResponse created = reviewService.createReview(productId, authentication.getName(), request.getRating(), request.getContent());
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
@@ -44,7 +45,7 @@ public class ReviewController {
         @PathVariable Long productId,
         @PathVariable Long reviewId,
         Authentication authentication,
-        @RequestBody ReviewRequest request
+        @Valid @RequestBody ReviewRequest request
     ) {
         return reviewService.updateReview(productId, reviewId, authentication.getName(), request.getRating(), request.getContent());
     }
@@ -56,9 +57,7 @@ public class ReviewController {
         @PathVariable Long reviewId,
         Authentication authentication
     ) {
-        boolean isAdmin = authentication.getAuthorities().stream()
-            .anyMatch(authority -> authority.getAuthority().equals("ADMIN"));
-        reviewService.deleteReview(productId, reviewId, authentication.getName(), isAdmin);
+        reviewService.deleteReview(productId, reviewId, authentication.getName(), SecurityUtils.isAdmin(authentication));
         return ResponseEntity.noContent().build();
     }
 }

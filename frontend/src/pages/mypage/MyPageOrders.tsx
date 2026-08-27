@@ -4,7 +4,10 @@ import { fetchMyOrders } from '../../api/orderApi';
 import styles from './MyPage.module.css';
 
 export const MyPageOrders = () => {
-  const { data: myOrders = [] } = useQuery({ queryKey: ['orders', 'me'], queryFn: fetchMyOrders });
+  const { data: myOrders = [] } = useQuery({
+    queryKey: ['orders', 'me'],
+    queryFn: fetchMyOrders,
+  });
 
   return (
     <div className={styles.wishlistSection}>

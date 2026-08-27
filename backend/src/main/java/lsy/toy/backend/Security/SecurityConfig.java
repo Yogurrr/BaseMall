@@ -58,11 +58,30 @@ public class SecurityConfig {
                 // 💡 API 문서(Swagger UI/OpenAPI 스펙)는 열람 목적이라 인증 없이 공개한다.
                 // 데모용 토이 프로젝트라 허용하는 것이고, 운영 배포 시에는 별도 보호가 필요하다.
                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                // 💡 헬스체크는 외부 모니터링(uptime 체크 등)이 로그인 없이 호출해야 하니 공개한다.
+                // health 외 나머지 actuator 엔드포인트는 노출 자체를 막아뒀으니(application.properties) 별도 매처가 필요 없다.
+                .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
                 .requestMatchers("/api/auth/register", "/api/auth/login").permitAll()
+                // 💡 카카오 로그인도 register/login과 동일하게 JWT 없이 호출하는 경로다.
+                // /api/auth/kakao/link(계정 연동, 인증 필요)와는 다른 경로라 겹치지 않는다.
+                .requestMatchers(HttpMethod.POST, "/api/auth/kakao/login").permitAll()
+                // 💡 refresh/logout은 Authorization 헤더가 아니라 httpOnly 쿠키로 신원을 확인하는 경로라
+                // 여기선 permitAll이고, 실제 검증은 AuthController/RefreshTokenService가 쿠키 값으로 직접 한다.
+                .requestMatchers(HttpMethod.POST, "/api/auth/refresh", "/api/auth/logout").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/products", "/api/products/page").permitAll()
                 // 💡 상품 상세는 비로그인 사용자도 봐야 하는 페이지. {id}는 숫자만 매칭해서
-                // /api/products/deleted, /api/products/stats 같은 관리자용 경로는 그대로 인증이 필요하게 둔다.
+                // /api/products/deleted, /api/products/stats 같은 관리자용 경로와 겹치지 않는다.
                 .requestMatchers(HttpMethod.GET, "/api/products/{id:[0-9]+}").permitAll()
+                // 💡 삭제된 상품 목록/판매 통계는 관리자 전용. 이 매처가 없으면 숫자가 아닌 경로라
+                // 위 {id:[0-9]+} 매처에도 안 걸리고 anyRequest().authenticated()로 떨어져
+                // 로그인한 누구나 조회할 수 있게 된다.
+                .requestMatchers(HttpMethod.GET, "/api/products/deleted", "/api/products/stats").hasAuthority("ADMIN")
+                // 💡 상품 등록·이미지 업로드는 관리자 전용. 수정/삭제/재고·상태변경(PUT/DELETE/PATCH)은
+                // 아래 리뷰(/api/products/*/reviews/*)·Q&A(/api/products/*/qna/*) 본인 작성/삭제 규칙과
+                // 경로가 겹치므로, 그 구체적인 규칙들 뒤에 더 넓은 패턴("/api/products/**")으로 선언한다
+                // (먼저 선언된 규칙이 우선 매칭되므로 순서를 반대로 하면 일반 사용자의 리뷰/Q&A
+                // 작성·삭제까지 관리자 전용으로 막혀버린다).
+                .requestMatchers(HttpMethod.POST, "/api/products", "/api/products/images").hasAuthority("ADMIN")
                 .requestMatchers(HttpMethod.GET, "/api/categories").permitAll()
                 // 💡 카테고리 관리 화면(등록/수정/삭제)은 관리자 전용. id 포함 전체 목록 조회도 마찬가지.
                 .requestMatchers(HttpMethod.GET, "/api/categories/admin").hasAuthority("ADMIN")
@@ -95,6 +114,11 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/products/*/qna").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/products/*/qna").authenticated()
                 .requestMatchers(HttpMethod.DELETE, "/api/products/*/qna/*").authenticated()
+                // 💡 상품 수정/삭제/재고·상태변경은 관리자 전용. 위 리뷰/Q&A의 PUT·DELETE 규칙보다
+                // 더 넓은 패턴이라 반드시 뒤에 와야 한다(앞에 두면 리뷰/Q&A 규칙을 가려버림).
+                .requestMatchers(HttpMethod.PUT, "/api/products/**").hasAuthority("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/products/**").hasAuthority("ADMIN")
+                .requestMatchers(HttpMethod.PATCH, "/api/products/**").hasAuthority("ADMIN")
                 // 💡 마이페이지 "상품 Q&A 내역"은 로그인한 본인만 조회 가능해야 한다.
                 .requestMatchers(HttpMethod.GET, "/api/qna/me").authenticated()
                 // 💡 Q&A 답변 등록과 전체 목록 조회는 관리자 전용.
@@ -123,9 +147,10 @@ public class SecurityConfig {
                 // 결과만 조용히 돌려주므로, 여기서 먼저 명확한 403으로 막는 게 API 사용자에게 더 낫다)
                 .requestMatchers(HttpMethod.GET, "/api/users", "/api/users/stats", "/api/users/*").hasAuthority("ADMIN")
                 .requestMatchers(HttpMethod.GET, "/api/orders/count-stats").hasAuthority("ADMIN")
-                // 💡 특정 회원의 주문 내역 조회(회원 상세 화면)도 관리자 전용. 이게 없으면
-                // anyRequest().authenticated()에 걸려 로그인한 누구나 다른 회원의 주문을 볼 수 있게 된다.
-                .requestMatchers(HttpMethod.GET, "/api/orders/user/*").hasAuthority("ADMIN")
+                // 💡 특정 회원의 주문 내역 조회(회원 상세 화면, /api/orders/user/{id}에서 이 경로로 이동함)도
+                // 관리자 전용. 위 "/api/users/*"는 세그먼트 1개만 매칭해 이 경로(세그먼트 2개)를 못 잡으므로
+                // 별도 매처가 없으면 anyRequest().authenticated()에 걸려 로그인한 누구나 호출할 수 있게 된다.
+                .requestMatchers(HttpMethod.GET, "/api/users/*/orders").hasAuthority("ADMIN")
                 // 💡 본인 주문 취소는 로그인한 고객이면 누구나 호출 가능해야 하니, 더 구체적인 이 규칙을
                 // 아래의 관리자 전용 PATCH 규칙보다 먼저 선언한다(서비스 계층에서 소유권/상태를 다시 검증).
                 .requestMatchers(HttpMethod.PATCH, "/api/orders/*/cancel").authenticated()
@@ -152,6 +177,10 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(List.of("http://localhost:5173"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
+        // 💡 리프레시 토큰을 httpOnly 쿠키로 주고받으려면 브라우저가 쿠키를 실어 보내고
+        // Set-Cookie를 받아들이게 허용해야 한다. AllowedOrigins가 와일드카드가 아니라 명시적
+        // 리스트라 AllowCredentials(true)와 함께 써도 스펙 위반이 아니다.
+        configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

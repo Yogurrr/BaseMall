@@ -126,7 +126,9 @@
   border: 0.05rem solid var(--border);
   background: var(--bg);
   color: var(--text-h);
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
 }
 
 .searchInput:focus {
@@ -190,7 +192,11 @@
   height: 7.2rem;
   border-radius: 0.5rem;
   overflow: hidden;
-  background: radial-gradient(circle at 30% 20%, var(--accent-bg), var(--code-bg));
+  background: radial-gradient(
+    circle at 30% 20%,
+    var(--accent-bg),
+    var(--code-bg)
+  );
   font-size: 3.6rem;
 }
 

@@ -26,7 +26,10 @@ export const CheckoutSummary = ({
   onCheckout,
   isSubmitting,
 }: CheckoutSummaryProps) => {
-  const shippingFee = totalPrice === 0 || totalPrice >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
+  const shippingFee =
+    totalPrice === 0 || totalPrice >= FREE_SHIPPING_THRESHOLD
+      ? 0
+      : SHIPPING_FEE;
   const grandTotal = totalPrice - discountAmount - pointsUsed + shippingFee;
 
   return (
@@ -55,7 +58,8 @@ export const CheckoutSummary = ({
       </div>
       {shippingFee > 0 && (
         <p className={styles.hint}>
-          {formatPrice(FREE_SHIPPING_THRESHOLD - totalPrice)} 더 담으면 무료배송!
+          {formatPrice(FREE_SHIPPING_THRESHOLD - totalPrice)} 더 담으면
+          무료배송!
         </p>
       )}
 
@@ -74,7 +78,11 @@ export const CheckoutSummary = ({
       </Button>
 
       <label className={styles.agreeRow}>
-        <input type="checkbox" checked={agreeToTerms} onChange={(e) => onAgreeToTermsChange(e.target.checked)} />
+        <input
+          type="checkbox"
+          checked={agreeToTerms}
+          onChange={(e) => onAgreeToTermsChange(e.target.checked)}
+        />
         주문 상품정보를 확인하였으며 결제에 동의합니다.
       </label>
     </aside>

@@ -15,7 +15,8 @@ interface PointHistoryPanelProps {
 }
 
 export const PointHistoryPanel = ({ transactions }: PointHistoryPanelProps) => {
-  const [appliedRange, setAppliedRange] = useState<DateRange>(defaultMonthRange);
+  const [appliedRange, setAppliedRange] =
+    useState<DateRange>(defaultMonthRange);
 
   const filteredTransactions = useMemo(() => {
     return transactions.filter((transaction) => {
@@ -43,9 +44,13 @@ export const PointHistoryPanel = ({ transactions }: PointHistoryPanelProps) => {
             <li key={transaction.id} className={styles.row}>
               <div className={styles.info}>
                 <p className={styles.label}>{transaction.description}</p>
-                <p className={styles.date}>{formatDate(transaction.createdAt)}</p>
+                <p className={styles.date}>
+                  {formatDate(transaction.createdAt)}
+                </p>
               </div>
-              <span className={`${styles.amount} ${transaction.amount >= 0 ? styles.plus : styles.minus}`}>
+              <span
+                className={`${styles.amount} ${transaction.amount >= 0 ? styles.plus : styles.minus}`}
+              >
                 {transaction.amount >= 0 ? '+' : '-'}
                 {formatPrice(Math.abs(transaction.amount))}
               </span>

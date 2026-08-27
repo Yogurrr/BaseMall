@@ -1,10 +1,12 @@
 package lsy.toy.backend.Controller;
 
+import jakarta.validation.Valid;
 import lsy.toy.backend.Dto.AdminInquiryResponse;
 import lsy.toy.backend.Dto.ImageUploadResponse;
 import lsy.toy.backend.Dto.InquiryAnswerRequest;
 import lsy.toy.backend.Dto.InquiryRequest;
 import lsy.toy.backend.Dto.InquiryResponse;
+import lsy.toy.backend.Security.SecurityUtils;
 import lsy.toy.backend.Service.InquiryService;
 import lsy.toy.backend.Service.SupabaseStorageService;
 import org.springframework.http.HttpStatus;
@@ -17,7 +19,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/inquiries")
-@CrossOrigin(origins = "http://localhost:5173") // 💡 React(Vite) 포트 허용
 public class InquiryController {
 
     // 💡 상품 이미지(product-images)/배너(banners)와 분리된 전용 버킷.
@@ -39,7 +40,7 @@ public class InquiryController {
 
     // 2. 문의 작성 (POST, JWT 필요)
     @PostMapping
-    public ResponseEntity<InquiryResponse> createInquiry(Authentication authentication, @RequestBody InquiryRequest request) {
+    public ResponseEntity<InquiryResponse> createInquiry(Authentication authentication, @Valid @RequestBody InquiryRequest request) {
         InquiryResponse created = inquiryService.createInquiry(authentication.getName(), request);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
@@ -53,7 +54,7 @@ public class InquiryController {
     // 4. 문의 상세 조회 (GET, 작성자 본인 또는 관리자)
     @GetMapping("/{id}")
     public InquiryResponse getInquiry(@PathVariable Long id, Authentication authentication) {
-        return inquiryService.getInquiry(id, authentication.getName(), isAdmin(authentication));
+        return inquiryService.getInquiry(id, authentication.getName(), SecurityUtils.isAdmin(authentication));
     }
 
     // 5. 문의 삭제 (DELETE, 작성자 본인만, 답변 완료 전에만 가능)
@@ -71,12 +72,7 @@ public class InquiryController {
 
     // 7. 문의 답변 등록 (PATCH, 관리자 전용)
     @PatchMapping("/{id}/answer")
-    public AdminInquiryResponse answerInquiry(@PathVariable Long id, @RequestBody InquiryAnswerRequest request) {
+    public AdminInquiryResponse answerInquiry(@PathVariable Long id, @Valid @RequestBody InquiryAnswerRequest request) {
         return inquiryService.answerInquiry(id, request.getAnswer());
-    }
-
-    private boolean isAdmin(Authentication authentication) {
-        return authentication.getAuthorities().stream()
-            .anyMatch(authority -> authority.getAuthority().equals("ADMIN"));
     }
 }

@@ -12,7 +12,11 @@ interface SortSelectProps {
 }
 
 export const SortSelect = ({ options, value, onChange }: SortSelectProps) => (
-  <select className={styles.select} value={value} onChange={(event) => onChange(event.target.value)}>
+  <select
+    className={styles.select}
+    value={value}
+    onChange={(event) => onChange(event.target.value)}
+  >
     {options.map((option) => (
       <option key={option.value} value={option.value}>
         {option.label}

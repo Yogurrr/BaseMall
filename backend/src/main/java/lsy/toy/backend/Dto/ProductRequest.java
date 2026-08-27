@@ -1,5 +1,8 @@
 package lsy.toy.backend.Dto;
 
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+
 public class ProductRequest {
     private String name;
     private String category;
@@ -8,6 +11,8 @@ public class ProductRequest {
     private Integer originalPrice;
     private String imageUrl;
     private String badge;
+    @NotNull(message = "재고는 0 이상이어야 합니다.")
+    @Min(value = 0, message = "재고는 0 이상이어야 합니다.")
     private Integer stock;
     private String description;
     private String detailImageUrl;

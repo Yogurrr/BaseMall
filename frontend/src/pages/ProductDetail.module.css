@@ -68,7 +68,11 @@
   justify-content: center;
   font-size: 6rem;
   border-radius: 1rem;
-  background: radial-gradient(circle at 30% 20%, var(--accent-bg), var(--code-bg));
+  background: radial-gradient(
+    circle at 30% 20%,
+    var(--accent-bg),
+    var(--code-bg)
+  );
   overflow: hidden;
 }
 
@@ -189,7 +193,9 @@
   color: var(--text-h);
   cursor: pointer;
   min-width: 9rem;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
 }
 
 .optionSelect:focus {

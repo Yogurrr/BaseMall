@@ -35,3 +35,12 @@ kakaopay.secret-key=<카카오페이 탭에서 발급받은 시크릿 키>
 # 💡 토스페이먼츠 테스트 결제 연동. 가입 없이도 토스 공식 문서에 공개된 테스트 시크릿 키로 결제 테스트가 가능하다.
 # 실제 가맹점 계정을 만들면 developers.tosspayments.com 개발자센터 > 내 개발정보에서 발급받는 키로 교체할 것.
 tosspayments.secret-key=test_sk_zXLkKEypNArWmo50nX3lmeaxYG5R
+
+# 💡 카카오 로그인 + "나에게 보내기" 알림 연동. developers.kakao.com 콘솔 > 내 애플리케이션 >
+# 앱 키의 REST API 키(카카오페이 시크릿 키와는 다른 키). 카카오 로그인 활성화, 동의항목에서
+# 닉네임/카카오계정(이메일)/talk_message 설정(이메일은 "필수 동의"로 해야 자동 가입이 된다),
+# Redirect URI에 아래 두 경로를 모두 등록해야 한다(로컬 기준):
+#   http://localhost:5173/login/kakao/callback       (로그인 화면의 "카카오로 시작하기")
+#   http://localhost:5173/mypage/kakao/callback       (마이페이지 > 회원정보수정의 계정 연동)
+# 비워두면 카카오 로그인/연동 기능만 동작하지 않는다.
+kakao.oauth.client-id=<카카오 디벨로퍼스에서 발급받은 REST API 키>

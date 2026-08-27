@@ -11,7 +11,10 @@ interface CartSummaryProps {
 }
 
 export const CartSummary = ({ totalPrice }: CartSummaryProps) => {
-  const shippingFee = totalPrice === 0 || totalPrice >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
+  const shippingFee =
+    totalPrice === 0 || totalPrice >= FREE_SHIPPING_THRESHOLD
+      ? 0
+      : SHIPPING_FEE;
   const estimatedTotal = totalPrice + shippingFee;
 
   return (
@@ -28,7 +31,8 @@ export const CartSummary = ({ totalPrice }: CartSummaryProps) => {
       </div>
       {shippingFee > 0 && (
         <p className={styles.hint}>
-          {formatPrice(FREE_SHIPPING_THRESHOLD - totalPrice)} 더 담으면 무료배송!
+          {formatPrice(FREE_SHIPPING_THRESHOLD - totalPrice)} 더 담으면
+          무료배송!
         </p>
       )}
 
@@ -36,7 +40,9 @@ export const CartSummary = ({ totalPrice }: CartSummaryProps) => {
         <span>예상 결제금액</span>
         <span>{formatPrice(estimatedTotal)}</span>
       </div>
-      <p className={styles.hint}>쿠폰 할인은 주문/결제 페이지에서 적용할 수 있어요.</p>
+      <p className={styles.hint}>
+        쿠폰 할인은 주문/결제 페이지에서 적용할 수 있어요.
+      </p>
 
       <Link to="/checkout" className={styles.checkoutLink}>
         <Button size="lg">주문하기</Button>

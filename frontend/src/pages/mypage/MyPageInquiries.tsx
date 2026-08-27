@@ -9,14 +9,21 @@ import type { Inquiry } from '../../types/inquiry';
 import styles from './MyPage.module.css';
 
 export const MyPageInquiries = () => {
-  const { data: inquiries = [] } = useQuery({ queryKey: ['inquiries', 'me'], queryFn: fetchMyInquiries });
+  const { data: inquiries = [] } = useQuery({
+    queryKey: ['inquiries', 'me'],
+    queryFn: fetchMyInquiries,
+  });
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedInquiry, setSelectedInquiry] = useState<Inquiry | null>(null);
 
   return (
     <div className={styles.wishlistSection}>
       <div className={styles.inquiryHeader}>
-        {!isFormOpen && <p className={styles.comingSoonTitle}>1:1 문의 내역 {inquiries.length}건</p>}
+        {!isFormOpen && (
+          <p className={styles.comingSoonTitle}>
+            1:1 문의 내역 {inquiries.length}건
+          </p>
+        )}
         {!isFormOpen && (
           <Button type="button" size="md" onClick={() => setIsFormOpen(true)}>
             문의하기
@@ -25,13 +32,20 @@ export const MyPageInquiries = () => {
       </div>
 
       {isFormOpen ? (
-        <InquiryForm onCancel={() => setIsFormOpen(false)} onSuccess={() => setIsFormOpen(false)} />
+        <InquiryForm
+          onCancel={() => setIsFormOpen(false)}
+          onSuccess={() => setIsFormOpen(false)}
+        />
       ) : (
         <InquiryListPanel inquiries={inquiries} onSelect={setSelectedInquiry} />
       )}
 
       {selectedInquiry && (
-        <InquiryDetailModal inquiry={selectedInquiry} mode="user" onClose={() => setSelectedInquiry(null)} />
+        <InquiryDetailModal
+          inquiry={selectedInquiry}
+          mode="user"
+          onClose={() => setSelectedInquiry(null)}
+        />
       )}
     </div>
   );

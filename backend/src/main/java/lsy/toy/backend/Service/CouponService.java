@@ -7,6 +7,7 @@ import lsy.toy.backend.Repository.CouponRepository;
 import lsy.toy.backend.Repository.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -35,6 +36,9 @@ public class CouponService {
 
     // 💡 대상 등급의 활성 회원 중, 같은 등급의 미사용 쿠폰이 없는 사람에게만 발급한다.
     // (관리자가 같은 등급 버튼을 반복 클릭해도 중복 발급되지 않도록)
+    // 💡 회원 수만큼 save()를 반복하므로, 중간에 실패해도 이미 발급된 쿠폰이 남지 않도록
+    // 전체를 하나의 트랜잭션으로 묶는다.
+    @Transactional
     public int issueByGrade(String grade) {
         Integer discountPercent = GRADE_DISCOUNTS.get(grade);
         if (discountPercent == null) {

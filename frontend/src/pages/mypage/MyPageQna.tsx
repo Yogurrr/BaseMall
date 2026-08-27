@@ -4,7 +4,10 @@ import { fetchMyQnas } from '../../api/qnaApi';
 import styles from './MyPage.module.css';
 
 export const MyPageQna = () => {
-  const { data: qnas = [] } = useQuery({ queryKey: ['qna', 'me'], queryFn: fetchMyQnas });
+  const { data: qnas = [] } = useQuery({
+    queryKey: ['qna', 'me'],
+    queryFn: fetchMyQnas,
+  });
 
   return (
     <div className={styles.wishlistSection}>

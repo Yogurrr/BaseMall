@@ -1,9 +1,9 @@
-import { useState, type FormEvent } from 'react';
+import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { Button } from '../Button/Button';
 import { StatusMessage } from '../StatusMessage/StatusMessage';
 import { Spinner } from '../Spinner/Spinner';
-import { openDaumPostcode } from '../../utils/daumPostcode';
 import {
   deleteAddress,
   fetchMyAddresses,
@@ -12,68 +12,41 @@ import {
   updateAddress,
   type SaveAddressParams,
 } from '../../api/addressApi';
-import type { Address } from '../../types/address';
+import { AddressForm } from './AddressForm';
 import styles from './AddressListPanel.module.css';
-
-const PHONE_PREFIXES = ['010', '011', '016', '017', '018', '019'] as const;
-
-const emptyForm = {
-  label: '',
-  recipientName: '',
-  phonePrefix: '010',
-  phoneMiddle: '',
-  phoneLast: '',
-  zipCode: '',
-  address: '',
-  addressDetail: '',
-  isDefault: false,
-};
-
-const toFormFromAddress = (item: Address) => {
-  const [phonePrefix = '010', phoneMiddle = '', phoneLast = ''] = item.recipientPhone.split('-');
-  return {
-    label: item.label ?? '',
-    recipientName: item.recipientName,
-    phonePrefix,
-    phoneMiddle,
-    phoneLast,
-    zipCode: item.zipCode,
-    address: item.address,
-    addressDetail: item.addressDetail ?? '',
-    isDefault: item.isDefault,
-  };
-};
 
 export const AddressListPanel = () => {
   const queryClient = useQueryClient();
-  const { data: addresses = [], isLoading } = useQuery({ queryKey: ['addresses', 'me'], queryFn: fetchMyAddresses });
+  const { data: addresses = [], isLoading } = useQuery({
+    queryKey: ['addresses', 'me'],
+    queryFn: fetchMyAddresses,
+  });
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [form, setForm] = useState(emptyForm);
-  const [formError, setFormError] = useState<string | null>(null);
 
   const saveMutation = useMutation({
     mutationFn: saveAddress,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['addresses', 'me'] });
       setIsFormOpen(false);
-      setForm(emptyForm);
-      setFormError(null);
+      toast.success('배송지가 등록되었습니다.');
     },
-    onError: () => setFormError('배송지를 저장하지 못했습니다. 잠시 후 다시 시도해주세요.'),
+    onError: () =>
+      toast.error('배송지를 저장하지 못했습니다. 잠시 후 다시 시도해주세요.'),
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, params }: { id: number; params: SaveAddressParams }) => updateAddress(id, params),
+    mutationFn: ({ id, params }: { id: number; params: SaveAddressParams }) =>
+      updateAddress(id, params),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['addresses', 'me'] });
       setIsFormOpen(false);
       setEditingId(null);
-      setForm(emptyForm);
-      setFormError(null);
+      toast.success('배송지가 수정되었습니다.');
     },
-    onError: () => setFormError('배송지를 수정하지 못했습니다. 잠시 후 다시 시도해주세요.'),
+    onError: () =>
+      toast.error('배송지를 수정하지 못했습니다. 잠시 후 다시 시도해주세요.'),
   });
 
   const deleteMutation = useMutation({
@@ -81,6 +54,7 @@ export const AddressListPanel = () => {
     onSuccess: (updated) => {
       queryClient.setQueryData(['addresses', 'me'], updated);
     },
+    onError: () => toast.error('배송지를 삭제하지 못했습니다.'),
   });
 
   const defaultMutation = useMutation({
@@ -88,60 +62,25 @@ export const AddressListPanel = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['addresses', 'me'] });
     },
+    onError: () => toast.error('기본 배송지 설정에 실패했습니다.'),
   });
 
   const openForm = () => {
     setEditingId(null);
-    setForm(emptyForm);
-    setFormError(null);
     setIsFormOpen(true);
   };
 
-  const openEditForm = (item: Address) => {
-    setEditingId(item.id);
-    setForm(toFormFromAddress(item));
-    setFormError(null);
+  const openEditForm = (id: number) => {
+    setEditingId(id);
     setIsFormOpen(true);
   };
 
   const closeForm = () => {
     setIsFormOpen(false);
     setEditingId(null);
-    setFormError(null);
   };
 
-  const handleSearchAddress = () => {
-    openDaumPostcode((data) => {
-      setForm((prev) => ({ ...prev, zipCode: data.zonecode, address: data.address }));
-    });
-  };
-
-  const handleSubmit = (event: FormEvent) => {
-    event.preventDefault();
-
-    if (!form.recipientName.trim()) {
-      setFormError('받는 분을 입력해주세요.');
-      return;
-    }
-    if (form.phoneMiddle.length !== 4 || form.phoneLast.length !== 4) {
-      setFormError('연락처를 입력해주세요.');
-      return;
-    }
-    if (!form.zipCode.trim() || !form.address.trim()) {
-      setFormError('주소 검색 버튼을 눌러 주소를 입력해주세요.');
-      return;
-    }
-
-    const params: SaveAddressParams = {
-      label: form.label.trim() || undefined,
-      recipientName: form.recipientName.trim(),
-      recipientPhone: `${form.phonePrefix}-${form.phoneMiddle}-${form.phoneLast}`,
-      zipCode: form.zipCode.trim(),
-      address: form.address.trim(),
-      addressDetail: form.addressDetail.trim() || undefined,
-      isDefault: form.isDefault,
-    };
-
+  const handleFormSubmit = (params: SaveAddressParams) => {
     if (editingId !== null) {
       updateMutation.mutate({ id: editingId, params });
     } else {
@@ -163,6 +102,11 @@ export const AddressListPanel = () => {
     );
   }
 
+  const editingAddress =
+    editingId !== null
+      ? addresses.find((item) => item.id === editingId)
+      : undefined;
+
   return (
     <div className={styles.panel}>
       <div className={styles.header}>
@@ -175,105 +119,14 @@ export const AddressListPanel = () => {
       </div>
 
       {isFormOpen && (
-        <form className={styles.form} onSubmit={handleSubmit}>
-          <p className={styles.formTitle}>{editingId !== null ? '배송지 수정' : '새 배송지 추가'}</p>
-          <div className={styles.formRow}>
-            <input
-              className={styles.labelInput}
-              value={form.label}
-              onChange={(e) => setForm((prev) => ({ ...prev, label: e.target.value }))}
-              placeholder="배송지 별칭 (선택, 예: 집)"
-              maxLength={20}
-            />
-          </div>
-
-          <div className={styles.formRow}>
-            <input
-              value={form.recipientName}
-              onChange={(e) => setForm((prev) => ({ ...prev, recipientName: e.target.value }))}
-              placeholder="받는 분의 이름을 입력하세요"
-            />
-          </div>
-
-          <div className={styles.formRow}>
-            <select
-              className={styles.phonePrefix}
-              value={form.phonePrefix}
-              onChange={(e) => setForm((prev) => ({ ...prev, phonePrefix: e.target.value }))}
-            >
-              {PHONE_PREFIXES.map((prefix) => (
-                <option key={prefix} value={prefix}>
-                  {prefix}
-                </option>
-              ))}
-            </select>
-            <span>-</span>
-            <input
-              className={styles.phonePart}
-              value={form.phoneMiddle}
-              onChange={(e) =>
-                setForm((prev) => ({ ...prev, phoneMiddle: e.target.value.replace(/\D/g, '').slice(0, 4) }))
-              }
-              inputMode="numeric"
-              maxLength={4}
-              placeholder="1234"
-            />
-            <span>-</span>
-            <input
-              className={styles.phonePart}
-              value={form.phoneLast}
-              onChange={(e) =>
-                setForm((prev) => ({ ...prev, phoneLast: e.target.value.replace(/\D/g, '').slice(0, 4) }))
-              }
-              inputMode="numeric"
-              maxLength={4}
-              placeholder="5678"
-            />
-          </div>
-
-          <div className={styles.formRow}>
-            <input className={styles.zipInput} value={form.zipCode} readOnly placeholder="우편번호" />
-            <Button type="button" variant="outline" size="sm" onClick={handleSearchAddress}>
-              주소 검색
-            </Button>
-          </div>
-          <div className={styles.formRow}>
-            <input
-              className={styles.addressInput}
-              value={form.address}
-              readOnly
-              placeholder="주소 검색 버튼을 눌러 주소를 입력하세요"
-            />
-          </div>
-          <div className={styles.formRow}>
-            <input
-              className={styles.addressInput}
-              value={form.addressDetail}
-              onChange={(e) => setForm((prev) => ({ ...prev, addressDetail: e.target.value }))}
-              placeholder="상세주소를 입력하세요 (선택)"
-            />
-          </div>
-
-          <label className={styles.checkboxRow}>
-            <input
-              type="checkbox"
-              checked={form.isDefault}
-              onChange={(e) => setForm((prev) => ({ ...prev, isDefault: e.target.checked }))}
-            />
-            기본 배송지로 설정
-          </label>
-
-          {formError && <p className={styles.formError}>{formError}</p>}
-
-          <div className={styles.formActions}>
-            <Button type="button" variant="outline" size="sm" onClick={closeForm}>
-              취소
-            </Button>
-            <Button type="submit" size="md" isLoading={saveMutation.isPending || updateMutation.isPending}>
-              {editingId !== null ? '수정 완료' : '저장'}
-            </Button>
-          </div>
-        </form>
+        <AddressForm
+          key={editingId ?? 'new'}
+          initialAddress={editingAddress}
+          isEditing={editingId !== null}
+          isSubmitting={saveMutation.isPending || updateMutation.isPending}
+          onCancel={closeForm}
+          onSubmit={handleFormSubmit}
+        />
       )}
 
       {addresses.length === 0 ? (
@@ -286,9 +139,13 @@ export const AddressListPanel = () => {
             <li key={item.id} className={styles.card}>
               <div className={styles.info}>
                 <div className={styles.titleRow}>
-                  {item.label && <span className={styles.labelBadge}>{item.label}</span>}
+                  {item.label && (
+                    <span className={styles.labelBadge}>{item.label}</span>
+                  )}
                   <span className={styles.recipient}>{item.recipientName}</span>
-                  {item.isDefault && <span className={styles.defaultBadge}>기본 배송지</span>}
+                  {item.isDefault && (
+                    <span className={styles.defaultBadge}>기본 배송지</span>
+                  )}
                 </div>
                 <p className={styles.phone}>{item.recipientPhone}</p>
                 <p className={styles.address}>
@@ -301,20 +158,31 @@ export const AddressListPanel = () => {
                     type="button"
                     variant="outline"
                     size="sm"
-                    isLoading={defaultMutation.isPending && defaultMutation.variables === item.id}
+                    isLoading={
+                      defaultMutation.isPending &&
+                      defaultMutation.variables === item.id
+                    }
                     onClick={() => defaultMutation.mutate(item.id)}
                   >
                     기본으로 설정
                   </Button>
                 )}
-                <Button type="button" variant="outline" size="sm" onClick={() => openEditForm(item)}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => openEditForm(item.id)}
+                >
                   수정
                 </Button>
                 <Button
                   type="button"
                   variant="outline"
                   size="md"
-                  isLoading={deleteMutation.isPending && deleteMutation.variables === item.id}
+                  isLoading={
+                    deleteMutation.isPending &&
+                    deleteMutation.variables === item.id
+                  }
                   onClick={() => handleDelete(item.id)}
                 >
                   삭제

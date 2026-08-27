@@ -29,7 +29,7 @@ public class CategoryService {
     }
 
     public Category createCategory(String name) {
-        String trimmedName = requireName(name);
+        String trimmedName = name.trim();
         if (categoryRepository.findByName(trimmedName).isPresent()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 존재하는 카테고리입니다: " + trimmedName);
         }
@@ -41,7 +41,7 @@ public class CategoryService {
 
     public Category updateCategory(Long id, String name) {
         Category category = findCategory(id);
-        String trimmedName = requireName(name);
+        String trimmedName = name.trim();
 
         if (!trimmedName.equals(category.getName()) && categoryRepository.findByName(trimmedName).isPresent()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 존재하는 카테고리입니다: " + trimmedName);
@@ -62,13 +62,6 @@ public class CategoryService {
 
         categoryRepository.delete(category);
         log.info("카테고리 삭제: categoryId={}, name={}", id, category.getName());
-    }
-
-    private String requireName(String name) {
-        if (name == null || name.isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "카테고리 이름을 입력해주세요.");
-        }
-        return name.trim();
     }
 
     private Category findCategory(Long id) {

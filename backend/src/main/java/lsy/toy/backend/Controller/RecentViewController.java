@@ -10,7 +10,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/recent-views")
-@CrossOrigin(origins = "http://localhost:5173")
 public class RecentViewController {
 
     private final RecentViewService recentViewService;

@@ -11,13 +11,14 @@ import java.util.List;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
-    // 💡 items는 @OneToMany(EAGER)라 fetch join 없이 조회하면 주문 개수만큼 order_items를
-    // 따로 SELECT하는 N+1이 발생한다. JOIN FETCH로 한 쿼리에 묶고, 1:N 조인이 행을 늘리므로
-    // DISTINCT로 주문 중복을 제거한다.
-    @Query("SELECT DISTINCT o FROM Order o LEFT JOIN FETCH o.items ORDER BY o.createdAt DESC")
+    // 💡 items는 @OneToMany(EAGER), user는 @ManyToOne(EAGER)라 fetch join 없이 조회하면
+    // 주문 개수만큼 order_items와 user를 각각 따로 SELECT하는 N+1이 발생한다(OrderResponse가
+    // 구매자 이름/이메일을 위해 user를 그대로 씀). JOIN FETCH로 한 쿼리에 묶고, 1:N 조인이
+    // 행을 늘리므로 DISTINCT로 주문 중복을 제거한다.
+    @Query("SELECT DISTINCT o FROM Order o JOIN FETCH o.user LEFT JOIN FETCH o.items ORDER BY o.createdAt DESC")
     List<Order> findAllByOrderByCreatedAtDesc();
 
-    @Query("SELECT DISTINCT o FROM Order o LEFT JOIN FETCH o.items WHERE o.user.id = :userId ORDER BY o.createdAt DESC")
+    @Query("SELECT DISTINCT o FROM Order o JOIN FETCH o.user LEFT JOIN FETCH o.items WHERE o.user.id = :userId ORDER BY o.createdAt DESC")
     List<Order> findByUser_IdOrderByCreatedAtDesc(@Param("userId") Long userId);
 
     // 💡 매출 집계용. 주문취소는 매출에서 제외하고, 필요한 컬럼만 뽑아 items N+1을 피한다.

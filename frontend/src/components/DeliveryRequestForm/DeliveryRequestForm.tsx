@@ -29,8 +29,10 @@ export const DeliveryRequestForm = ({
   entryNote,
   onEntryNoteChange,
 }: DeliveryRequestFormProps) => {
-  const showEntryNote = entryMethod === '비밀번호' || entryMethod === '기타사항';
-  const entryNoteLabel = entryMethod === '기타사항' ? '기타사항' : '공동현관 비밀번호';
+  const showEntryNote =
+    entryMethod === '비밀번호' || entryMethod === '기타사항';
+  const entryNoteLabel =
+    entryMethod === '기타사항' ? '기타사항' : '공동현관 비밀번호';
 
   return (
     <section className={styles.section}>
@@ -85,7 +87,11 @@ export const DeliveryRequestForm = ({
               <input
                 value={entryNote}
                 onChange={(e) => onEntryNoteChange(e.target.value)}
-                placeholder={entryMethod === '기타사항' ? '출입 방법을 입력하세요' : '예) #1234#'}
+                placeholder={
+                  entryMethod === '기타사항'
+                    ? '출입 방법을 입력하세요'
+                    : '예) #1234#'
+                }
               />
             ) : (
               <span className={styles.muted}>-</span>

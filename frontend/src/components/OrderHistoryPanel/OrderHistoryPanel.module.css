@@ -19,11 +19,7 @@
 }
 
 .table tbody tr {
-  cursor: pointer;
-}
-
-.table tbody tr:hover {
-  background: var(--code-bg);
+  position: relative;
 }
 
 .table tbody td {
@@ -32,8 +28,43 @@
   color: var(--text-h);
 }
 
+.rowButton {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  z-index: 0;
+}
+
+.rowButton:hover {
+  background: var(--code-bg);
+}
+
+.rowButton:focus-visible {
+  outline: 2px solid var(--accent-border);
+  outline-offset: -2px;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .cancelButton {
   display: block;
+  position: relative;
+  z-index: 1;
   margin-top: 6px;
 }
 
@@ -64,4 +95,3 @@
   font-weight: 700;
   color: var(--border);
 }
-

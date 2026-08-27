@@ -32,9 +32,14 @@ export const AdminCoupons = () => {
       </section>
 
       {mutation.isSuccess && (
-        <p>{mutation.variables} 등급 회원 {mutation.data.issuedCount}명에게 쿠폰을 발급했습니다.</p>
+        <p>
+          {mutation.variables} 등급 회원 {mutation.data.issuedCount}명에게
+          쿠폰을 발급했습니다.
+        </p>
       )}
-      {mutation.isError && <p className={styles.error}>쿠폰 발급에 실패했습니다.</p>}
+      {mutation.isError && (
+        <p className={styles.error}>쿠폰 발급에 실패했습니다.</p>
+      )}
     </>
   );
 };

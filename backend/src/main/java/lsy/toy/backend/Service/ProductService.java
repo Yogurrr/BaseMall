@@ -94,7 +94,7 @@ public class ProductService {
     ) {
         Product product = new Product(name, findCategory(categoryName), price, originalPrice, 0, 0, imageUrl, badge);
         product.setTeam(findTeam(teamName));
-        product.setStock(validateStock(stock));
+        product.setStock(stock);
         product.setDescription(description);
         product.setDetailImageUrl(detailImageUrl);
         Product saved = productRepository.save(product);
@@ -117,7 +117,7 @@ public class ProductService {
         product.setOriginalPrice(originalPrice);
         product.setImageUrl(imageUrl);
         product.setBadge(badge);
-        product.setStock(validateStock(stock));
+        product.setStock(stock);
         product.setDescription(description);
         product.setDetailImageUrl(detailImageUrl);
 
@@ -131,15 +131,8 @@ public class ProductService {
         Product product = productRepository.findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "상품을 찾을 수 없습니다: " + id));
 
-        product.setStock(validateStock(stock));
+        product.setStock(stock);
         return productRepository.save(product);
-    }
-
-    private int validateStock(Integer stock) {
-        if (stock == null || stock < 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "재고는 0 이상이어야 합니다.");
-        }
-        return stock;
     }
 
     public Product updateStatus(Long id, String status) {
@@ -168,7 +161,7 @@ public class ProductService {
     }
 
     public ProductStatsResponse getStats() {
-        List<ProductRankRow> topProducts = productRepository.findTop10ByUseAtOrderBySoldCountDesc("Y").stream()
+        List<ProductRankRow> topProducts = productRepository.findTop10ByUseAtOrderBySoldCountDesc("Y", PageRequest.of(0, 10)).stream()
             .map(p -> new ProductRankRow(p.getId(), p.getName(), p.getImageUrl(), p.getCategoryName(), p.getSoldCount()))
             .toList();
 

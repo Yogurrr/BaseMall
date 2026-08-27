@@ -14,7 +14,10 @@ import java.util.List;
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
     // 💡 인기 상품 TOP10 - 이미 있는 누적 판매 수량(soldCount) 컬럼을 그대로 정렬 기준으로 쓴다.
-    List<Product> findTop10ByUseAtOrderBySoldCountDesc(String useAt);
+    // category/team이 @ManyToOne(EAGER)라 fetch join 없이 조회하면 상품 개수만큼(최대 10개씩 2번)
+    // categories/teams를 따로 SELECT하는 N+1이 발생하므로 fetch join.
+    @Query("SELECT p FROM Product p LEFT JOIN FETCH p.category LEFT JOIN FETCH p.team WHERE p.useAt = :useAt ORDER BY p.soldCount DESC")
+    List<Product> findTop10ByUseAtOrderBySoldCountDesc(@Param("useAt") String useAt, Pageable pageable);
 
     long countByUseAtAndStatus(String useAt, String status);
 
@@ -23,7 +26,9 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     // 💡 뱃지 이름 변경/삭제 시, badge가 자유 문자열이라 FK로 자동 반영되지 않으므로
     // BadgeService가 영향받는 상품을 직접 찾아 갱신하기 위해 사용.
-    List<Product> findByBadge(String badge);
+    // category/team이 @ManyToOne(EAGER)라 fetch join 없이 조회하면 영향받는 상품 개수만큼 N+1이 발생하므로 fetch join.
+    @Query("SELECT p FROM Product p LEFT JOIN FETCH p.category LEFT JOIN FETCH p.team WHERE p.badge = :badge")
+    List<Product> findByBadge(@Param("badge") String badge);
 
     @Query("""
         SELECT new lsy.toy.backend.Dto.CategorySalesRow(p.category.name, SUM(p.soldCount))

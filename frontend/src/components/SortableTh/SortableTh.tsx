@@ -7,7 +7,12 @@ interface SortableThProps {
   onClick: () => void;
 }
 
-export const SortableTh = ({ label, active, direction, onClick }: SortableThProps) => (
+export const SortableTh = ({
+  label,
+  active,
+  direction,
+  onClick,
+}: SortableThProps) => (
   <th>
     <button type="button" className={styles.sortButton} onClick={onClick}>
       {label}

@@ -11,7 +11,12 @@ import styles from './MyPage.module.css';
 export const MyPageRecentViews = () => {
   const { addItem } = useCart();
   const { isLiked, toggleWishlist } = useWishlist();
-  const { isAddToCartModalOpen, openAddToCartModal, closeAddToCartModal, goToCheckout } = useAddToCartModal();
+  const {
+    isAddToCartModalOpen,
+    openAddToCartModal,
+    closeAddToCartModal,
+    goToCheckout,
+  } = useAddToCartModal();
 
   const { data: recentViews = [], isLoading } = useQuery({
     queryKey: ['recent-views'],
@@ -46,7 +51,10 @@ export const MyPageRecentViews = () => {
       )}
 
       {isAddToCartModalOpen && (
-        <AddToCartModal onClose={closeAddToCartModal} onCheckout={goToCheckout} />
+        <AddToCartModal
+          onClose={closeAddToCartModal}
+          onCheckout={goToCheckout}
+        />
       )}
     </div>
   );

@@ -1,5 +1,6 @@
 package lsy.toy.backend.Controller;
 
+import jakarta.validation.Valid;
 import lsy.toy.backend.Dto.AdminQnaResponse;
 import lsy.toy.backend.Dto.MyQnaResponse;
 import lsy.toy.backend.Dto.QnaAnswerRequest;
@@ -11,7 +12,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/qna")
-@CrossOrigin(origins = "http://localhost:5173") // 💡 React(Vite) 포트 허용
 public class QnaController {
 
     private final QnaService qnaService;
@@ -34,7 +34,7 @@ public class QnaController {
 
     // 3. Q&A 답변 등록 (PATCH, 관리자 전용)
     @PatchMapping("/{id}/answer")
-    public AdminQnaResponse answerQna(@PathVariable Long id, @RequestBody QnaAnswerRequest request) {
+    public AdminQnaResponse answerQna(@PathVariable Long id, @Valid @RequestBody QnaAnswerRequest request) {
         return qnaService.answerQna(id, request.getAnswer());
     }
 }

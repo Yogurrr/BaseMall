@@ -3,7 +3,12 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCart } from '../../hooks/useCart';
 import { useCurrentUser } from '../../hooks/useCurrentUser';
-import { clearToken, isLoggedIn, subscribeAuthChange } from '../../api/authToken';
+import {
+  clearToken,
+  isLoggedIn,
+  subscribeAuthChange,
+} from '../../api/authToken';
+import { logout } from '../../api/authApi';
 import { fetchCategories, fetchTeams } from '../../api/productApi';
 import { SearchBar } from '../SearchBar/SearchBar';
 import styles from './SiteHeader.module.css';
@@ -36,10 +41,16 @@ export const SiteHeader = () => {
   useEffect(() => {
     if (!categoryMenuOpen && !teamMenuOpen) return;
     const handleClickOutside = (event: MouseEvent) => {
-      if (categoryMenuRef.current && !categoryMenuRef.current.contains(event.target as Node)) {
+      if (
+        categoryMenuRef.current &&
+        !categoryMenuRef.current.contains(event.target as Node)
+      ) {
         setCategoryMenuOpen(false);
       }
-      if (teamMenuRef.current && !teamMenuRef.current.contains(event.target as Node)) {
+      if (
+        teamMenuRef.current &&
+        !teamMenuRef.current.contains(event.target as Node)
+      ) {
         setTeamMenuOpen(false);
       }
     };
@@ -72,17 +83,24 @@ export const SiteHeader = () => {
   };
 
   const handleLogout = () => {
-    clearToken();
-    queryClient.removeQueries({ queryKey: ['me'] });
-    queryClient.removeQueries({ queryKey: ['cart'] });
-    navigate('/');
+    // 💡 서버쪽 리프레시 토큰도 폐기해야 새로고침 시 조용히 재로그인되는 걸 막을 수 있다.
+    // 서버 호출이 실패해도(네트워크 오류 등) 클라이언트 로그아웃은 항상 완료돼야 하므로 결과와 무관하게 정리한다.
+    logout().finally(() => {
+      clearToken();
+      queryClient.removeQueries({ queryKey: ['me'] });
+      queryClient.removeQueries({ queryKey: ['cart'] });
+      queryClient.removeQueries({ queryKey: ['wishlist'] });
+      navigate('/');
+    });
   };
 
   return (
     <header className={styles.header}>
       <div className={styles.headerInner}>
         <div className={styles.brandNav}>
-          <Link to="/" className={styles.logo}>⚾ KBO 굿즈</Link>
+          <Link to="/" className={styles.logo}>
+            ⚾ KBO 굿즈
+          </Link>
           <nav className={styles.nav}>
             <a href="#best">베스트</a>
             <a href="#products">신상품</a>
@@ -97,11 +115,18 @@ export const SiteHeader = () => {
               </button>
               {categoryMenuOpen && (
                 <div className={styles.categoryDropdown}>
-                  <button type="button" onClick={() => handleSelectCategory('전체')}>
+                  <button
+                    type="button"
+                    onClick={() => handleSelectCategory('전체')}
+                  >
                     전체
                   </button>
                   {categoryNames.map((category) => (
-                    <button type="button" key={category} onClick={() => handleSelectCategory(category)}>
+                    <button
+                      type="button"
+                      key={category}
+                      onClick={() => handleSelectCategory(category)}
+                    >
                       {category}
                     </button>
                   ))}
@@ -119,11 +144,18 @@ export const SiteHeader = () => {
               </button>
               {teamMenuOpen && (
                 <div className={styles.categoryDropdown}>
-                  <button type="button" onClick={() => handleSelectTeam('전체')}>
+                  <button
+                    type="button"
+                    onClick={() => handleSelectTeam('전체')}
+                  >
                     전체
                   </button>
                   {teamNames.map((team) => (
-                    <button type="button" key={team} onClick={() => handleSelectTeam(team)}>
+                    <button
+                      type="button"
+                      key={team}
+                      onClick={() => handleSelectTeam(team)}
+                    >
                       {team}
                     </button>
                   ))}
@@ -137,17 +169,30 @@ export const SiteHeader = () => {
         </div>
         <div className={styles.headerActions}>
           {!isAdmin && (
-            <Link to="/cart" className={styles.cartButton} aria-label="장바구니">
+            <Link
+              to="/cart"
+              className={styles.cartButton}
+              aria-label="장바구니"
+            >
               🛒
-              {totalCount > 0 && <span className={styles.cartBadge}>{totalCount}</span>}
+              {totalCount > 0 && (
+                <span className={styles.cartBadge}>{totalCount}</span>
+              )}
             </Link>
           )}
           {loggedIn ? (
             <>
-              <Link to={isAdmin ? '/admin' : '/mypage'} className={styles.authButton}>
+              <Link
+                to={isAdmin ? '/admin' : '/mypage'}
+                className={styles.authButton}
+              >
                 {isAdmin ? '관리자 페이지' : '마이페이지'}
               </Link>
-              <button type="button" className={styles.authButton} onClick={handleLogout}>
+              <button
+                type="button"
+                className={styles.authButton}
+                onClick={handleLogout}
+              >
                 로그아웃
               </button>
             </>

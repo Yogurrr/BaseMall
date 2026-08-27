@@ -17,13 +17,19 @@ export const MyPageSidebar = ({ onLogout }: MyPageSidebarProps) => (
           {group.items.map((item) => (
             <li key={item.key}>
               {item.key === 'logout' ? (
-                <button type="button" className={styles.item} onClick={onLogout}>
+                <button
+                  type="button"
+                  className={styles.item}
+                  onClick={onLogout}
+                >
                   {item.label}
                 </button>
               ) : (
                 <NavLink
                   to={pathFor(item.key)}
-                  className={({ isActive }) => `${styles.item} ${isActive ? styles.itemActive : ''}`}
+                  className={({ isActive }) =>
+                    `${styles.item} ${isActive ? styles.itemActive : ''}`
+                  }
                 >
                   {item.label}
                 </NavLink>

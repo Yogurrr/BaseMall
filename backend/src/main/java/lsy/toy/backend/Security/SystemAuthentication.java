@@ -21,10 +21,17 @@ public final class SystemAuthentication {
     }
 
     public static void runAsAdmin(Runnable action) {
+        runAs(SYSTEM_PRINCIPAL, action);
+    }
+
+    // 💡 리프레시 토큰 로테이션처럼 "방금 신원을 확인했지만 아직 SecurityContext는 없는" 특정 유저로
+    // 짧게 인증을 흉내내야 할 때 쓴다. runAsAdmin과 동일한 try/finally 패턴이지만 고정 ADMIN이 아니라
+    // 임의의 principal을 받는다.
+    public static void runAs(AppUserPrincipal principal, Runnable action) {
         Authentication previous = SecurityContextHolder.getContext().getAuthentication();
-        Authentication systemAuth =
-            new UsernamePasswordAuthenticationToken(SYSTEM_PRINCIPAL, null, SYSTEM_PRINCIPAL.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(systemAuth);
+        Authentication authentication =
+            new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
         try {
             action.run();
         } finally {

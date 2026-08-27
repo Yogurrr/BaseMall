@@ -14,8 +14,17 @@ interface ProductCardProps {
   onAddToCart?: (product: Product) => void;
 }
 
-export const ProductCard = ({ product, liked, onToggleLike, onAddToCart }: ProductCardProps) => {
-  const { data: badges = [] } = useQuery({ queryKey: ['badges'], queryFn: fetchBadges, staleTime: 5 * 60 * 1000 });
+export const ProductCard = ({
+  product,
+  liked,
+  onToggleLike,
+  onAddToCart,
+}: ProductCardProps) => {
+  const { data: badges = [] } = useQuery({
+    queryKey: ['badges'],
+    queryFn: fetchBadges,
+    staleTime: 5 * 60 * 1000,
+  });
   const discountPercent = product.originalPrice
     ? Math.round((1 - product.price / product.originalPrice) * 100)
     : 0;
@@ -23,9 +32,16 @@ export const ProductCard = ({ product, liked, onToggleLike, onAddToCart }: Produ
   return (
     <article className={styles.card}>
       <Link to={`/products/${product.id}`} className={styles.thumb}>
-        <ProductThumb imageUrl={product.imageUrl} alt={product.name} size="lg" />
+        <ProductThumb
+          imageUrl={product.imageUrl}
+          alt={product.name}
+          size="lg"
+        />
         {product.badge && (
-          <span className={styles.badge} style={{ background: getBadgeGradient(badges, product.badge) }}>
+          <span
+            className={styles.badge}
+            style={{ background: getBadgeGradient(badges, product.badge) }}
+          >
             {product.badge}
           </span>
         )}
@@ -45,7 +61,9 @@ export const ProductCard = ({ product, liked, onToggleLike, onAddToCart }: Produ
       <div className={styles.cardBody}>
         <p className={styles.category}>
           {product.category}
-          {product.team && <span className={styles.team}> · {product.team}</span>}
+          {product.team && (
+            <span className={styles.team}> · {product.team}</span>
+          )}
         </p>
         <h3>
           <Link to={`/products/${product.id}`} className={styles.titleLink}>
@@ -56,10 +74,14 @@ export const ProductCard = ({ product, liked, onToggleLike, onAddToCart }: Produ
           ⭐ {product.rating} ({product.reviewCount})
         </p>
         <div className={styles.priceRow}>
-          {discountPercent > 0 && <span className={styles.discount}>{discountPercent}%</span>}
+          {discountPercent > 0 && (
+            <span className={styles.discount}>{discountPercent}%</span>
+          )}
           <span className={styles.price}>{formatPrice(product.price)}</span>
           {product.originalPrice && (
-            <span className={styles.originalPrice}>{formatPrice(product.originalPrice)}</span>
+            <span className={styles.originalPrice}>
+              {formatPrice(product.originalPrice)}
+            </span>
           )}
         </div>
         {onAddToCart && (

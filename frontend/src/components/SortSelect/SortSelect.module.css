@@ -10,7 +10,9 @@
   color: var(--text-h);
   cursor: pointer;
   min-width: 8rem;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
 }
 
 .select:focus {

@@ -4,7 +4,10 @@ import { Spinner } from '../../components/Spinner/Spinner';
 import { StatusMessage } from '../../components/StatusMessage/StatusMessage';
 import { RevenueChart } from '../../components/RevenueChart/RevenueChart';
 import { RevenueBreakdownChart } from '../../components/RevenueBreakdownChart/RevenueBreakdownChart';
-import { PeriodFilter, type PeriodRange } from '../../components/PeriodFilter/PeriodFilter';
+import {
+  PeriodFilter,
+  type PeriodRange,
+} from '../../components/PeriodFilter/PeriodFilter';
 import { fetchSales, fetchSalesBreakdown } from '../../api/orderApi';
 import { formatPrice } from '../../api/productApi';
 import styles from './Admin.module.css';
@@ -42,7 +45,9 @@ export const AdminSales = () => {
       </div>
 
       {isLoading ? (
-        <div className={styles.empty}><Spinner /></div>
+        <div className={styles.empty}>
+          <Spinner />
+        </div>
       ) : isError || !data ? (
         <div className={styles.comingSoon}>
           <StatusMessage icon="⚠️" title="매출 정보를 불러오지 못했습니다">
@@ -77,7 +82,9 @@ export const AdminSales = () => {
       <PeriodFilter value={range} onApply={setRange} />
 
       {isBreakdownLoading ? (
-        <div className={styles.empty}><Spinner /></div>
+        <div className={styles.empty}>
+          <Spinner />
+        </div>
       ) : isBreakdownError || !breakdown ? (
         <div className={styles.comingSoon}>
           <StatusMessage icon="⚠️" title="기간별 매출을 불러오지 못했습니다">
@@ -94,8 +101,14 @@ export const AdminSales = () => {
           </section>
 
           <div className={styles.breakdownGrid}>
-            <RevenueBreakdownChart title="구단별 매출" data={breakdown.byTeam} />
-            <RevenueBreakdownChart title="품목별 매출" data={breakdown.byCategory} />
+            <RevenueBreakdownChart
+              title="구단별 매출"
+              data={breakdown.byTeam}
+            />
+            <RevenueBreakdownChart
+              title="품목별 매출"
+              data={breakdown.byCategory}
+            />
           </div>
         </>
       )}

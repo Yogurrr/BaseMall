@@ -40,7 +40,11 @@ export const CouponPointsForm = ({
               {coupons.length > 0 ? (
                 <select
                   value={selectedCouponId ?? ''}
-                  onChange={(e) => onCouponChange(e.target.value ? Number(e.target.value) : null)}
+                  onChange={(e) =>
+                    onCouponChange(
+                      e.target.value ? Number(e.target.value) : null,
+                    )
+                  }
                 >
                   <option value="">쿠폰 사용 안 함</option>
                   {coupons.map((coupon) => (
@@ -50,7 +54,9 @@ export const CouponPointsForm = ({
                   ))}
                 </select>
               ) : (
-                <span className={styles.muted}>적용할 수 있는 쿠폰이 없습니다.</span>
+                <span className={styles.muted}>
+                  적용할 수 있는 쿠폰이 없습니다.
+                </span>
               )}
               <span className={styles.discountAmount}>
                 {discountAmount > 0 ? `-${formatPrice(discountAmount)}` : '0원'}
@@ -75,10 +81,17 @@ export const CouponPointsForm = ({
                     value={pointsUsed}
                     onChange={(e) => handlePointsChange(e.target.value)}
                   />
-                  <Button type="button" size="sm" variant="outline" onClick={() => onPointsUsedChange(maxUsablePoints)}>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => onPointsUsedChange(maxUsablePoints)}
+                  >
                     전액사용
                   </Button>
-                  <span className={styles.balance}>보유 {formatPrice(availablePoints)}</span>
+                  <span className={styles.balance}>
+                    보유 {formatPrice(availablePoints)}
+                  </span>
                 </>
               ) : (
                 <span className={styles.muted}>보유한 적립금이 없습니다.</span>

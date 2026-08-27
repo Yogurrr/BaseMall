@@ -19,11 +19,22 @@ const formatDate = (iso: string) => {
   return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
 };
 
-export const ReviewList = ({ reviews, currentUserId, isAdmin, isSaving, onUpdate, onDelete }: ReviewListProps) => {
+export const ReviewList = ({
+  reviews,
+  currentUserId,
+  isAdmin,
+  isSaving,
+  onUpdate,
+  onDelete,
+}: ReviewListProps) => {
   const [editingId, setEditingId] = useState<number | null>(null);
 
   if (reviews.length === 0) {
-    return <p className={styles.empty}>아직 작성된 리뷰가 없습니다. 첫 리뷰를 남겨보세요!</p>;
+    return (
+      <p className={styles.empty}>
+        아직 작성된 리뷰가 없습니다. 첫 리뷰를 남겨보세요!
+      </p>
+    );
   }
 
   return (
@@ -53,17 +64,27 @@ export const ReviewList = ({ reviews, currentUserId, isAdmin, isSaving, onUpdate
                     <span className={styles.userName}>{review.userName}</span>
                     <StarRating value={review.rating} size="sm" />
                   </div>
-                  <span className={styles.date}>{formatDate(review.createdAt)}</span>
+                  <span className={styles.date}>
+                    {formatDate(review.createdAt)}
+                  </span>
                 </div>
                 <p className={styles.content}>{review.content}</p>
                 {(isOwner || isAdmin) && (
                   <div className={styles.actions}>
                     {isOwner && (
-                      <Button variant="outline" size="sm" onClick={() => setEditingId(review.id)}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setEditingId(review.id)}
+                      >
                         수정
                       </Button>
                     )}
-                    <Button variant="outline" size="sm" onClick={() => onDelete(review.id)}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onDelete(review.id)}
+                    >
                       삭제
                     </Button>
                   </div>

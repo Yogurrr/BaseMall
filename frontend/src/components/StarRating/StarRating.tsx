@@ -8,7 +8,11 @@ interface StarRatingProps {
 
 const STARS = [1, 2, 3, 4, 5];
 
-export const StarRating = ({ value, onChange, size = 'md' }: StarRatingProps) => {
+export const StarRating = ({
+  value,
+  onChange,
+  size = 'md',
+}: StarRatingProps) => {
   const interactive = !!onChange;
 
   return (

@@ -12,7 +12,9 @@ import styles from './Checkout.module.css';
 export const KakaoPayApprove = () => {
   const [searchParams] = useSearchParams();
   const { clearCart } = useCart();
-  const [status, setStatus] = useState<'pending' | 'success' | 'error'>('pending');
+  const [status, setStatus] = useState<'pending' | 'success' | 'error'>(
+    'pending',
+  );
   const startedRef = useRef(false);
 
   useEffect(() => {

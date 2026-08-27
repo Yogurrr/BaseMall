@@ -11,11 +11,18 @@ interface CartItemRowProps {
   readOnly?: boolean;
 }
 
-export const CartItemRow = ({ item, onQuantityChange, onRemove, readOnly }: CartItemRowProps) => {
+export const CartItemRow = ({
+  item,
+  onQuantityChange,
+  onRemove,
+  readOnly,
+}: CartItemRowProps) => {
   const hasOptions = item.size || item.markingName;
 
   return (
-    <article className={readOnly ? `${styles.row} ${styles.readOnly}` : styles.row}>
+    <article
+      className={readOnly ? `${styles.row} ${styles.readOnly}` : styles.row}
+    >
       <Link to={`/products/${item.id}`} className={styles.thumb}>
         <ProductThumb imageUrl={item.imageUrl} alt={item.name} size="lg" />
       </Link>
@@ -27,7 +34,10 @@ export const CartItemRow = ({ item, onQuantityChange, onRemove, readOnly }: Cart
         </Link>
         {hasOptions && (
           <p className={styles.options}>
-            {[item.size && `사이즈 ${item.size}`, item.markingName && `마킹 ${item.markingName}`]
+            {[
+              item.size && `사이즈 ${item.size}`,
+              item.markingName && `마킹 ${item.markingName}`,
+            ]
               .filter(Boolean)
               .join(' · ')}
           </p>
@@ -41,7 +51,9 @@ export const CartItemRow = ({ item, onQuantityChange, onRemove, readOnly }: Cart
         <div className={styles.stepper}>
           <button
             type="button"
-            onClick={() => onQuantityChange?.(item.cartItemId, item.quantity - 1)}
+            onClick={() =>
+              onQuantityChange?.(item.cartItemId, item.quantity - 1)
+            }
             aria-label="수량 감소"
           >
             −
@@ -49,7 +61,9 @@ export const CartItemRow = ({ item, onQuantityChange, onRemove, readOnly }: Cart
           <span>{item.quantity}</span>
           <button
             type="button"
-            onClick={() => onQuantityChange?.(item.cartItemId, item.quantity + 1)}
+            onClick={() =>
+              onQuantityChange?.(item.cartItemId, item.quantity + 1)
+            }
             aria-label="수량 증가"
           >
             +
@@ -57,7 +71,9 @@ export const CartItemRow = ({ item, onQuantityChange, onRemove, readOnly }: Cart
         </div>
       )}
 
-      <p className={styles.lineTotal}>{formatPrice(item.price * item.quantity)}</p>
+      <p className={styles.lineTotal}>
+        {formatPrice(item.price * item.quantity)}
+      </p>
 
       {!readOnly && (
         <button

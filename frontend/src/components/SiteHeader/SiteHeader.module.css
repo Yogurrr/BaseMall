@@ -184,7 +184,9 @@
   color: var(--text-h);
   text-decoration: none;
   white-space: nowrap;
-  transition: border-color 0.2s, color 0.2s;
+  transition:
+    border-color 0.2s,
+    color 0.2s;
 }
 
 .authButton:hover {

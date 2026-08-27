@@ -1,7 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import type { Product } from '../types/product';
-import { addWishlistItem, fetchWishlist, removeWishlistItem } from '../api/wishlistApi';
+import {
+  addWishlistItem,
+  fetchWishlist,
+  removeWishlistItem,
+} from '../api/wishlistApi';
 import { isLoggedIn, subscribeAuthChange } from '../api/authToken';
 import { useGuestWishlistStore } from '../store/guestWishlistStore';
 
@@ -25,11 +30,15 @@ export const useWishlist = () => {
     if (!loggedIn || guestItems.length === 0) return;
 
     const mergeGuestWishlist = async () => {
-      for (const item of guestItems) {
-        await addWishlistItem(item.id);
+      try {
+        for (const item of guestItems) {
+          await addWishlistItem(item.id);
+        }
+        guestClear();
+        queryClient.invalidateQueries({ queryKey: ['wishlist'] });
+      } catch {
+        toast.error('위시리스트를 합치는 중 오류가 발생했습니다.');
       }
-      guestClear();
-      queryClient.invalidateQueries({ queryKey: ['wishlist'] });
     };
 
     mergeGuestWishlist();
@@ -38,15 +47,26 @@ export const useWishlist = () => {
 
   const items = loggedIn ? serverItems : guestItems;
 
-  const isLiked = useCallback((id: number) => items.some((item) => item.id === id), [items]);
+  const isLiked = useCallback(
+    (id: number) => items.some((item) => item.id === id),
+    [items],
+  );
 
   const toggleWishlist = useCallback(
     (product: Product) => {
       if (loggedIn) {
         if (isLiked(product.id)) {
-          removeWishlistItem(product.id).then((updated) => queryClient.setQueryData(['wishlist'], updated));
+          removeWishlistItem(product.id)
+            .then((updated) => queryClient.setQueryData(['wishlist'], updated))
+            .catch(() =>
+              toast.error('위시리스트에서 삭제하는 중 오류가 발생했습니다.'),
+            );
         } else {
-          addWishlistItem(product.id).then((updated) => queryClient.setQueryData(['wishlist'], updated));
+          addWishlistItem(product.id)
+            .then((updated) => queryClient.setQueryData(['wishlist'], updated))
+            .catch(() =>
+              toast.error('위시리스트에 담는 중 오류가 발생했습니다.'),
+            );
         }
         return;
       }

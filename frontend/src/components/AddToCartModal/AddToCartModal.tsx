@@ -6,7 +6,10 @@ interface AddToCartModalProps {
   onCheckout: () => void;
 }
 
-export const AddToCartModal = ({ onClose, onCheckout }: AddToCartModalProps) => {
+export const AddToCartModal = ({
+  onClose,
+  onCheckout,
+}: AddToCartModalProps) => {
   return (
     <div className={styles.overlay} onClick={onClose}>
       <div
@@ -28,7 +31,9 @@ export const AddToCartModal = ({ onClose, onCheckout }: AddToCartModalProps) => 
           />
         </svg>
         <p className={styles.message}>장바구니에 담았습니다.</p>
-        <p className={styles.subMessage}>계속 쇼핑하시겠어요, 결제하러 가시겠어요?</p>
+        <p className={styles.subMessage}>
+          계속 쇼핑하시겠어요, 결제하러 가시겠어요?
+        </p>
         <div className={styles.actions}>
           <Button type="button" size="md" variant="outline" onClick={onClose}>
             계속 쇼핑하기

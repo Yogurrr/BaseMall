@@ -14,7 +14,11 @@ const STATUS_CLASS: Record<ProductStatus, string> = {
   품절: styles.soldOut,
 };
 
-export const ProductStatusSelect = ({ value, onSave, isSaving }: ProductStatusSelectProps) => (
+export const ProductStatusSelect = ({
+  value,
+  onSave,
+  isSaving,
+}: ProductStatusSelectProps) => (
   <select
     className={`${styles.select} ${STATUS_CLASS[value]}`}
     value={value}

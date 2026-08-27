@@ -1,7 +1,9 @@
 package lsy.toy.backend.Controller;
 
+import jakarta.validation.Valid;
 import lsy.toy.backend.Dto.QnaRequest;
 import lsy.toy.backend.Dto.QnaResponse;
+import lsy.toy.backend.Security.SecurityUtils;
 import lsy.toy.backend.Service.QnaService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +14,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/products/{productId}/qna")
-@CrossOrigin(origins = "http://localhost:5173") // 💡 React(Vite) 포트 허용
 public class ProductQnaController {
 
     private final QnaService qnaService;
@@ -32,7 +33,7 @@ public class ProductQnaController {
     public ResponseEntity<QnaResponse> createQna(
         @PathVariable Long productId,
         Authentication authentication,
-        @RequestBody QnaRequest request
+        @Valid @RequestBody QnaRequest request
     ) {
         QnaResponse created = qnaService.createQna(productId, authentication.getName(), request.getQuestion());
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
@@ -45,9 +46,7 @@ public class ProductQnaController {
         @PathVariable Long qnaId,
         Authentication authentication
     ) {
-        boolean isAdmin = authentication.getAuthorities().stream()
-            .anyMatch(authority -> authority.getAuthority().equals("ADMIN"));
-        qnaService.deleteQna(productId, qnaId, authentication.getName(), isAdmin);
+        qnaService.deleteQna(productId, qnaId, authentication.getName(), SecurityUtils.isAdmin(authentication));
         return ResponseEntity.noContent().build();
     }
 }

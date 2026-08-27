@@ -12,7 +12,10 @@ interface CouponListPanelProps {
   emptyMessage: string;
 }
 
-export const CouponListPanel = ({ coupons, emptyMessage }: CouponListPanelProps) => {
+export const CouponListPanel = ({
+  coupons,
+  emptyMessage,
+}: CouponListPanelProps) => {
   if (coupons.length === 0) {
     return (
       <div className={styles.empty}>
@@ -24,12 +27,17 @@ export const CouponListPanel = ({ coupons, emptyMessage }: CouponListPanelProps)
   return (
     <ul className={styles.list}>
       {coupons.map((coupon) => (
-        <li key={coupon.id} className={`${styles.card} ${coupon.usedAt ? styles.used : ''}`}>
+        <li
+          key={coupon.id}
+          className={`${styles.card} ${coupon.usedAt ? styles.used : ''}`}
+        >
           <span className={styles.percent}>{coupon.discountPercent}%</span>
           <div className={styles.info}>
             <p className={styles.name}>{coupon.name}</p>
             <p className={styles.meta}>
-              {coupon.usedAt ? `사용일 ${formatDate(coupon.usedAt)}` : `발급일 ${formatDate(coupon.issuedAt)}`}
+              {coupon.usedAt
+                ? `사용일 ${formatDate(coupon.usedAt)}`
+                : `발급일 ${formatDate(coupon.issuedAt)}`}
             </p>
           </div>
           {coupon.usedAt && <span className={styles.badge}>사용완료</span>}

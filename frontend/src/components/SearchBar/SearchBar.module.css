@@ -5,7 +5,9 @@
   border-radius: 49.95rem;
   border: 0.05rem solid var(--border);
   background: var(--code-bg);
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
 }
 
 .form:focus-within {

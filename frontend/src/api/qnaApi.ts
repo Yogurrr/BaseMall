@@ -6,12 +6,20 @@ export const fetchQnas = async (productId: number): Promise<Qna[]> => {
   return response.data;
 };
 
-export const createQna = async (productId: number, question: string): Promise<Qna> => {
-  const response = await api.post<Qna>(`/products/${productId}/qna`, { question });
+export const createQna = async (
+  productId: number,
+  question: string,
+): Promise<Qna> => {
+  const response = await api.post<Qna>(`/products/${productId}/qna`, {
+    question,
+  });
   return response.data;
 };
 
-export const deleteQna = async (productId: number, qnaId: number): Promise<void> => {
+export const deleteQna = async (
+  productId: number,
+  qnaId: number,
+): Promise<void> => {
   await api.delete(`/products/${productId}/qna/${qnaId}`);
 };
 
@@ -25,7 +33,10 @@ export const fetchAllQnas = async (): Promise<AdminQna[]> => {
   return response.data;
 };
 
-export const answerQna = async (id: number, answer: string): Promise<AdminQna> => {
+export const answerQna = async (
+  id: number,
+  answer: string,
+): Promise<AdminQna> => {
   const response = await api.patch<AdminQna>(`/qna/${id}/answer`, { answer });
   return response.data;
 };

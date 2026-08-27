@@ -7,7 +7,12 @@ interface CategoryTabsProps {
   sectionId?: string;
 }
 
-export const CategoryTabs = ({ categories, active, onSelect, sectionId }: CategoryTabsProps) => {
+export const CategoryTabs = ({
+  categories,
+  active,
+  onSelect,
+  sectionId,
+}: CategoryTabsProps) => {
   return (
     <section id={sectionId} className={styles.categories}>
       {categories.map((category) => (

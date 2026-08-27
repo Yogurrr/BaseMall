@@ -7,10 +7,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.stream.Collectors;
 
 // 💡 컨트롤러/서비스에서 던진 예외를 한 곳에서 {timestamp,status,error,message,path} 형태로 통일해서 응답한다.
 // 프론트는 이미 err.response.data.message를 읽고 있으므로(Login.tsx 등) 그 계약을 그대로 유지한다.
@@ -36,11 +40,19 @@ public class GlobalExceptionHandler {
             .body(new ErrorResponse(statusCode.value(), error, message, request.getRequestURI()));
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex, HttpServletRequest request) {
-        log.warn("잘못된 요청: {} - {}", request.getRequestURI(), ex.getMessage());
+    // 💡 DTO의 @NotBlank/@Min 등 Bean Validation 제약이 깨졌을 때. 필드 에러가 여러 개일 수 있어
+    // ", "로 이어붙여 하나의 message 문자열로 내려준다(프론트는 message 하나만 읽으므로).
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex, HttpServletRequest request) {
+        String message = ex.getBindingResult().getFieldErrors().stream()
+            .map(FieldError::getDefaultMessage)
+            .collect(Collectors.joining(", "));
+        if (message.isBlank()) {
+            message = "요청 값이 올바르지 않습니다.";
+        }
+        log.warn("입력값 검증 실패: {} - {}", request.getRequestURI(), message);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-            .body(toBody(HttpStatus.BAD_REQUEST, ex.getMessage(), request));
+            .body(toBody(HttpStatus.BAD_REQUEST, message, request));
     }
 
     // 💡 KakaoPayService/TossPayService가 결제 요청 정보 직렬화·복원 실패 시 던지는 예외.

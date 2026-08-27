@@ -1,5 +1,6 @@
 package lsy.toy.backend.Controller;
 
+import jakarta.validation.Valid;
 import lsy.toy.backend.Dto.ImageUploadResponse;
 import lsy.toy.backend.Dto.ProductRequest;
 import lsy.toy.backend.Dto.ProductResponse;
@@ -19,8 +20,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/products")
-@CrossOrigin(origins = "http://localhost:5173") // 💡 React(Vite) 포트 허용
 public class ProductController {
+
+    // 💡 상품 목록 페이징 기본 페이지 크기. @RequestParam defaultValue는 컴파일타임 상수 문자열만 받는다.
+    private static final String DEFAULT_PAGE_SIZE = "12";
 
     private final ProductService productService;
     private final SupabaseStorageService supabaseStorageService;
@@ -40,7 +43,7 @@ public class ProductController {
     @GetMapping("/page")
     public Page<ProductResponse> getProductsPaged(
         @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "12") int size,
+        @RequestParam(defaultValue = DEFAULT_PAGE_SIZE) int size,
         @RequestParam(required = false) String category,
         @RequestParam(required = false) String team,
         @RequestParam(required = false) String keyword,
@@ -69,7 +72,7 @@ public class ProductController {
 
     // 2. 신규 상품 등록 (POST)
     @PostMapping
-    public ResponseEntity<ProductResponse> createProduct(@RequestBody ProductRequest request) {
+    public ResponseEntity<ProductResponse> createProduct(@Valid @RequestBody ProductRequest request) {
         Product created = productService.createProduct(
             request.getName(),
             request.getCategory(),
@@ -87,7 +90,7 @@ public class ProductController {
 
     // 3. 상품 수정 (PUT)
     @PutMapping("/{id}")
-    public ProductResponse updateProduct(@PathVariable Long id, @RequestBody ProductRequest request) {
+    public ProductResponse updateProduct(@PathVariable Long id, @Valid @RequestBody ProductRequest request) {
         Product updated = productService.updateProduct(
             id,
             request.getName(),
@@ -125,7 +128,7 @@ public class ProductController {
 
     // 6. 재고만 빠르게 수정 (PATCH)
     @PatchMapping("/{id}/stock")
-    public ProductResponse updateStock(@PathVariable Long id, @RequestBody UpdateStockRequest request) {
+    public ProductResponse updateStock(@PathVariable Long id, @Valid @RequestBody UpdateStockRequest request) {
         return ProductResponse.from(productService.updateStock(id, request.getStock()));
     }
 

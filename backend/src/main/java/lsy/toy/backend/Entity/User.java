@@ -54,6 +54,25 @@ public class User {
     @Column(nullable = false)
     private Integer points = 0;
 
+    // 💡 브루트포스 방지용 연속 로그인 실패 횟수. 성공하면 0으로 리셋된다.
+    // AuthService.login에서만 갱신하며, 인증 전 상태라 app_auth_update_login_state
+    // SECURITY DEFINER 함수를 통해서만 실제 DB 값이 바뀐다(엔티티 setter로 저장 X).
+    @Column(nullable = false)
+    private Integer failedLoginAttempts = 0;
+
+    // 💡 failedLoginAttempts가 임계치를 넘으면 이 시각까지 로그인 자체를 막는다. 평소엔 null.
+    private Instant lockedUntil;
+
+    // 💡 카카오 "나에게 보내기" 알림 연동 정보. 연동하지 않은 회원은 전부 null.
+    // 로그인 자체는 여전히 이메일/비밀번호(JWT) 방식이고, 이 필드들은 talk_message
+    // 스코프 동의로 얻은 토큰을 보관해 주문 알림 발송에만 쓴다.
+    private Long kakaoId;
+    @Column(columnDefinition = "text")
+    private String kakaoAccessToken;
+    @Column(columnDefinition = "text")
+    private String kakaoRefreshToken;
+    private Instant kakaoTokenExpiresAt;
+
     protected User() {
         // JPA
     }
@@ -92,6 +111,26 @@ public class User {
 
     public Integer getPoints() { return points; }
     public void setPoints(Integer points) { this.points = points; }
+
+    public Integer getFailedLoginAttempts() { return failedLoginAttempts; }
+    public Instant getLockedUntil() { return lockedUntil; }
+
+    public Long getKakaoId() { return kakaoId; }
+    public void setKakaoId(Long kakaoId) { this.kakaoId = kakaoId; }
+    public String getKakaoAccessToken() { return kakaoAccessToken; }
+    public void setKakaoAccessToken(String kakaoAccessToken) { this.kakaoAccessToken = kakaoAccessToken; }
+    public String getKakaoRefreshToken() { return kakaoRefreshToken; }
+    public void setKakaoRefreshToken(String kakaoRefreshToken) { this.kakaoRefreshToken = kakaoRefreshToken; }
+    public Instant getKakaoTokenExpiresAt() { return kakaoTokenExpiresAt; }
+    public void setKakaoTokenExpiresAt(Instant kakaoTokenExpiresAt) { this.kakaoTokenExpiresAt = kakaoTokenExpiresAt; }
+
+    // 💡 연동 해제 시 관련 필드를 한 번에 초기화 (withdraw()와 동일한 스타일의 도메인 동작 메서드).
+    public void unlinkKakao() {
+        this.kakaoId = null;
+        this.kakaoAccessToken = null;
+        this.kakaoRefreshToken = null;
+        this.kakaoTokenExpiresAt = null;
+    }
 
     // 💡 실제로 행을 지우지 않고 use_at을 'N'으로 바꾸는 소프트 삭제 (Product.deleteProduct와 동일한 패턴).
     public void withdraw() {
