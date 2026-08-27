@@ -4,7 +4,9 @@ KBO(한국프로야구) 구단 굿즈를 사고파는 온라인 쇼핑몰입니�
 
 ## 주요 기능
 
-- 회원가입(생년월일 · 전화번호 선택 입력, 비밀번호 형식 검증) / 로그인(JWT 기반 인증) / 회원 탈퇴
+- 회원가입(생년월일 · 전화번호 선택 입력, 비밀번호 형식 검증) / 로그인(JWT 액세스 · 리프레시 토큰 기반 인증) / 회원 탈퇴
+- 카카오 계정으로 로그인, 기존 계정에 카카오 연동/해제 — 연동한 회원에게는 주문 상태 변경 · 운송장 등록 시 카카오 "나에게 보내기"로 알림 발송
+- 로그인 연속 실패 시 계정 잠금(동시 요청에도 안전한 원자적 처리)
 - 구단 · 카테고리별 상품 필터링, 상품 검색, 위시리스트(찜), 최근 본 상품
 - 상품 상세: 리뷰(별점 · 후기) 작성/수정/삭제, 유니폼 옵션(사이즈 · 마킹) 선택, 상품 Q&A 문의/답변
 - 장바구니 및 주문/결제(Checkout), 회원 등급별 쿠폰 발급 및 적용, 적립금 사용/적립
@@ -15,7 +17,7 @@ KBO(한국프로야구) 구단 굿즈를 사고파는 온라인 쇼핑몰입니�
 - 마이페이지 (`/mypage` 하위 라우팅): 응원 구단 선택, 회원정보 수정, 주문/배송 조회(기간별 필터), 취소/반품 내역, 쿠폰함, 적립금 내역(기간별 필터), 위시리스트, 최근 본 상품, 내가 쓴 리뷰/리뷰 작성 대상 확인, 상품 Q&A 내역, 1:1 문의 내역, 배송지 관리
 - 관리자 페이지 (`/admin` 하위 라우팅): 상품 관리(재고 · 판매상태 · 상세이미지 수정), 카테고리/뱃지 관리(등록 · 수정 · 삭제), 회원 관리(회원 상세 정보 모달 포함), 주문 상태 관리(상태별 필터, 송장번호 입력), 쿠폰 발급, 배너 관리, 통계/매출 대시보드(기간별 매출 추이 · 구성 차트), 상품 Q&A/1:1 문의 답변 — 모두 관리자 권한 필요
 - 상품 이미지 업로드 (Supabase Storage)
-- Postgres RLS(Row Level Security) 기반 DB 접근 제어: 런타임 전용 제한 계정과 마이그레이션 소유자 계정을 분리
+- Postgres RLS(Row Level Security) 기반 DB 접근 제어: 런타임 전용 제한 계정과 마이그레이션 소유자 계정을 분리, 장바구니 · 위시리스트 · 쿠폰 테이블까지 적용
 - 인증/인가 실패 및 예외 응답을 일관된 JSON 형식으로 반환, Swagger UI/OpenAPI 스펙(`/swagger-ui.html`) 제공
 - 라이트 / 다크 테마 지원
 
@@ -23,17 +25,24 @@ KBO(한국프로야구) 구단 굿즈를 사고파는 온라인 쇼핑몰입니�
 
 **Backend**
 - Java 17, Spring Boot 4
-- Spring Security (JWT 인증), Spring Data JPA
+- Spring Security (JWT 액세스/리프레시 토큰 인증), Spring Data JPA
 - PostgreSQL (Supabase) + Row Level Security, Flyway로 스키마 버전 관리
 - Supabase Storage (상품/배너 이미지 업로드)
 - 카카오페이 Open API, 토스페이먼츠 결제 API 연동 (테스트/샌드박스 키)
-- springdoc-openapi (Swagger UI), JUnit 기반 Service 계층 단위 테스트, GitHub Actions CI
+- 카카오 로그인/계정 연동 및 "나에게 보내기" 알림 연동 (Kakao API)
+- springdoc-openapi (Swagger UI), JUnit + Mockito 기반 Service 계층 단위 테스트, GitHub Actions CI
 
 **Frontend**
 - React 19, TypeScript, Vite
 - React Router, TanStack Query, Axios, Zustand(게스트 장바구니/위시리스트 로컬 상태)
+- React Hook Form + Zod(폼 검증), Sonner(토스트 알림)
 - 토스페이먼츠 결제위젯 SDK(`@tosspayments/payment-widget-sdk`), 다음(Daum) 우편번호 서비스
 - CSS Modules
+- Vitest + Testing Library(단위 테스트), Playwright(e2e 테스트)
+- ESLint + Prettier, Husky + lint-staged(커밋 전 자동 포맷/린트)
+
+**개발 환경**
+- Docker Compose로 백엔드/프론트엔드 로컬 개발 컨테이너 구성
 
 ## 화면
 
